@@ -45,6 +45,7 @@ if ($highlightValueMemoryUsage >= 80) {
 } elseif ($threshold >= 60) {
     $threshold = ' mid';
 }
+$totalFilesCached = count($opcache_status['scripts']);
 
 if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) 
     && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
@@ -55,11 +56,28 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
         'used_memory'       => memsize($opcache_status['memory_usage']['used_memory']),
         'free_memory'       => memsize($opcache_status['memory_usage']['free_memory']),
         'wasted_memory'     => memsize($opcache_status['memory_usage']['wasted_memory']),
-        'wasted_percentage' => round($opcache_status['memory_usage']['current_wasted_percentage'], 2) . '%'
+        'wasted_percentage' => round($opcache_status['memory_usage']['current_wasted_percentage'], 2) . '%',
+        'files_cached'      => $totalFilesCached
     );
     echo json_encode($data);
     exit;
 }
+
+$host = (function_exists('gethostname')
+    ? gethostname()
+    : (php_uname('n')
+        ?: (empty($_SERVER['SERVER_NAME'])
+            ? $_SERVER['HOST_NAME']
+            : $_SERVER['SERVER_NAME']
+        )
+    )
+);
+
+$validPages = array('overview', 'files');
+$page = (empty($_GET['page']) || !in_array($_GET['page'], $validPages)
+    ? 'overview'
+    : $_GET['page']
+);
 
 ?>
 <!doctype html>
@@ -67,13 +85,11 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-    <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
-    <link href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" rel="stylesheet" type="text/css">
-    <link href="http://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
+    <script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
+    <link href="//fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
     <style type="text/css">
-        html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,abbr,address,cite,code,del,dfn,em,img,ins,kbd,q,samp,small,strong,sub,sup,var,b,i,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,figcaption,figure,footer,header,hgroup,menu,nav,section,summary,time,mark,audio,video{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}nav ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:none}a{margin:0;padding:0;font-size:100%;vertical-align:baseline;background:transparent}ins{background-color:#ff9;color:#000;text-decoration:none}mark{background-color:#ff9;color:#000;font-style:italic;font-weight:bold}del{text-decoration:line-through}abbr[title],dfn[title]{border-bottom:1px dotted;cursor:help}table{border-collapse:collapse;border-spacing:0}hr{display:block;height:1px;border:0;border-top:1px solid #ccc;margin:1em 0;padding:0}input,select{vertical-align:middle}
-        html{font-size:70%;line-height:1.2;padding:2em;}
+        html{font-family:sans-serif;font-size:100%;line-height:1.2;padding:2em;}
+        body {font-size:75%;}
         .container{overflow:auto;width:100%;position:relative;}
         #info{margin-right:290px;}
         #counts{position:absolute;top:0;right:0;width:280px;}
@@ -88,35 +104,13 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
         #counts div.values p {text-align:left;}
         #counts p span{font-family:'Roboto',sans-serif;}
         #counts p span.large{display:block;line-height:90%;font-size:800%;}
-        table {
-            margin: 0 0 1em 0;
-            border-collapse: collapse;
-            border-color: #fff;
-            width: 100%;
-        }
-        table caption {
-            text-align: left;
-            font-size: 1.5em;
-        }        
-        table tr {
-            background-color: #99D0DF;
-            border-color: #fff;
-        }
-        table th {
-            text-align: left;
-            padding: 6px;
-            background-color: #0BA0C8;
-            color: #fff;
-            border-color: #fff;
-        }
-        table td {
-            padding: 4px 6px;
-            line-height: 1.4em;
-            vertical-align: top;
-            border-color: #fff;
-        }
-        table tr.odd       { background-color: #EFFEFF; }
-        table tr.even      { background-color: #E0ECEF; }
+        table { margin: 0 0 1em 0; border-collapse: collapse; border-color: #fff; width: 100%; }
+        table caption { text-align: left; font-size: 1.5em; }        
+        table tr { background-color: #99D0DF; border-color: #fff; }
+        table th { text-align: left; padding: 6px; background-color: #0BA0C8; color: #fff; border-color: #fff; }
+        table td { padding: 4px 6px; line-height: 1.4em; vertical-align: top; border-color: #fff; }
+        table tr.odd { background-color: #EFFEFF; }
+        table tr.even { background-color: #E0ECEF; }
         table tr.highlight { background-color: #61C4DF; }
         .wsnw { white-space: nowrap; }
         .low{color:#000000;}
@@ -137,7 +131,20 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
             padding: 0 5px;
             vertical-align: middle;
             cursor: pointer;
-        }
+        }        
+        a.button {
+            text-decoration: none;
+            font-size: 110%;
+            color: #292929;
+            padding: 10px 26px;
+            background: -moz-linear-gradient(top, #ffffff 0%, #b4b7b8);
+            background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#b4b7b8));
+            -moz-border-radius: 6px;
+            -webkit-border-radius: 6px;
+            border-radius: 6px;
+            border: 1px solid #a1a1a1;
+            text-shadow: 0px -1px 0px rgba(000,000,000,0), 0px 1px 0px rgba(255,255,255,0.4);
+        }        
         span.showmore span.button:hover {
             background-color: #CCCCCC;
         }
@@ -148,6 +155,7 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
     </style>
     <script type="text/javascript">
         $(function(){
+            <?php if ($page == 'overview'): ?>
             var realtime = false;
             function ping() {
                 $.ajax({
@@ -161,7 +169,6 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
                     }
                 });
             }
-            $("#tabs").tabs();
             $('#toggleRealtime').click(function(){
                 if (realtime === false) {
                     realtime = setInterval(function(){ping()}, 5000);
@@ -172,6 +179,8 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
                     $(this).text('Enable real-time update of stats');
                 }
             });
+            <?php endif; ?>
+            <?php if ($page == 'files'): ?>
             $('span.showmore span.button').click(function(){
                 if ($(this).next().is(":visible")) {
                     $(this).next().hide();
@@ -181,124 +190,130 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
                     $(this).css('padding-top', '2px').text('«');
                 }
             });
+            <?php endif; ?>
         });
     </script>
 </head>
 
 <body>
 
-<div id="tabs" style="margin-bottom:2em;">
-    <ul>
-        <li><a href="#tab-info">Information overview</a></li>
-        <li><a href="#tab-file">File usage</a></li>
-    </ul>
-    <div id="tab-info">
-        <div class="container">
-            <div id="counts">
-                <div>
-                    <p><span class="large realtime <?php echo $threshold; ?>" data-value="memory_usage"><?php echo $highlightValueMemoryUsage; ?>%</span> memory usage</p>
-                </div>
-                <div>
-                    <p><span class="large realtime" data-value="hit_rate"><?php echo $highlightValueHits; ?>%</span> hit rate</p>
-                </div>
-                <div class="values">
-                    <p><b>used memory:</b> <span class="realtime" data-value="used_memory"><?php echo memsize($opcache_status['memory_usage']['used_memory']); ?></span></p>
-                    <p><b>free memory:</b> <span class="realtime" data-value="free_memory"><?php echo memsize($opcache_status['memory_usage']['free_memory']); ?></span></p>
-                    <p><b>wasted memory:</b> <span class="realtime" data-value="wasted_memory"><?php echo memsize($opcache_status['memory_usage']['wasted_memory']); ?></span> (<span class="realtime" data-value="wasted_percentage"><?php echo round($opcache_status['memory_usage']['current_wasted_percentage'], 2); ?>%</span>)</p>
-                </div>
-                <br />
-                <p><a href="#" id="toggleRealtime">Enable real-time update of stats</a></p>
-            </div>
-            <div id="info">
-            
-                <table>
-                    <tr><th colspan="2">General info</th></tr>
-                    <tr class="<?php rc(); ?>">
-                        <td>Zend OPcache</td>
-                        <td><?php echo $opcache_config['version']['version']; ?></td>
-                    </tr>
-                    <tr class="<?php rc(); ?>">
-                        <td>PHP</td>
-                        <td><?php echo phpversion(); ?></td>
-                    </tr>
-                    <?php if (!empty($_SERVER['SERVER_NAME'])): ?>
-                    <tr class="<?php rc(); ?>">    
-                        <td>Host</td>
-                        <td><?php echo $_SERVER['SERVER_NAME']; ?></td>
-                    </tr>
-                    <?php endif; ?>
-                    <?php if (!empty($_SERVER['SERVER_SOFTWARE'])): ?>
-                    <tr class="<?php rc(); ?>">
-                        <td>Server Software</td>
-                        <td><?php echo $_SERVER['SERVER_SOFTWARE']; ?></td>
-                    </tr>
-                    <?php endif; ?>
-                    <tr class="<?php rc(); ?>">
-                        <td>Start time</td>
-                        <td><?php echo date_format(date_create("@{$opcache_status['opcache_statistics']['start_time']}"), 'Y-m-d H:i:s'); ?></td>
-                    </tr>
-                    <tr class="<?php rc(); ?>">
-                        <td>Last reset</td>
-                        <td><?php echo ($opcache_status['opcache_statistics']['last_restart_time'] == 0
-                                ? '<em>never</em>'
-                                : date_format(date_create("@{$opcache_status['opcache_statistics']['last_restart_time']}"), 'Y-m-d H:i:s')); ?></td>
-                    </tr>
-                </table>
-                
-                <table>
-                    <tr><th colspan="2">Directives</th></tr>
-                    <?php rc(0); foreach ($opcache_config['directives'] as $d => $v): ?>
-                    <tr class="<?php rc(); ?>">
-                        <td><span title="<?php echo $d; ?>"><?php echo str_replace(array('opcache.', '_'), array('', ' '), $d); ?></span></td>
-                        <td><?php echo (is_bool($v)
-                            ? ($v ? '<i>true</i>' : '<i>false</i>')
-                            : $v); ?></td>
-                    </tr>
-                    <?php endforeach; ?>
-                </table>
-                <br style="clear:both;" />
-            </div>
-        </div>
+    <div style="text-align:center;margin-bottom:2em;">
+        <p>
+            <a href="?page=overview" class="button" style="margin-right:2em;">Overview</a>
+            <a href="?page=files" class="button">File usage</a>
+        </p>
     </div>
-    <div id="tab-file">
-        <div class="container">
+
+    <?php if ($page == 'overview'): ?>
+    <h2>Overview</h2>
+    <div class="container">
+        <div id="counts">
+            <div>
+                <p><span class="large realtime <?php echo $threshold; ?>" data-value="memory_usage"><?php echo $highlightValueMemoryUsage; ?>%</span> memory usage</p>
+            </div>
+            <div>
+                <p><span class="large realtime" data-value="hit_rate"><?php echo $highlightValueHits; ?>%</span> hit rate</p>
+            </div>
+            <div class="values">
+                <p><b>used memory:</b> <span class="realtime" data-value="used_memory"><?php echo memsize($opcache_status['memory_usage']['used_memory']); ?></span></p>
+                <p><b>free memory:</b> <span class="realtime" data-value="free_memory"><?php echo memsize($opcache_status['memory_usage']['free_memory']); ?></span></p>
+                <p><b>wasted memory:</b> <span class="realtime" data-value="wasted_memory"><?php echo memsize($opcache_status['memory_usage']['wasted_memory']); ?></span> (<span class="realtime" data-value="wasted_percentage"><?php echo round($opcache_status['memory_usage']['current_wasted_percentage'], 2); ?>%</span>)</p>
+                <p><b>number of cached files:</b> <span class="realtime" data-value="files_cached"><?php echo $totalFilesCached; ?></span></p>
+            </div>
+            <br />
+            <p><a href="#" id="toggleRealtime">Enable real-time update of stats</a></p>
+        </div>
+        <div id="info">
+        
             <table>
-            <tr>
-                <th>Script</th>
-                <th>Details</th>
-            </tr>
-            <?php rc(0); foreach ($opcache_status['scripts'] as $s): ?>
-            <tr class="<?php rc(); ?>">
-                <td><?php 
-                    $base  = basename($s['full_path']);
-                    $parts = array_filter(explode(DIRECTORY_SEPARATOR, dirname($s['full_path'])));
-                    if (!empty($settings['compress_path_threshold'])) {
-                        echo '<span class="showmore"><span class="button">…</span><span class="text" style="display:none;">' . DIRECTORY_SEPARATOR;
-                        echo join(DIRECTORY_SEPARATOR, array_slice($parts, 0, $settings['compress_path_threshold'])) . DIRECTORY_SEPARATOR;
-                        echo '</span>';
-                        echo join(DIRECTORY_SEPARATOR, array_slice($parts, $settings['compress_path_threshold']));
-                        if (count($parts) > $settings['compress_path_threshold']) {
-                            echo DIRECTORY_SEPARATOR;
-                        }
-                        echo "{$base}</span>";
-                    } else {
-                        echo htmlentities($s['full_path'], ENT_COMPAT, 'UTF-8');
-                    }
-                    ?>
-                </td>
-                <td>
-                    <p>
-                        hits: <?php echo $s['hits']; ?>, 
-                        memory: <?php echo memsize($s['memory_consumption']); ?><br />
-                        last used: <?php echo date_format(date_create($s['last_used']), 'Y-m-d H:i:s'); ?>
-                    </p>
-                </td>
-            </tr>
-            <?php endforeach; ?>
+                <tr><th colspan="2">General info</th></tr>
+                <tr class="<?php rc(); ?>">
+                    <td>Zend OPcache</td>
+                    <td><?php echo $opcache_config['version']['version']; ?></td>
+                </tr>
+                <tr class="<?php rc(); ?>">
+                    <td>PHP</td>
+                    <td><?php echo phpversion(); ?></td>
+                </tr>
+                <tr class="<?php rc(); ?>">    
+                    <td>Host</td>
+                    <td><?php echo $host; ?></td>
+                </tr>
+                <?php if (!empty($_SERVER['SERVER_SOFTWARE'])): ?>
+                <tr class="<?php rc(); ?>">
+                    <td>Server Software</td>
+                    <td><?php echo $_SERVER['SERVER_SOFTWARE']; ?></td>
+                </tr>
+                <?php endif; ?>
+                <tr class="<?php rc(); ?>">
+                    <td>Start time</td>
+                    <td><?php echo date_format(date_create("@{$opcache_status['opcache_statistics']['start_time']}"), 'Y-m-d H:i:s'); ?></td>
+                </tr>
+                <tr class="<?php rc(); ?>">
+                    <td>Last reset</td>
+                    <td><?php echo ($opcache_status['opcache_statistics']['last_restart_time'] == 0
+                            ? '<em>never</em>'
+                            : date_format(date_create("@{$opcache_status['opcache_statistics']['last_restart_time']}"), 'Y-m-d H:i:s')); ?></td>
+                </tr>
             </table>
+            
+            <table>
+                <tr><th colspan="2">Directives</th></tr>
+                <?php rc(0); foreach ($opcache_config['directives'] as $d => $v): ?>
+                <tr class="<?php rc(); ?>">
+                    <td><span title="<?php echo $d; ?>"><?php echo str_replace(array('opcache.', '_'), array('', ' '), $d); ?></span></td>
+                    <td><?php echo (is_bool($v)
+                        ? ($v ? '<i>true</i>' : '<i>false</i>')
+                        : $v); ?></td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+            <br style="clear:both;" />
         </div>
     </div>
-</div>
+    <?php endif; ?>
+
+    <?php if ($page == 'files'): ?>
+    <h2>File usage</h2>
+    <div class="container">
+        <h3><?php echo $totalFilesCached; ?> file<?php echo ($totalFilesCached == 1 ? '' : 's'); ?> cached</h3>
+        <table>
+        <tr>
+            <th>Script</th>
+            <th>Details</th>
+        </tr>
+        <?php rc(0); foreach ($opcache_status['scripts'] as $s): ?>
+        <tr class="<?php rc(); ?>">
+            <td><?php 
+                $base  = basename($s['full_path']);
+                $parts = array_filter(explode(DIRECTORY_SEPARATOR, dirname($s['full_path'])));
+                if (!empty($settings['compress_path_threshold'])) {
+                    echo '<span class="showmore"><span class="button">…</span><span class="text" style="display:none;">' . DIRECTORY_SEPARATOR;
+                    echo join(DIRECTORY_SEPARATOR, array_slice($parts, 0, $settings['compress_path_threshold'])) . DIRECTORY_SEPARATOR;
+                    echo '</span>';
+                    echo join(DIRECTORY_SEPARATOR, array_slice($parts, $settings['compress_path_threshold']));
+                    if (count($parts) > $settings['compress_path_threshold']) {
+                        echo DIRECTORY_SEPARATOR;
+                    }
+                    echo "{$base}</span>";
+                } else {
+                    echo htmlentities($s['full_path'], ENT_COMPAT, 'UTF-8');
+                }
+                ?>
+            </td>
+            <td>
+                <p>
+                    hits: <?php echo $s['hits']; ?>, 
+                    memory: <?php echo memsize($s['memory_consumption']); ?><br />
+                    last used: <?php echo date_format(date_create($s['last_used']), 'Y-m-d H:i:s'); ?>
+                </p>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+        </table>
+    </div>
+    <?php endif; ?>
+
 
 </body>
 </html>
