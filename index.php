@@ -37,28 +37,35 @@ function rc($at = null)
     }
 }
 
-$highlightValueMemoryUsage = round(100 * ($opcache_status['memory_usage']['used_memory'] / $opcache_status['memory_usage']['free_memory']));
-$highlightValueHits = round($opcache_status['opcache_statistics']['opcache_hit_rate']);
+$data = array_merge(
+    $opcache_status['memory_usage'],
+    $opcache_status['opcache_statistics'],
+    array(
+        'used_memory_percentage'  => round(100 * ($opcache_status['memory_usage']['used_memory'] / $opcache_status['memory_usage']['free_memory'])),
+        'hit_rate_percentage'     => round($opcache_status['opcache_statistics']['opcache_hit_rate']),
+        'wasted_percentage'       => round($opcache_status['memory_usage']['current_wasted_percentage'], 2),
+        'used_memory_size'        => memsize($opcache_status['memory_usage']['used_memory']),
+        'free_memory_size'        => memsize($opcache_status['memory_usage']['free_memory']),
+        'wasted_memory_size'      => memsize($opcache_status['memory_usage']['wasted_memory']),
+        'files_cached'            => number_format($opcache_status['opcache_statistics']['num_cached_scripts']),
+        'hits_size'               => number_format($opcache_status['opcache_statistics']['hits']),
+        'miss_size'               => number_format($opcache_status['opcache_statistics']['misses']),
+        'blacklist_miss_size'     => number_format($opcache_status['opcache_statistics']['blacklist_misses']),
+        'num_cached_keys_size'    => number_format($opcache_status['opcache_statistics']['num_cached_keys']),
+        'max_cached_keys_size'    => number_format($opcache_status['opcache_statistics']['max_cached_keys']),
+    )
+);
+
 $threshold = '';
-if ($highlightValueMemoryUsage >= 80) {
+if ($data['used_memory_percentage'] >= 80) {
     $threshold = ' high';
-} elseif ($threshold >= 60) {
+} elseif ($data['used_memory_percentage'] >= 60) {
     $threshold = ' mid';
 }
-$totalFilesCached = count($opcache_status['scripts']);
 
 if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) 
     && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
 ) {
-    $data = array(
-        'memory_usage'      => "{$highlightValueMemoryUsage}%",
-        'hit_rate'          => "{$highlightValueHits}%",
-        'used_memory'       => memsize($opcache_status['memory_usage']['used_memory']),
-        'free_memory'       => memsize($opcache_status['memory_usage']['free_memory']),
-        'wasted_memory'     => memsize($opcache_status['memory_usage']['wasted_memory']),
-        'wasted_percentage' => round($opcache_status['memory_usage']['current_wasted_percentage'], 2) . '%',
-        'files_cached'      => $totalFilesCached
-    );
     echo json_encode($data);
     exit;
 }
@@ -103,7 +110,7 @@ $page = (empty($_GET['page']) || !in_array($_GET['page'], $validPages)
         #counts p {text-align:center;}
         #counts div.values p {text-align:left;}
         #counts p span{font-family:'Roboto',sans-serif;}
-        #counts p span.large{display:block;line-height:90%;font-size:800%;}
+        #counts p span.large{display:block;line-height:90%;font-size:800%;}   
         table { margin: 0 0 1em 0; border-collapse: collapse; border-color: #fff; width: 100%; }
         table caption { text-align: left; font-size: 1.5em; }        
         table tr { background-color: #99D0DF; border-color: #fff; }
@@ -209,16 +216,21 @@ $page = (empty($_GET['page']) || !in_array($_GET['page'], $validPages)
     <div class="container">
         <div id="counts">
             <div>
-                <p><span class="large realtime <?php echo $threshold; ?>" data-value="memory_usage"><?php echo $highlightValueMemoryUsage; ?>%</span> memory usage</p>
+                <p><span class="large <?php echo $threshold; ?>"><span class="realtime" data-value="used_memory_percentage"><?php echo $data['used_memory_percentage']; ?></span>%</span> memory usage</p>
             </div>
             <div>
-                <p><span class="large realtime" data-value="hit_rate"><?php echo $highlightValueHits; ?>%</span> hit rate</p>
+                <p><span class="large"><span class="realtime" data-value="hit_rate"><?php echo $data['hit_rate_percentage']; ?></span>%</span> hit rate</p>
             </div>
             <div class="values">
-                <p><b>used memory:</b> <span class="realtime" data-value="used_memory"><?php echo memsize($opcache_status['memory_usage']['used_memory']); ?></span></p>
-                <p><b>free memory:</b> <span class="realtime" data-value="free_memory"><?php echo memsize($opcache_status['memory_usage']['free_memory']); ?></span></p>
-                <p><b>wasted memory:</b> <span class="realtime" data-value="wasted_memory"><?php echo memsize($opcache_status['memory_usage']['wasted_memory']); ?></span> (<span class="realtime" data-value="wasted_percentage"><?php echo round($opcache_status['memory_usage']['current_wasted_percentage'], 2); ?>%</span>)</p>
-                <p><b>number of cached files:</b> <span class="realtime" data-value="files_cached"><?php echo $totalFilesCached; ?></span></p>
+                <p><b>used memory:</b> <span class="realtime" data-value="used_memory_size"><?php echo $data['used_memory_size']; ?></span></p>
+                <p><b>free memory:</b> <span class="realtime" data-value="free_memory_size"><?php echo $data['free_memory_size']; ?></span></p>
+                <p><b>wasted memory:</b> <span class="realtime" data-value="wasted_memory_size"><?php echo $data['wasted_memory_size']; ?></span> (<span class="realtime" data-value="wasted_percentage"><?php echo $data['wasted_percentage']; ?></span>%)</p>
+                <p><b>number of cached files:</b> <span class="realtime" data-value="files_cached"><?php echo $data['files_cached']; ?></span></p>
+                <p><b>number of hits:</b> <span class="realtime" data-value="hits_size"><?php echo $data['hits_size']; ?></span></p>
+                <p><b>number of misses:</b> <span class="realtime" data-value="miss_size"><?php echo $data['miss_size']; ?></span></p>
+                <p><b>blacklist misses:</b> <span class="realtime" data-value="blacklist_miss_size"><?php echo $data['blacklist_miss_size']; ?></span></p>
+                <p><b>number of cached keys:</b> <span class="realtime" data-value="num_cached_keys_size"><?php echo $data['num_cached_keys_size']; ?></span></p>
+                <p><b>max cached keys:</b> <span class="realtime" data-value="max_cached_keys_size"><?php echo $data['max_cached_keys_size']; ?></span></p>
             </div>
             <br />
             <p><a href="#" id="toggleRealtime">Enable real-time update of stats</a></p>
@@ -247,13 +259,13 @@ $page = (empty($_GET['page']) || !in_array($_GET['page'], $validPages)
                 <?php endif; ?>
                 <tr class="<?php rc(); ?>">
                     <td>Start time</td>
-                    <td><?php echo date_format(date_create("@{$opcache_status['opcache_statistics']['start_time']}"), 'Y-m-d H:i:s'); ?></td>
+                    <td><?php echo date_format(date_create("@{$data['start_time']}"), 'Y-m-d H:i:s'); ?></td>
                 </tr>
                 <tr class="<?php rc(); ?>">
                     <td>Last reset</td>
-                    <td><?php echo ($opcache_status['opcache_statistics']['last_restart_time'] == 0
+                    <td><?php echo ($data['last_restart_time'] == 0
                             ? '<em>never</em>'
-                            : date_format(date_create("@{$opcache_status['opcache_statistics']['last_restart_time']}"), 'Y-m-d H:i:s')); ?></td>
+                            : date_format(date_create("@{$data['last_restart_time']}"), 'Y-m-d H:i:s')); ?></td>
                 </tr>
             </table>
             
@@ -276,7 +288,7 @@ $page = (empty($_GET['page']) || !in_array($_GET['page'], $validPages)
     <?php if ($page == 'files'): ?>
     <h2>File usage</h2>
     <div class="container">
-        <h3><?php echo $totalFilesCached; ?> file<?php echo ($totalFilesCached == 1 ? '' : 's'); ?> cached</h3>
+        <h3><?php echo $data['files_cached']; ?> file<?php echo ($data['files_cached'] == 1 ? '' : 's'); ?> cached</h3>
         <table>
         <tr>
             <th>Script</th>
