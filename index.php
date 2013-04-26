@@ -1,19 +1,33 @@
 <?php
 
 if (!function_exists('opcache_get_status')) {
-    die('Zend OPcache does not appear to be running');
+    die('The Zend OPcache extension does not appear to be installed');
 }
 
 $settings = array(
     'compress_path_threshold' => 2
 );
 
+
+$validPages = array('overview', 'files', 'reset');
+$page = (empty($_GET['page']) || !in_array($_GET['page'], $validPages)
+    ? 'overview'
+    : strtolower($_GET['page'])
+);
+
+if ($page == 'reset') {
+    opcache_reset();
+    $page = 'overview';
+}
+
 $opcache_config = opcache_get_configuration();
 $opcache_status = opcache_get_status();
 
-uasort($opcache_status['scripts'], function($a, $b) {
-    return $a['hits'] < $b['hits'];
-});
+if (!empty($opcache_status['scripts'])) {
+    uasort($opcache_status['scripts'], function($a, $b) {
+        return $a['hits'] < $b['hits'];
+    });
+}
 
 function memsize($size, $precision = 3, $space = false)
 {
@@ -78,12 +92,6 @@ $host = (function_exists('gethostname')
             : $_SERVER['SERVER_NAME']
         )
     )
-);
-
-$validPages = array('overview', 'files');
-$page = (empty($_GET['page']) || !in_array($_GET['page'], $validPages)
-    ? 'overview'
-    : $_GET['page']
 );
 
 ?>
@@ -151,6 +159,7 @@ $page = (empty($_GET['page']) || !in_array($_GET['page'], $validPages)
             border-radius: 6px;
             border: 1px solid #a1a1a1;
             text-shadow: 0px -1px 0px rgba(000,000,000,0), 0px 1px 0px rgba(255,255,255,0.4);
+            margin: 0 1em;
         }        
         span.showmore span.button:hover {
             background-color: #CCCCCC;
@@ -206,8 +215,9 @@ $page = (empty($_GET['page']) || !in_array($_GET['page'], $validPages)
 
     <div style="text-align:center;margin-bottom:2em;">
         <p>
-            <a href="?page=overview" class="button" style="margin-right:2em;">Overview</a>
+            <a href="?page=overview" class="button">Overview</a>
             <a href="?page=files" class="button">File usage</a>
+            <a href="?page=reset" class="button" onclick="return confirm('Are you sure you want to reset the cache?');">Reset cache</a>
         </p>
     </div>
 
@@ -216,10 +226,10 @@ $page = (empty($_GET['page']) || !in_array($_GET['page'], $validPages)
     <div class="container">
         <div id="counts">
             <div>
-                <p><span class="large <?php echo $threshold; ?>"><span class="realtime" data-value="used_memory_percentage"><?php echo $data['used_memory_percentage']; ?></span>%</span> memory usage</p>
+                <p><span class="large <?php echo $threshold; ?>"><span class="realtime" data-value="used_memory_percentage"><?php echo $data['used_memory_percentage']; ?></span>%</span><br/>memory usage</p>
             </div>
             <div>
-                <p><span class="large"><span class="realtime" data-value="hit_rate"><?php echo $data['hit_rate_percentage']; ?></span>%</span> hit rate</p>
+                <p><span class="large"><span class="realtime" data-value="hit_rate"><?php echo $data['hit_rate_percentage']; ?></span>%</span><br/>hit rate</p>
             </div>
             <div class="values">
                 <p><b>used memory:</b> <span class="realtime" data-value="used_memory_size"><?php echo $data['used_memory_size']; ?></span></p>
