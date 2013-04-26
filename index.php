@@ -47,7 +47,7 @@ function rc($at = null)
     if ($at !== null) {
         $i = $at;
     } else {
-        echo (++$i % 2 ? 'odd' : 'even');
+        echo (++$i % 2 ? 'even' : 'odd');
     }
 }
 
@@ -167,6 +167,10 @@ $host = (function_exists('gethostname')
         @media screen and (max-width: 700px) {
             #info{margin-right:auto;}
             #counts{position:relative;display:block;margin-bottom:2em;width:100%;}
+        }
+        @media screen and (max-width: 550px) {
+            a.button{display:block;margin-bottom:2px;}
+            #frmFilter{width:99% !important;}
         }
     </style>
     <script type="text/javascript">
@@ -297,8 +301,9 @@ $host = (function_exists('gethostname')
 
     <?php if ($page == 'files'): ?>
     <h2>File usage</h2>
+    <p><label>Start typing to filter on script path<br/><input type="text" style="width:40em;" name="filter" id="frmFilter" /><label></p>
     <div class="container">
-        <h3><?php echo $data['files_cached']; ?> file<?php echo ($data['files_cached'] == 1 ? '' : 's'); ?> cached</h3>
+        <h3><?php echo $data['files_cached']; ?> file<?php echo ($data['files_cached'] == 1 ? '' : 's'); ?> cached <span id="filterShowing"></span></h3>
         <table>
         <tr>
             <th>Script</th>
@@ -306,7 +311,7 @@ $host = (function_exists('gethostname')
         </tr>
         <?php rc(0); foreach ($opcache_status['scripts'] as $s): ?>
         <tr class="<?php rc(); ?>">
-            <td><?php 
+            <td class="pathname"><?php 
                 $base  = basename($s['full_path']);
                 $parts = array_filter(explode(DIRECTORY_SEPARATOR, dirname($s['full_path'])));
                 if (!empty($settings['compress_path_threshold'])) {
@@ -334,6 +339,31 @@ $host = (function_exists('gethostname')
         <?php endforeach; ?>
         </table>
     </div>
+    <script type="text/javascript">
+        $(function(){
+            $('.container table').bind('paint', function(event, params) {
+                var trs = $('tr:visible', $(this)).not(':first');
+                trs.removeClass('odd even')
+                   .filter(':odd').addClass('odd')
+                   .end()
+                   .filter(':even').addClass('even');
+                $('#filterShowing').text(($('#frmFilter').val().length
+                    ? trs.length + ' showing due to filter'
+                    : ''
+                ));
+            });
+            $('#frmFilter').bind('keyup', function(event){
+                $('td.pathname').each(function(index){
+                    if (($(this).text().toLowerCase().indexOf($('#frmFilter').val().toLowerCase())) == -1) {
+                        $(this).parent('tr').hide();
+                    } else {
+                        $(this).parent('tr').show();
+                    }
+                });
+                $('.container table').trigger('paint');
+            });
+        });
+    </script>
     <?php endif; ?>
 
 
