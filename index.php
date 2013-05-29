@@ -17,7 +17,7 @@ $page = (empty($_GET['page']) || !in_array($_GET['page'], $validPages)
 
 if ($page == 'reset') {
     opcache_reset();
-    $page = 'overview';
+    header('Location: ?page=overview');
 }
 
 $opcache_config = opcache_get_configuration();
@@ -55,7 +55,10 @@ $data = array_merge(
     $opcache_status['memory_usage'],
     $opcache_status['opcache_statistics'],
     array(
-        'used_memory_percentage'  => round(100 * ($opcache_status['memory_usage']['used_memory'] / $opcache_status['memory_usage']['free_memory'])),
+        'total_memory_size'       => memsize($opcache_config['directives']['opcache.memory_consumption']),
+        'used_memory_percentage'  => round(100 * (
+            ($opcache_status['memory_usage']['used_memory'] + $opcache_status['memory_usage']['wasted_memory']) 
+                / $opcache_config['directives']['opcache.memory_consumption'])),
         'hit_rate_percentage'     => round($opcache_status['opcache_statistics']['opcache_hit_rate']),
         'wasted_percentage'       => round($opcache_status['memory_usage']['current_wasted_percentage'], 2),
         'used_memory_size'        => memsize($opcache_status['memory_usage']['used_memory']),
@@ -160,6 +163,7 @@ $host = (function_exists('gethostname')
             border: 1px solid #a1a1a1;
             text-shadow: 0px -1px 0px rgba(000,000,000,0), 0px 1px 0px rgba(255,255,255,0.4);
             margin: 0 1em;
+            white-space: nowrap;
         }        
         span.showmore span.button:hover {
             background-color: #CCCCCC;
@@ -236,6 +240,7 @@ $host = (function_exists('gethostname')
                 <p><span class="large"><span class="realtime" data-value="hit_rate"><?php echo $data['hit_rate_percentage']; ?></span>%</span><br/>hit rate</p>
             </div>
             <div class="values">
+                <p><b>total memory:</b> <span data-value="total_memory_size"><?php echo $data['total_memory_size']; ?></span></p>
                 <p><b>used memory:</b> <span class="realtime" data-value="used_memory_size"><?php echo $data['used_memory_size']; ?></span></p>
                 <p><b>free memory:</b> <span class="realtime" data-value="free_memory_size"><?php echo $data['free_memory_size']; ?></span></p>
                 <p><b>wasted memory:</b> <span class="realtime" data-value="wasted_memory_size"><?php echo $data['wasted_memory_size']; ?></span> (<span class="realtime" data-value="wasted_percentage"><?php echo $data['wasted_percentage']; ?></span>%)</p>
