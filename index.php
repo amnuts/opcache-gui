@@ -277,6 +277,7 @@ $host = (function_exists('gethostname')
             
             <table>
                 <tr><th colspan="2">Directives</th></tr>
+                <?php ksort($opcache_config['directives']); ?>
                 <?php rc(0); foreach ($opcache_config['directives'] as $d => $v): ?>
                 <tr class="<?php rc(); ?>">
                     <td><span title="<?php echo $d; ?>"><?php echo str_replace(array('opcache.', '_'), array('', ' '), $d); ?></span></td>
