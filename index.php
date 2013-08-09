@@ -1,15 +1,27 @@
 <?php
 
+/**
+ * OPcache GUI
+ * 
+ * A simple but effective single-file GUI for the OPcache PHP extension.
+ * 
+ * @author Andrew Collington, andy@amnuts.com
+ * @license MIT, http://acollington.mit-license.org/
+ */
+
 if (!function_exists('opcache_get_status')) {
     die('The Zend OPcache extension does not appear to be installed');
 }
 
 $settings = array(
-    'compress_path_threshold' => 2
+    'compress_path_threshold' => 2,
+    'used_memory_percentage_high_threshold' => 80,
+    'used_memory_percentage_mid_threshold' => 60,
+    'allow_invalidate' => true
 );
 
 
-$validPages = array('overview', 'files', 'reset');
+$validPages = array('overview', 'files', 'reset', 'invalidate');
 $page = (empty($_GET['page']) || !in_array($_GET['page'], $validPages)
     ? 'overview'
     : strtolower($_GET['page'])
@@ -18,10 +30,23 @@ $page = (empty($_GET['page']) || !in_array($_GET['page'], $validPages)
 if ($page == 'reset') {
     opcache_reset();
     header('Location: ?page=overview');
+    exit;
+}
+
+if ($page == 'invalidate') {
+    $file = (isset($_GET['file']) ? trim($_GET['file']) : null);
+    if (!$settings['allow_invalidate'] || !function_exists('opcache_invalidate') || empty($file)) {
+        header('Location: ?page=files&error=1');
+        exit;
+    }
+    $success = (int)opcache_invalidate(urldecode($file), true);
+    header("Location: ?page=files&success={$success}");
+    exit;
 }
 
 $opcache_config = opcache_get_configuration();
 $opcache_status = opcache_get_status();
+$opcache_funcs  = get_extension_funcs('Zend OPcache');
 
 if (!empty($opcache_status['scripts'])) {
     uasort($opcache_status['scripts'], function($a, $b) {
@@ -74,9 +99,9 @@ $data = array_merge(
 );
 
 $threshold = '';
-if ($data['used_memory_percentage'] >= 80) {
+if ($data['used_memory_percentage'] >= $settings['used_memory_percentage_high_threshold']) {
     $threshold = ' high';
-} elseif ($data['used_memory_percentage'] >= 60) {
+} elseif ($data['used_memory_percentage'] >= $settings['used_memory_percentage_mid_threshold']) {
     $threshold = ' mid';
 }
 
@@ -130,10 +155,12 @@ $host = (function_exists('gethostname')
         table tr.odd { background-color: #EFFEFF; }
         table tr.even { background-color: #E0ECEF; }
         table tr.highlight { background-color: #61C4DF; }
+        td.pathname p { margin-bottom: 0.25em; }
         .wsnw { white-space: nowrap; }
         .low{color:#000000;}
         .mid{color:#550000;}
         .high{color:#FF0000;}
+        .invalid{color:#FF4545;}
         span.showmore span.button {
             display: inline-block;
             margin-right: 5px;
@@ -177,46 +204,6 @@ $host = (function_exists('gethostname')
             #frmFilter{width:99% !important;}
         }
     </style>
-    <script type="text/javascript">
-        $(function(){
-            <?php if ($page == 'overview'): ?>
-            var realtime = false;
-            function ping() {
-                $.ajax({
-                    url: "#",
-                    dataType: "json",
-                    cache: false,
-                    success: function(data){
-                        $('.realtime').each(function(){
-                            $(this).text(data[$(this).attr('data-value')]);
-                        });
-                    }
-                });
-            }
-            $('#toggleRealtime').click(function(){
-                if (realtime === false) {
-                    realtime = setInterval(function(){ping()}, 5000);
-                    $(this).text('Disable real-time update of stats');
-                } else {
-                    clearInterval(realtime);
-                    realtime = false;
-                    $(this).text('Enable real-time update of stats');
-                }
-            });
-            <?php endif; ?>
-            <?php if ($page == 'files'): ?>
-            $('span.showmore span.button').click(function(){
-                if ($(this).next().is(":visible")) {
-                    $(this).next().hide();
-                    $(this).css('padding-top', '0').text('…');
-                } else {
-                    $(this).next().show();
-                    $(this).css('padding-top', '2px').text('«');
-                }
-            });
-            <?php endif; ?>
-        });
-    </script>
 </head>
 
 <body>
@@ -295,13 +282,49 @@ $host = (function_exists('gethostname')
                     <td><span title="<?php echo $d; ?>"><?php echo str_replace(array('opcache.', '_'), array('', ' '), $d); ?></span></td>
                     <td><?php echo (is_bool($v)
                         ? ($v ? '<i>true</i>' : '<i>false</i>')
-                        : $v); ?></td>
+                        : (empty($v) ? '<i>no value</i>' : $v)); ?></td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+            
+            <table>
+                <tr><th>Available functions</th></tr>
+                <?php rc(0); foreach ($opcache_funcs as $f): ?>
+                <tr class="<?php rc(); ?>">
+                    <td><a href="http://php.net/<?php echo $f; ?>" title="View manual page" target="_blank"><?php echo $f; ?></td>
                 </tr>
                 <?php endforeach; ?>
             </table>
             <br style="clear:both;" />
         </div>
     </div>
+    <script type="text/javascript">
+        $(function(){
+            var realtime = false;
+            function ping() {
+                $.ajax({
+                    url: "#",
+                    dataType: "json",
+                    cache: false,
+                    success: function(data){
+                        $('.realtime').each(function(){
+                            $(this).text(data[$(this).attr('data-value')]);
+                        });
+                    }
+                });
+            }
+            $('#toggleRealtime').click(function(){
+                if (realtime === false) {
+                    realtime = setInterval(function(){ping()}, 5000);
+                    $(this).text('Disable real-time update of stats');
+                } else {
+                    clearInterval(realtime);
+                    realtime = false;
+                    $(this).text('Enable real-time update of stats');
+                }
+            });
+        });
+    </script>
     <?php endif; ?>
 
     <?php if ($page == 'files'): ?>
@@ -316,7 +339,7 @@ $host = (function_exists('gethostname')
         </tr>
         <?php rc(0); foreach ($opcache_status['scripts'] as $s): ?>
         <tr class="<?php rc(); ?>">
-            <td class="pathname"><?php 
+            <td class="pathname"><p><?php 
                 $base  = basename($s['full_path']);
                 $parts = array_filter(explode(DIRECTORY_SEPARATOR, dirname($s['full_path'])));
                 if (!empty($settings['compress_path_threshold'])) {
@@ -331,13 +354,19 @@ $host = (function_exists('gethostname')
                 } else {
                     echo htmlentities($s['full_path'], ENT_COMPAT, 'UTF-8');
                 }
-                ?>
+                ?></p>
+                <?php if ($settings['allow_invalidate'] && function_exists('opcache_invalidate')): ?>
+                <a href="?page=invalidate&file=<?php echo urlencode($s['full_path']); ?>">Force file invalidation</a>
+                <?php endif; ?>
             </td>
             <td>
                 <p>
                     hits: <?php echo $s['hits']; ?>, 
                     memory: <?php echo memsize($s['memory_consumption']); ?><br />
                     last used: <?php echo date_format(date_create($s['last_used']), 'Y-m-d H:i:s'); ?>
+                    <?php if ($s['timestamp'] === 0): ?>
+                    <br /><i class="invalid">has been invalidated</i>
+                    <?php endif; ?>
                 </p>
             </td>
         </tr>
@@ -346,6 +375,15 @@ $host = (function_exists('gethostname')
     </div>
     <script type="text/javascript">
         $(function(){
+            $('span.showmore span.button').click(function(){
+                if ($(this).next().is(":visible")) {
+                    $(this).next().hide();
+                    $(this).css('padding-top', '0').text('…');
+                } else {
+                    $(this).next().show();
+                    $(this).css('padding-top', '2px').text('«');
+                }
+            });
             $('.container table').bind('paint', function(event, params) {
                 var trs = $('tr:visible', $(this)).not(':first');
                 trs.removeClass('odd even')
@@ -358,11 +396,11 @@ $host = (function_exists('gethostname')
                 ));
             });
             $('#frmFilter').bind('keyup', function(event){
-                $('td.pathname').each(function(index){
-                    if (($(this).text().toLowerCase().indexOf($('#frmFilter').val().toLowerCase())) == -1) {
-                        $(this).parent('tr').hide();
+                $('td.pathname p').each(function(index){
+                    if ($(this).text().toLowerCase().indexOf($('#frmFilter').val().toLowerCase()) == -1) {
+                        $(this).closest('tr').hide();
                     } else {
-                        $(this).parent('tr').show();
+                        $(this).closest('tr').show();
                     }
                 });
                 $('.container table').trigger('paint');
