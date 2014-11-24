@@ -122,7 +122,12 @@ class OpCacheService
             ]
         );
 
+        $directives = [];
         ksort($config['directives']);
+        foreach ($config['directives'] as $k => $v) {
+            $directives[] = ['k' => $k, 'v' => $v];
+        }
+
         $version = array_merge(
             $config['version'],
             [
@@ -144,7 +149,7 @@ class OpCacheService
             'version'    => $version,
             'overview'   => $overview,
             'files'      => $status['scripts'],
-            'directives' => $config['directives'],
+            'directives' => $directives,
             'blacklist'  => $config['blacklist'],
             'functions'  => get_extension_funcs('Zend OPcache')
         ];
@@ -159,7 +164,9 @@ $opcache = OpCacheService::init();
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <script src="http://fb.me/react-0.12.1.js"></script>
+    <script src="http://fb.me/JSXTransformer-0.12.1.js"></script>
+    <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
     <style type="text/css">
         body {
             font-family:sans-serif;
@@ -265,72 +272,11 @@ $opcache = OpCacheService::init();
 <div id="overview">
     <h2>Overview</h2>
     <div class="container">
-        <?php $data = $opcache->getData('overview'); ?>
-        <div id="counts">
-            <div id="used_memory_percentage">
-                <h3>memory usage</h3>
-                <p class="large"><?php echo $data['used_memory_percentage']; ?><span>%</span></p>
-            </div>
-            <div id="hit_rate_percentage">
-                <h3>hit rate</h3>
-                <p class="large"><?php echo $data['hit_rate_percentage']; ?><span>%</span></p>
-            </div>
-            <div id="overview_data" class="values">
-                <p><b>total memory:</b> <?php echo $data['readable']['total_memory']; ?></p>
-                <p><b>used memory:</b> <?php echo $data['readable']['used_memory']; ?></p>
-                <p><b>free memory:</b> <?php echo $data['readable']['free_memory']; ?></p>
-                <p><b>wasted memory:</b> <?php echo $data['readable']['wasted_memory']; ?> (<?php echo $data['wasted_percentage']; ?>%)</p>
-                <p><b>number of cached files:</b> <?php echo $data['readable']['num_cached_scripts']; ?></p>
-                <p><b>number of hits:</b> <?php echo $data['readable']['hits']; ?></p>
-                <p><b>number of misses:</b> <?php echo $data['readable']['misses']; ?></p>
-                <p><b>blacklist misses:</b> <?php echo $data['readable']['blacklist_miss']; ?></p>
-                <p><b>number of cached keys:</b> <?php echo $data['readable']['num_cached_keys']; ?></p>
-                <p><b>max cached keys:</b> <?php echo $data['readable']['max_cached_keys']; ?></p>
-            </div>
-            <p><a href="#" id="toggleRealtime">Enable real-time update of stats</a></p>
-        </div>
+        <div id="counts"></div>
         <div id="info">
-            <?php $version = $opcache->getData('version'); ?>
-            <table>
-                <thead>
-                    <tr><th colspan="2">General info</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Zend OPcache</td><td><?php echo $version['version']; ?></td></tr>
-                    <tr><td>PHP</td><td><?php echo $version['php']; ?></td></tr>
-                    <tr><td>Host</td><td><?php echo $version['host']; ?></td></tr>
-                    <tr><td>Server Software</td><td><?php echo $version['server']; ?></td></tr>
-                    <tr><td>Start time</td><td><?php echo $data['readable']['start_time']; ?></td></tr>
-                    <tr><td>Last reset</td><td><?php echo $data['last_restart_time']; ?></td></tr>
-                </tbody>
-            </table>
-            <?php $directives = $opcache->getData('directives'); ?>
-            <table>
-                <thead>
-                    <tr><th colspan="2">Directives</th></tr>
-                </thead>
-                <tbody>
-                <?php foreach ($directives as $d => $v): ?>
-                    <tr>
-                        <td title="<?php echo $d; ?>"><?php echo str_replace(['opcache.', '_'], ['', ' '], $d); ?></td>
-                        <td><?php echo (is_bool($v)
-                                ? ($v ? '<i>true</i>' : '<i>false</i>')
-                                : (empty($v) ? '<i>no value</i>' : $v)); ?></td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
-            <?php $functions = $opcache->getData('functions'); ?>
-            <table>
-                <thead>
-                    <tr><th>Available functions</th></tr>
-                </thead>
-                <?php foreach ($functions as $f): ?>
-                    <tr>
-                        <td><a href="http://php.net/<?php echo $f; ?>" title="View manual page" target="_blank"><?php echo $f; ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </table>
+            <div id="generalInfo"></div>
+            <div id="directives"></div>
+            <div id="functions"></div>
             <br style="clear:both;" />
         </div>
     </div>
@@ -389,6 +335,133 @@ $opcache = OpCacheService::init();
         </table>
     </div>
 </div>
+
+<script type="text/jsx">
+    var opstate = <?php echo json_encode($opcache->getData()); ?>;
+
+    var OverviewCounts = React.createClass({
+        getInitialState: function() {
+            return { data : opstate.overview };
+        },
+        render: function() {
+            return (
+                <div>
+                    <div>
+                        <h3>memory usage</h3>
+                        <p className="large">{this.state.data.used_memory_percentage}</p>
+                    </div>
+                    <div>
+                        <h3>hit rate</h3>
+                        <p className="large">{this.state.data.hit_rate_percentage}</p>
+                    </div>
+                    <div>
+                        <p><b>total memory:</b>{this.state.data.readable.total_memory}</p>
+                        <p><b>used memory:</b>{this.state.data.readable.used_memory}</p>
+                        <p><b>free memory:</b>{this.state.data.readable.free_memory}</p>
+                        <p><b>wasted memory:</b>{this.state.data.readable.wasted_memory} ({this.state.data.wasted_percentage}%)</p>
+                        <p><b>number of cached files:</b>{this.state.data.readable.num_cached_scripts}</p>
+                        <p><b>number of hits:</b>{this.state.data.readable.hits}</p>
+                        <p><b>number of misses:</b>{this.state.data.readable.misses}</p>
+                        <p><b>blacklist misses:</b>{this.state.data.readable.blacklist_miss}</p>
+                        <p><b>number of cached keys:</b>{this.state.data.readable.num_cached_keys}</p>
+                        <p><b>max cached keys:</b>{this.state.data.readable.max_cached_keys}</p>
+                    </div>
+                </div>
+            );
+        }
+    });
+
+    var GeneralInfo = React.createClass({
+        getInitialState: function() {
+            return {
+                version : opstate.version,
+                start : opstate.overview.readable.start_time,
+                reset : opstate.overview.readable.last_restart_time,
+            };
+        },
+        render: function() {
+            return (
+                <table>
+                    <thead>
+                        <tr><th colSpan="2">General info</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Zend OPcache</td><td>{this.state.version.version}</td></tr>
+                        <tr><td>PHP</td><td>{this.state.version.php}</td></tr>
+                        <tr><td>Host</td><td>{this.state.version.host}</td></tr>
+                        <tr><td>Server Software</td><td>{this.state.version.server}</td></tr>
+                        <tr><td>Start time</td><td>{this.state.start}</td></tr>
+                        <tr><td>Last reset</td><td>{this.state.reset}</td></tr>
+                    </tbody>
+                </table>
+            );
+        }
+    });
+
+    var Directives = React.createClass({
+        getInitialState: function() {
+            return { data : opstate.directives };
+        },
+        render: function() {
+            var directiveNodes = this.state.data.map(function(directive) {
+                var map = { 'opcache.':'', '_':' ' };
+                var dShow = directive.k.replace(/opcache\.|_/gi, function(matched){
+                    return map[matched];
+                });
+                var vShow;
+                if (directive.v === true || directive.v === false) {
+                    vShow = React.createElement('i', {}, directive.v.toString());
+                } else if (directive.v == '') {
+                    vShow = React.createElement('i', {}, 'no value');
+                } else {
+                    vShow = directive.v;
+                }
+                return (
+                    <tr>
+                        <td title="{directive.k}">{dShow}</td>
+                        <td>{vShow}</td>
+                    </tr>
+                );
+            });
+            return (
+                <table>
+                    <thead>
+                        <tr><th colSpan="2">Directives</th></tr>
+                    </thead>
+                    <tbody>{directiveNodes}</tbody>
+                </table>
+            );
+        }
+    });
+
+    var Functions = React.createClass({
+        getInitialState: function() {
+            return { data : opstate.functions };
+        },
+        render: function() {
+            var functionNodes = this.state.data.map(function(func) {
+                return (
+                    <tr>
+                        <td><a href="http://php.net/{func}" title="View manual page" target="_blank">{func}</a></td>
+                    </tr>
+                );
+            });
+            return (
+                <table>
+                    <thead>
+                    <tr><th>Available functions</th></tr>
+                    </thead>
+                    <tbody>{functionNodes}</tbody>
+                </table>
+            );
+        }
+    });
+
+    React.render(<OverviewCounts/>, document.getElementById('counts'));
+    React.render(<GeneralInfo/>, document.getElementById('generalInfo'));
+    React.render(<Directives/>, document.getElementById('directives'));
+    React.render(<Functions/>, document.getElementById('functions'));
+</script>
 
 <script type="text/javascript">
     $(function(){
