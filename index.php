@@ -13,22 +13,17 @@ if (!extension_loaded('Zend OPcache')) {
     die('The Zend OPcache extension does not appear to be installed');
 }
 
-$settings = array(
-    'compress_path_threshold' => 2,
-    'used_memory_percentage_high_threshold' => 80,
-    'used_memory_percentage_mid_threshold' => 60,
-    'allow_invalidate' => true
-);
-
 class OpCacheService
 {
-    protected $config;
-    protected $status;
-    protected $functions;
+    protected $data;
+    protected $options = [
+        'allow_invalidate' => true
+    ];
 
-    private function __construct()
+    private function __construct($options = [])
     {
         $this->data = $this->compileState();
+        $this->options = array_merge($this->options, $options);
     }
 
     public static function init()
@@ -45,6 +40,17 @@ class OpCacheService
             $self->resetCache($_GET['invalidate']);
         }
         return $self;
+    }
+
+    public function getOption($name = null)
+    {
+        if ($name === null) {
+            return $this->options;
+        }
+        return (isset($this->options[$name])
+            ? $this->options[$name]
+            : null
+        );
     }
 
     public function getData($section = null)
@@ -75,6 +81,7 @@ class OpCacheService
 
     protected function compileState()
     {
+        $status = opcache_get_status();
         $config = opcache_get_configuration();
         $memsize = function($size, $precision = 3, $space = false)
         {
@@ -87,12 +94,19 @@ class OpCacheService
             return sprintf("%.{$precision}f%s%s", $size, (($space && $i) ? ' ' : ''), $val[$i]);
         };
 
-        $status = opcache_get_status();
+        $files = [];
         if (!empty($status['scripts'])) {
             uasort($status['scripts'], function($a, $b) {
                 return $a['hits'] < $b['hits'];
             });
-            $this->data['files'] = $status['scripts'];
+            foreach ($status['scripts'] as &$file) {
+                $file['full_path'] = str_replace('\\', '/', $file['full_path']);
+                $file['readable'] = [
+                    'hits'               => number_format($file['hits']),
+                    'memory_consumption' => $memsize($file['memory_consumption'])
+                ];
+            }
+            $files = array_values($status['scripts']);
         }
 
         $overview = array_merge(
@@ -148,7 +162,7 @@ class OpCacheService
         return [
             'version'    => $version,
             'overview'   => $overview,
-            'files'      => $status['scripts'],
+            'files'      => $files,
             'directives' => $directives,
             'blacklist'  => $config['blacklist'],
             'functions'  => get_extension_funcs('Zend OPcache')
@@ -170,32 +184,87 @@ $opcache = OpCacheService::init();
     <style type="text/css">
         body {
             font-family:sans-serif;
-            font-size:100%;
-            padding: 2em;
+            font-size:90%;
+            padding: 0;
+            margin: 0
         }
-        .container{overflow:auto;width:100%;position:relative;}
-        #info{margin-right:290px;}
-        #counts{position:absolute;top:0;right:0;width:280px;}
-        #counts > div {
-            padding:0;
-            margin-bottom:1em;
-            background-color: #efefef;
+
+        #tabs { padding: 2em; }
+        #tabs > div {
+            display: none;
         }
-        #counts > div > h3 {
-            background-color: #dedede;
-            padding: 7px;
-            font-size: 100%;
+        #tabs > div#overview {
+            display:block;
+        }
+
+        nav { padding-top: 20px; }
+        nav > ul {
+            list-style-type: none;
+            padding-left: 8px;
+            margin: 0;
+            border-bottom: 1px solid #ccc;
+        }
+        nav > ul > li {
+            display: inline-block;
+            padding: 0;
+            margin: 0 0 -1px 0;
+        }
+        nav > ul > li > a {
+            display: block;
+            margin: 0 10px;
+            padding: 20px 40px;
+            border: 1px solid transparent;
+            border-bottom-color: #ccc;
+        }
+        nav > ul > li > a[data-for].active {
+            border: 1px solid #ccc;
+            border-bottom-color: #ffffff;
+            border-top: 3px solid #6ca6ef;
+        }
+        #resetCache, #toggleRealtime {
+            background-position: 15px 50%;
+            background-repeat: no-repeat;
+            background-color: transparent;
+        }
+        #resetCache {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NjBFMUMyMjI3NDlGMTFFNEE3QzNGNjQ0OEFDQzQ1MkMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NjBFMUMyMjM3NDlGMTFFNEE3QzNGNjQ0OEFDQzQ1MkMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo2MEUxQzIyMDc0OUYxMUU0QTdDM0Y2NDQ4QUNDNDUyQyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo2MEUxQzIyMTc0OUYxMUU0QTdDM0Y2NDQ4QUNDNDUyQyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PplZ+ZkAAAD1SURBVHjazFPtDYJADIUJZAMZ4UbACWQENjBO4Ao6AW5AnODcADZQJwAnwJ55NbWhB/6zycsdpX39uDZNpsURtjgzwkDoCBecs5ITPGGMwCNAkIrQw+8ri36GhBHsavFdpILEo4wEpZxRigy009EhG760gr0VhFoyZfvJKPwsheIWIeGejBZRIxRVhMRFevbuUXBew/iE/lhlBduV0j8Jx+TvJEWPphq8n5li9utgaw6cW/h6NSt/JcnVBhQxotIgKTBrbNvIHo2G0x1rwlKqTDusxiAz6hHNL1zayTVqVKRKpa/LPljPH1sJh6l/oNSrZfwSYABtq3tFdZA5BAAAAABJRU5ErkJggg==');
+        }
+        #toggleRealtime {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAUCAYAAACAl21KAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6ODE5RUU4NUE3NDlGMTFFNDkyMzA4QzY1RjRBQkIzQjUiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6ODE5RUU4NUI3NDlGMTFFNDkyMzA4QzY1RjRBQkIzQjUiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MTlFRTg1ODc0OUYxMUU0OTIzMDhDNjVGNEFCQjNCNSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4MTlFRTg1OTc0OUYxMUU0OTIzMDhDNjVGNEFCQjNCNSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PpXjpvMAAAD2SURBVHjarFQBEcMgDKR3E1AJldA5wMEqAQmTgINqmILdFCChdUAdMAeMcukuSwnQbbnLlZLwJPkQIcrSiT/IGNQHNb8CGQDyRw+2QWUBqC+luzo4OKQZIAVrB+ssyKp3Bkijf0+ijzIh4wQppoBauMSjyDZfMSCDxYZMsfHF120T36AqWZMkgyguQ3GOfottJ5TKnHC+wfeRsC2oDVayPgr3bbN2tHBH3tWuJCPa0JUgKtFzMQrcZH3FNHAc0yOp1cCASALyngoN6lhDopkJWxdifwY9A3u7l29ImpxOFSWIOVsGwHKENIWxss2eBVKdOeeXAAMAk/Z9h4QhXmUAAAAASUVORK5CYII=');
+        }
+        #counts {
+            width: 270px;
+            float: right;
+        }
+        #counts > div > div {
+            background-color: #ededed;
+            margin-bottom: 10px;
+        }
+        #counts > div > div > h3 {
+            background-color: #cdcdcd;
+            padding: 10px;
             margin: 0;
         }
-        #counts div.values { padding: 10px; }
-        #counts p.large {
-            font-family:'Roboto',sans-serif;
-            line-height:90%;
-            font-size:800%;
-            text-align:center;
-            margin: 20px 0;
+        #counts > div > div > p {
+            margin: 0;
+            text-align: center;
         }
-        #counts p.large > span { font-size: 50%; }
+        #counts > div > div > p > span.large ~ span {
+            font-size: 20pt;
+            margin: 0;
+        }
+        #counts > div > div > p > span.large {
+            font-size: 80pt;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        #moreinfo { padding: 10px; }
+        #moreinfo > p {
+            text-align: left !important;
+            line-height: 180%;
+        }
+        #info { margin-right: 280px; }
 
         table { margin: 0 0 1em 0; border-collapse: collapse; border-color: #fff; width: 100%; }
         table caption { text-align: left; font-size: 1.5em; }
@@ -204,58 +273,8 @@ $opcache = OpCacheService::init();
         table td { padding: 4px 6px; line-height: 1.4em; vertical-align: top; border-color: #fff; }
         table tr:nth-child(odd) { background-color: #EFFEFF; }
         table tr:nth-child(even) { background-color: #E0ECEF; }
-        table tr.highlight { background-color: #61C4DF; }
-        td.pathname p { margin-bottom: 0.25em; }
-        .wsnw { white-space: nowrap; }
-        .low{color:#000000;}
-        .mid{color:#550000;}
-        .high{color:#FF0000;}
+        td.pathname { width: 70%; }
 
-        .invalid{color:#FF4545;}
-
-        span.showmore span.button {
-            display: inline-block;
-            margin-right: 5px;
-            position: relative;
-            top: -1px;
-            color: #333333;
-            background: none repeat scroll 0 0 #DDDDDD;
-            border-radius: 2px 2px 2px 2px;
-            font-size: 12px;
-            font-weight: bold;
-            height: 12px;
-            line-height: 6px;
-            padding: 0 5px;
-            vertical-align: middle;
-            cursor: pointer;
-        }
-        a.button {
-            text-decoration: none;
-            font-size: 110%;
-            color: #292929;
-            padding: 10px 26px;
-            background: -moz-linear-gradient(top, #ffffff 0%, #b4b7b8);
-            background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#b4b7b8));
-            -moz-border-radius: 6px;
-            -webkit-border-radius: 6px;
-            border-radius: 6px;
-            border: 1px solid #a1a1a1;
-            text-shadow: 0px -1px 0px rgba(000,000,000,0), 0px 1px 0px rgba(255,255,255,0.4);
-            margin: 0 1em;
-            white-space: nowrap;
-        }
-        span.showmore span.button:hover {
-            background-color: #CCCCCC;
-        }
-
-        @media screen and (max-width: 700px) {
-            #info{margin-right:auto;}
-            #counts{position:relative;display:block;margin-bottom:2em;width:100%;}
-        }
-        @media screen and (max-width: 550px) {
-            a.button{display:block;margin-bottom:2px;}
-            #frmFilter{width:99% !important;}
-        }
     </style>
 </head>
 
@@ -265,79 +284,32 @@ $opcache = OpCacheService::init();
     <ul>
         <li><a data-for="overview" href="#overview" class="active">Overview</a></li>
         <li><a data-for="files" href="#files">File usage</a></li>
-        <li><a data-for="reset" href="?reset=1" onclick="return confirm('Are you sure you want to reset the cache?');">Reset cache</a></li>
+        <li><a href="?reset=1" id="resetCache" onclick="return confirm('Are you sure you want to reset the cache?');">Reset cache</a></li>
+        <li><a href="#" id="toggleRealtime">Enable real-time update of stats</a></li>
     </ul>
 </nav>
 
-<div id="overview">
-    <h2>Overview</h2>
-    <div class="container">
-        <div id="counts"></div>
-        <div id="info">
-            <div id="generalInfo"></div>
-            <div id="directives"></div>
-            <div id="functions"></div>
-            <br style="clear:both;" />
+<div id="tabs">
+    <div id="overview">
+        <div class="container">
+            <div id="counts"></div>
+            <div id="info">
+                <div id="generalInfo"></div>
+                <div id="directives"></div>
+                <div id="functions"></div>
+                <br style="clear:both;" />
+            </div>
         </div>
     </div>
-</div>
-
-<div id="files">
-    <h2>File usage</h2>
-    <p><label>Start typing to filter on script path<br/><input type="text" style="width:40em;" name="filter" id="frmFilter" /><label></p>
-    <div class="container">
-        <h3><?php echo $data['readable']['num_cached_scripts']; ?> file<?php echo ($data['readable']['num_cached_scripts'] == 1 ? '' : 's'); ?> cached <span id="filterShowing"></span></h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Script</th>
-                    <th>Details</th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php $files = $opcache->getData('files'); ?>
-            <?php foreach ($files as $f): ?>
-                <tr>
-                    <td class="pathname">
-                        <p><?php
-                            $base  = basename($f['full_path']);
-                            $parts = array_filter(explode(DIRECTORY_SEPARATOR, dirname($f['full_path'])));
-                            if (!empty($settings['compress_path_threshold'])) {
-                                echo '<span class="showmore"><span class="button">…</span><span class="text" style="display:none;">' . DIRECTORY_SEPARATOR;
-                                echo join(DIRECTORY_SEPARATOR, array_slice($parts, 0, $settings['compress_path_threshold'])) . DIRECTORY_SEPARATOR;
-                                echo '</span>';
-                                echo join(DIRECTORY_SEPARATOR, array_slice($parts, $settings['compress_path_threshold']));
-                                if (count($parts) > $settings['compress_path_threshold']) {
-                                    echo DIRECTORY_SEPARATOR;
-                                }
-                                echo "{$base}</span>";
-                            } else {
-                                echo htmlentities($f['full_path'], ENT_COMPAT, 'UTF-8');
-                            }
-                        ?></p>
-                        <?php if ($settings['allow_invalidate'] && function_exists('opcache_invalidate')): ?>
-                            <a href="?invalidate=<?php echo urlencode($f['full_path']); ?>">Force file invalidation</a>
-                        <?php endif; ?>
-                    </td>
-                    <td>
-                        <p>
-                            hits: <?php echo $f['hits']; ?>,
-                            memory: <?php echo $f['memory_consumption']; ?><br />
-                            last used: <?php echo date_format(date_create($f['last_used']), 'Y-m-d H:i:s'); ?>
-                            <?php if ($f['timestamp'] === 0): ?>
-                                <br /><i class="invalid">has been invalidated</i>
-                            <?php endif; ?>
-                        </p>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
+    <div id="files">
+        <p><label>Start typing to filter on script path<br/><input type="text" style="width:40em;" name="filter" id="frmFilter" /><label></p>
+        <div class="container" id="filelist"></div>
     </div>
 </div>
 
 <script type="text/jsx">
     var opstate = <?php echo json_encode($opcache->getData()); ?>;
+    var realtime = false;
 
     var OverviewCounts = React.createClass({
         getInitialState: function() {
@@ -348,13 +320,13 @@ $opcache = OpCacheService::init();
                 <div>
                     <div>
                         <h3>memory usage</h3>
-                        <p className="large">{this.state.data.used_memory_percentage}</p>
+                        <p><span className="large">{this.state.data.used_memory_percentage}</span><span>%</span></p>
                     </div>
                     <div>
                         <h3>hit rate</h3>
-                        <p className="large">{this.state.data.hit_rate_percentage}</p>
+                        <p><span className="large">{this.state.data.hit_rate_percentage}</span><span>%</span></p>
                     </div>
-                    <div>
+                    <div id="moreinfo">
                         <p><b>total memory:</b>{this.state.data.readable.total_memory}</p>
                         <p><b>used memory:</b>{this.state.data.readable.used_memory}</p>
                         <p><b>free memory:</b>{this.state.data.readable.free_memory}</p>
@@ -457,30 +429,95 @@ $opcache = OpCacheService::init();
         }
     });
 
-    React.render(<OverviewCounts/>, document.getElementById('counts'));
-    React.render(<GeneralInfo/>, document.getElementById('generalInfo'));
+    var Files = React.createClass({
+        getInitialState: function() {
+            return {
+                data : opstate.files,
+                count_formatted : opstate.overview.readable.num_cached_scripts,
+                count : opstate.overview.num_cached_scripts
+            };
+        },
+        render: function() {
+            var fileNodes = this.state.data.map(function (file) {
+                var invalidated;
+                console.log(file);
+                if (file.timestamp == 0) {
+                    invalidated = <span>
+                        <i className="invalid">has been invalidated</i>
+                    </span>;
+                }
+                return (
+                    <tr>
+                        <td className="pathname">
+                            <p>{file.full_path}</p>
+                            <?php if ($opcache->getOption('allow_invalidate') && function_exists('opcache_invalidate')): ?>
+                            <p><a href="?invalidate={file.full_path}">Force file invalidation</a></p>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <p>
+                                <span>hits: {file.readable.hits},</span>
+                                <span>memory: {file.readable.memory_consumption}</span>
+                                <br />
+                                <span>last used: {file.last_used}</span>
+                                {invalidated}
+                            </p>
+                        </td>
+                    </tr>
+                );
+            });
+            return (
+                <div>
+                    <h3>{this.state.count_formatted} file{this.state.count == 1 ? '' : 's'} cached
+                        <span id="filterShowing"></span>
+                    </h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Script</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>{fileNodes}</tbody>
+                    </table>
+                </div>
+            );
+        }
+    });
+
+    var overviewCountsObj = React.render(<OverviewCounts/>, document.getElementById('counts'));
+    var generalInfoObj = React.render(<GeneralInfo/>, document.getElementById('generalInfo'));
+    var filesObj = React.render(<Files/>, document.getElementById('filelist'));
     React.render(<Directives/>, document.getElementById('directives'));
     React.render(<Functions/>, document.getElementById('functions'));
-</script>
 
-<script type="text/javascript">
-    $(function(){
-        var realtime = false;
-        function ping() {
+    $(function() {
+        function updateStatus() {
             $.ajax({
                 url: "#",
                 dataType: "json",
                 cache: false,
-                success: function(data){
-                    $('.realtime').each(function(){
-                        $(this).text(data[$(this).attr('data-value')]);
+                success: function(data) {
+                    opstate = data;
+                    overviewCountsObj.setState({
+                        data : opstate.overview
+                    });
+                    generalInfoObj.setState({
+                        version : opstate.version,
+                        start : opstate.overview.readable.start_time,
+                        reset : opstate.overview.readable.last_restart_time
+                    });
+                    filesObj.setState({
+                        data : opstate.files,
+                        count_formatted : opstate.overview.readable.num_cached_scripts,
+                        count : opstate.overview.num_cached_scripts
                     });
                 }
             });
         }
         $('#toggleRealtime').click(function(){
             if (realtime === false) {
-                realtime = setInterval(function(){ping()}, 5000);
+                realtime = setInterval(function(){updateStatus()}, 5000);
                 $(this).text('Disable real-time update of stats');
             } else {
                 clearInterval(realtime);
@@ -488,6 +525,18 @@ $opcache = OpCacheService::init();
                 $(this).text('Enable real-time update of stats');
             }
         });
+        $('nav a[data-for]').click(function(){
+            $('#tabs > div').hide();
+            $('#' + $(this).data('for')).show();
+            $('nav a[data-for]').removeClass('active');
+            $(this).addClass('active');
+            return false;
+        });
+    });
+</script>
+
+<script type="text/javascript">
+    $(function(){
         $('span.showmore span.button').click(function(){
             if ($(this).next().is(":visible")) {
                 $(this).next().hide();
