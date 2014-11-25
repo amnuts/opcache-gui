@@ -32,7 +32,13 @@ class OpCacheService
         if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
             && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
         ) {
-            echo json_encode($self->getData(@$_GET['section'] ?: null));
+            if ((isset($_GET['reset']))) {
+                echo '{ "success": "' . ($self->resetCache() ? 'yes' : 'no') . '" }';
+            } else if ((isset($_GET['invalidate']))) {
+                echo '{ "success": "' . ($self->resetCache($_GET['invalidate']) ? 'yes' : 'no') . '" }';
+            } else {
+                echo json_encode($self->getData(@$_GET['section'] ?: null));
+            }
             exit;
         } else if ((isset($_GET['reset']))) {
             $self->resetCache();
@@ -212,9 +218,17 @@ $opcache = OpCacheService::init();
         nav > ul > li > a {
             display: block;
             margin: 0 10px;
-            padding: 20px 40px;
+            padding: 15px 30px;
             border: 1px solid transparent;
             border-bottom-color: #ccc;
+            text-decoration: none;
+        }
+        nav > ul > li > a:hover {
+            background-color: #f4f4f4;
+            text-decoration: underline;
+        }
+        nav > ul > li > a.active:hover {
+            background-color: initial;
         }
         nav > ul > li > a[data-for].active {
             border: 1px solid #ccc;
@@ -222,7 +236,7 @@ $opcache = OpCacheService::init();
             border-top: 3px solid #6ca6ef;
         }
         #resetCache, #toggleRealtime {
-            background-position: 15px 50%;
+            background-position: 5px 50%;
             background-repeat: no-repeat;
             background-color: transparent;
         }
@@ -269,12 +283,40 @@ $opcache = OpCacheService::init();
         table { margin: 0 0 1em 0; border-collapse: collapse; border-color: #fff; width: 100%; }
         table caption { text-align: left; font-size: 1.5em; }
         table tr { background-color: #99D0DF; border-color: #fff; }
-        table th { text-align: left; padding: 6px; background-color: #0BA0C8; color: #fff; border-color: #fff; }
+        table th { text-align: left; padding: 6px; background-color: #0BA0C8; color: #fff; border-color: #fff; font-weight: normal; }
         table td { padding: 4px 6px; line-height: 1.4em; vertical-align: top; border-color: #fff; }
         table tr:nth-child(odd) { background-color: #EFFEFF; }
         table tr:nth-child(even) { background-color: #E0ECEF; }
         td.pathname { width: 70%; }
+        .metainfo { font-size: 80%; }
 
+        @media screen and (max-width: 750px) {
+            #info { margin-right:auto; }
+            nav > ul {
+                border-bottom: 0;
+            }
+            nav > ul > li {
+                display: block;
+                margin: 0;
+            }
+            nav > ul > li > a {
+                display: block;
+                margin: 0 10px;
+                padding: 10px 0 10px 30px;
+                border: 0;
+            }
+            nav > ul > li > a[data-for].active {
+                border-bottom-color: #ccc;
+            }
+            #counts {
+                position:relative;
+                display:block;
+                width:100%;
+            }
+        }
+        @media screen and (max-width: 550px) {
+            #frmFilter { width: 100%; }
+        }
     </style>
 </head>
 
@@ -285,7 +327,7 @@ $opcache = OpCacheService::init();
         <li><a data-for="overview" href="#overview" class="active">Overview</a></li>
         <li><a data-for="files" href="#files">File usage</a></li>
         <li><a href="?reset=1" id="resetCache" onclick="return confirm('Are you sure you want to reset the cache?');">Reset cache</a></li>
-        <li><a href="#" id="toggleRealtime">Enable real-time update of stats</a></li>
+        <li><a href="#" id="toggleRealtime">Enable real-time update</a></li>
     </ul>
 </nav>
 
@@ -307,9 +349,72 @@ $opcache = OpCacheService::init();
     </div>
 </div>
 
+<script type="text/javascript">
+    var realtime = false;
+
+    $(function(){
+        function updateStatus() {
+            $.ajax({
+                url: "#",
+                dataType: "json",
+                cache: false,
+                success: function(data) {
+                    opstate = data;
+                    overviewCountsObj.setState({
+                        data : opstate.overview
+                    });
+                    generalInfoObj.setState({
+                        version : opstate.version,
+                        start : opstate.overview.readable.start_time,
+                        reset : opstate.overview.readable.last_restart_time
+                    });
+                    filesObj.setState({
+                        data : opstate.files,
+                        count_formatted : opstate.overview.readable.num_cached_scripts,
+                        count : opstate.overview.num_cached_scripts
+                    });
+                    $('#frmFilter').trigger('keyup');
+                }
+            });
+        }
+        $('#toggleRealtime').click(function(){
+            if (realtime === false) {
+                realtime = setInterval(function(){updateStatus()}, 5000);
+                $(this).text('Disable real-time update');
+            } else {
+                clearInterval(realtime);
+                realtime = false;
+                $(this).text('Enable real-time update');
+            }
+        });
+        $('nav a[data-for]').click(function(){
+            $('#tabs > div').hide();
+            $('#' + $(this).data('for')).show();
+            $('nav a[data-for]').removeClass('active');
+            $(this).addClass('active');
+            return false;
+        });
+        $(document).on('paint', '#filelist table tbody', function(event, params) {
+            var trs = $('tr:visible', $(this));
+            trs.filter(':odd').css({backgroundColor:'#E0ECEF'})
+               .end().filter(':even').css({backgroundColor:'#EFFEFF'});
+            filesObj.setState({showing: trs.length});
+        });
+        $('#frmFilter').bind('keyup', function(event){
+            $('span.pathname').each(function(index){
+                if ($(this).text().toLowerCase().indexOf($('#frmFilter').val().toLowerCase()) == -1) {
+                    $(this).closest('tr').hide();
+                } else {
+                    $(this).closest('tr').show();
+                }
+            });
+            $('#filelist table tbody').trigger('paint');
+        });
+    });
+</script>
+
 <script type="text/jsx">
     var opstate = <?php echo json_encode($opcache->getData()); ?>;
-    var realtime = false;
 
     var OverviewCounts = React.createClass({
         getInitialState: function() {
@@ -433,51 +538,47 @@ $opcache = OpCacheService::init();
         getInitialState: function() {
             return {
                 data : opstate.files,
-                count_formatted : opstate.overview.readable.num_cached_scripts,
-                count : opstate.overview.num_cached_scripts
+                showing: null
             };
         },
+        handleInvalidate: function(e) {
+            e.preventDefault();
+            if (realtime) {
+                $.get('#', { invalidate: e.currentTarget.getAttribute('data-file') }, function(data) {
+                    console.log('success: ' + data.success);
+                }, 'json');
+            } else {
+                window.location.href = e.currentTarget.href;
+            }
+        },
         render: function() {
-            var fileNodes = this.state.data.map(function (file) {
+            var fileNodes = this.state.data.map(function(file) {
                 var invalidated;
-                console.log(file);
                 if (file.timestamp == 0) {
-                    invalidated = <span>
-                        <i className="invalid">has been invalidated</i>
-                    </span>;
+                    invalidated = <span><i className="invalid metainfo">has been invalidated</i></span>;
                 }
+                var details = 'hits: ' + file.readable.hits + ', memory: ' 
+                    + file.readable.memory_consumption + ', last used: ' + file.last_used;
                 return (
                     <tr>
-                        <td className="pathname">
-                            <p>{file.full_path}</p>
-                            <?php if ($opcache->getOption('allow_invalidate') && function_exists('opcache_invalidate')): ?>
-                            <p><a href="?invalidate={file.full_path}">Force file invalidation</a></p>
-                            <?php endif; ?>
-                        </td>
                         <td>
-                            <p>
-                                <span>hits: {file.readable.hits},</span>
-                                <span>memory: {file.readable.memory_consumption}</span>
-                                <br />
-                                <span>last used: {file.last_used}</span>
+                            <div>
+                                <span className="pathname">{file.full_path}</span><br/>
+                                <span className="metainfo">{details}</span>
+                                <?php if ($opcache->getOption('allow_invalidate') && function_exists('opcache_invalidate')): ?>
+                                <span>,&nbsp;</span><a className="metainfo" href={'?invalidate=' + file.full_path} data-file={file.full_path} onClick={this.handleInvalidate}>force file invalidation</a>
+                                <?php endif; ?>
                                 {invalidated}
-                            </p>
+                            </div>
                         </td>
                     </tr>
                 );
-            });
+            }.bind(this));
             return (
                 <div>
-                    <h3>{this.state.count_formatted} file{this.state.count == 1 ? '' : 's'} cached
-                        <span id="filterShowing"></span>
-                    </h3>
+                    <FilesListed showing={this.state.showing} />
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Script</th>
-                                <th>Details</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Script</th></tr></thead>
                         <tbody>{fileNodes}</tbody>
                     </table>
                 </div>
@@ -485,89 +586,27 @@ $opcache = OpCacheService::init();
         }
     });
 
+    var FilesListed = React.createClass({
+        getInitialState: function() {
+            return {
+                formatted : opstate.overview.readable.num_cached_scripts,
+                total     : opstate.overview.num_cached_scripts
+            };
+        },
+        render: function() {
+            var display = this.state.formatted + ' file' + (this.state.total == 1 ? '' : 's') + ' cached';
+            if (this.props.showing !== null && this.props.showing != 0 && this.props.showing != this.state.total) {
+                display += ', ' + this.props.showing + ' showing due to filter';
+            }
+            return (<h3>{display}</h3>);
+        }
+    })
+
     var overviewCountsObj = React.render(<OverviewCounts/>, document.getElementById('counts'));
     var generalInfoObj = React.render(<GeneralInfo/>, document.getElementById('generalInfo'));
     var filesObj = React.render(<Files/>, document.getElementById('filelist'));
     React.render(<Directives/>, document.getElementById('directives'));
     React.render(<Functions/>, document.getElementById('functions'));
-
-    $(function() {
-        function updateStatus() {
-            $.ajax({
-                url: "#",
-                dataType: "json",
-                cache: false,
-                success: function(data) {
-                    opstate = data;
-                    overviewCountsObj.setState({
-                        data : opstate.overview
-                    });
-                    generalInfoObj.setState({
-                        version : opstate.version,
-                        start : opstate.overview.readable.start_time,
-                        reset : opstate.overview.readable.last_restart_time
-                    });
-                    filesObj.setState({
-                        data : opstate.files,
-                        count_formatted : opstate.overview.readable.num_cached_scripts,
-                        count : opstate.overview.num_cached_scripts
-                    });
-                }
-            });
-        }
-        $('#toggleRealtime').click(function(){
-            if (realtime === false) {
-                realtime = setInterval(function(){updateStatus()}, 5000);
-                $(this).text('Disable real-time update of stats');
-            } else {
-                clearInterval(realtime);
-                realtime = false;
-                $(this).text('Enable real-time update of stats');
-            }
-        });
-        $('nav a[data-for]').click(function(){
-            $('#tabs > div').hide();
-            $('#' + $(this).data('for')).show();
-            $('nav a[data-for]').removeClass('active');
-            $(this).addClass('active');
-            return false;
-        });
-    });
-</script>
-
-<script type="text/javascript">
-    $(function(){
-        $('span.showmore span.button').click(function(){
-            if ($(this).next().is(":visible")) {
-                $(this).next().hide();
-                $(this).css('padding-top', '0').text('…');
-            } else {
-                $(this).next().show();
-                $(this).css('padding-top', '2px').text('«');
-            }
-        });
-        $('.container table').bind('paint', function(event, params) {
-            var trs = $('tr:visible', $(this)).not(':first');
-            trs.removeClass('odd even')
-                .filter(':odd').addClass('odd')
-                .end()
-                .filter(':even').addClass('even');
-            $('#filterShowing').text(($('#frmFilter').val().length
-                ? trs.length + ' showing due to filter'
-                : ''
-            ));
-        });
-        $('#frmFilter').bind('keyup', function(event){
-            $('td.pathname p').each(function(index){
-                if ($(this).text().toLowerCase().indexOf($('#frmFilter').val().toLowerCase()) == -1) {
-                    $(this).closest('tr').hide();
-                } else {
-                    $(this).closest('tr').show();
-                }
-            });
-            $('.container table').trigger('paint');
-        });
-    });
 </script>
 
 </body>
