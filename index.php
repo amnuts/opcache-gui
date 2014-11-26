@@ -338,7 +338,18 @@ $opcache = OpCacheService::init();
             <div id="info">
                 <div id="generalInfo"></div>
                 <div id="directives"></div>
-                <div id="functions"></div>
+                <div id="functions">
+                    <table>
+                        <thead>
+                            <tr><th>Available functions</th></tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($opcache->getData('functions') as $func): ?>
+                            <tr><td><a href="http://php.net/<?php echo $func; ?>" title="View manual page" target="_blank"><?php echo $func; ?></a></td></tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
                 <br style="clear:both;" />
             </div>
         </div>
@@ -495,7 +506,7 @@ $opcache = OpCacheService::init();
                 }
                 return (
                     <tr>
-                        <td title="{directive.k}">{dShow}</td>
+                        <td title={directive.k}>{dShow}</td>
                         <td>{vShow}</td>
                     </tr>
                 );
@@ -506,29 +517,6 @@ $opcache = OpCacheService::init();
                         <tr><th colSpan="2">Directives</th></tr>
                     </thead>
                     <tbody>{directiveNodes}</tbody>
-                </table>
-            );
-        }
-    });
-
-    var Functions = React.createClass({
-        getInitialState: function() {
-            return { data : opstate.functions };
-        },
-        render: function() {
-            var functionNodes = this.state.data.map(function(func) {
-                return (
-                    <tr>
-                        <td><a href="http://php.net/{func}" title="View manual page" target="_blank">{func}</a></td>
-                    </tr>
-                );
-            });
-            return (
-                <table>
-                    <thead>
-                    <tr><th>Available functions</th></tr>
-                    </thead>
-                    <tbody>{functionNodes}</tbody>
                 </table>
             );
         }
@@ -606,7 +594,6 @@ $opcache = OpCacheService::init();
     var generalInfoObj = React.render(<GeneralInfo/>, document.getElementById('generalInfo'));
     var filesObj = React.render(<Files/>, document.getElementById('filelist'));
     React.render(<Directives/>, document.getElementById('directives'));
-    React.render(<Functions/>, document.getElementById('functions'));
 </script>
 
 </body>
