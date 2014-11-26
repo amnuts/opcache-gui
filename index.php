@@ -6,6 +6,8 @@
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
+ * @version 2.0.0
+ * @link https://github.com/amnuts/opcache-gui
  * @license MIT, http://acollington.mit-license.org/
  */
 
@@ -26,9 +28,9 @@ class OpCacheService
         $this->options = array_merge($this->options, $options);
     }
 
-    public static function init()
+    public static function init($options = [])
     {
-        $self = new self;
+        $self = new self($options);
         if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
             && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
         ) {
@@ -59,16 +61,24 @@ class OpCacheService
         );
     }
 
-    public function getData($section = null)
+    public function getData($section = null, $property = null)
     {
         if ($section === null) {
             return $this->data;
         }
         $section = strtolower($section);
-        return (isset($this->data[$section])
-            ? $this->data[$section]
-            : null
-        );
+        if (isset($this->data[$section])) {
+            if ($property === null || !isset($this->data[$section][$property])) {
+                return $this->data[$section];
+            }
+            return $this->data[$section][$property];
+        }
+        return null;
+    }
+
+    public function canInvalidate()
+    {
+        return ($this->getOption('allow_invalidate') && function_exists('opcache_invalidate'));
     }
 
     public function resetCache($file = null)
@@ -184,8 +194,8 @@ $opcache = OpCacheService::init();
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>OPcache statistics on <?php echo $opcache->getData('version', 'host'); ?></title>
     <script src="http://fb.me/react-0.12.1.js"></script>
-    <script src="http://fb.me/JSXTransformer-0.12.1.js"></script>
     <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
     <style type="text/css">
         body { font-family:sans-serif; font-size:90%; padding: 0; margin: 0 }
@@ -199,15 +209,19 @@ $opcache = OpCacheService::init();
         table { margin: 0 0 1em 0; border-collapse: collapse; border-color: #fff; width: 100%; }
         table caption { text-align: left; font-size: 1.5em; }
         table tr { background-color: #99D0DF; border-color: #fff; }
-        table th { text-align: left; padding: 6px; background-color: #0BA0C8; color: #fff; border-color: #fff; font-weight: normal; }
+        table th { text-align: left; padding: 6px; background-color: #6ca6ef; color: #fff; border-color: #fff; font-weight: normal; }
         table td { padding: 4px 6px; line-height: 1.4em; vertical-align: top; border-color: #fff; }
         table tr:nth-child(odd) { background-color: #EFFEFF; }
         table tr:nth-child(even) { background-color: #E0ECEF; }
         td.pathname { width: 70%; }
+        footer { border-top: 1px solid #ccc; padding: 1em 2em; }
+        footer a { padding: 2em; text-decoration: none; opacity: 0.7; }
+        footer a:hover { opacity: 1; }
         #tabs { padding: 2em; }
         #tabs > div { display: none; }
         #tabs > div#overview { display:block; }
-        #resetCache, #toggleRealtime { background-position: 5px 50%; background-repeat: no-repeat; background-color: transparent; }
+        #resetCache, #toggleRealtime, footer > a { background-position: 5px 50%; background-repeat: no-repeat; background-color: transparent; }
+        footer > a { background-position: 0 50%; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAQCAYAAAAbBi9cAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyBpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBXaW5kb3dzIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjE2MENCRkExNzVBQjExRTQ5NDBGRTUzMzQyMDVDNzFFIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjE2MENCRkEyNzVBQjExRTQ5NDBGRTUzMzQyMDVDNzFFIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTYwQ0JGOUY3NUFCMTFFNDk0MEZFNTMzNDIwNUM3MUUiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6MTYwQ0JGQTA3NUFCMTFFNDk0MEZFNTMzNDIwNUM3MUUiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7HtUU1AAABN0lEQVR42qyUvWoCQRSF77hCLLKC+FOlCKTyIbYQUuhbWPkSFnZ2NpabUvANLGyz5CkkYGMlFtFAUmiSM8lZOVkWsgm58K079+fMnTusZl92BXbgDrTtZ2szd8fas/XBOzmBKaiCEFyTkL4pc9L8vgpNJJDyWtDna61EoXpO+xcFfXUVqtrf7Vx7m9Pub/EatvgHoYXD4ylztC14BBVwydvydgDPHPgNaErN3jLKIxAUmEvAXK21I18SJpXBGAxyBAaMlblOWOs1bMXFkMGeBFsi0pJNe/QNuV7563+gs8LfhrRfE6GaHLuRqfnUiKi6lJ034B44EXL0baTTJWujNGkG3kBX5uRyZuRkPl3WzDTBtzjnxxiDDq83yNxUk7GYuXM53jeLuMNavvAXkv4zrJkTaeGHAAMAIal3icPMsyQAAAAASUVORK5CYII='); font-size: 80%; }
         #resetCache { background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NjBFMUMyMjI3NDlGMTFFNEE3QzNGNjQ0OEFDQzQ1MkMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NjBFMUMyMjM3NDlGMTFFNEE3QzNGNjQ0OEFDQzQ1MkMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo2MEUxQzIyMDc0OUYxMUU0QTdDM0Y2NDQ4QUNDNDUyQyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo2MEUxQzIyMTc0OUYxMUU0QTdDM0Y2NDQ4QUNDNDUyQyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PplZ+ZkAAAD1SURBVHjazFPtDYJADIUJZAMZ4UbACWQENjBO4Ao6AW5AnODcADZQJwAnwJ55NbWhB/6zycsdpX39uDZNpsURtjgzwkDoCBecs5ITPGGMwCNAkIrQw+8ri36GhBHsavFdpILEo4wEpZxRigy009EhG760gr0VhFoyZfvJKPwsheIWIeGejBZRIxRVhMRFevbuUXBew/iE/lhlBduV0j8Jx+TvJEWPphq8n5li9utgaw6cW/h6NSt/JcnVBhQxotIgKTBrbNvIHo2G0x1rwlKqTDusxiAz6hHNL1zayTVqVKRKpa/LPljPH1sJh6l/oNSrZfwSYABtq3tFdZA5BAAAAABJRU5ErkJggg=='); }
         #toggleRealtime { background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAUCAYAAACAl21KAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6ODE5RUU4NUE3NDlGMTFFNDkyMzA4QzY1RjRBQkIzQjUiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6ODE5RUU4NUI3NDlGMTFFNDkyMzA4QzY1RjRBQkIzQjUiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MTlFRTg1ODc0OUYxMUU0OTIzMDhDNjVGNEFCQjNCNSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4MTlFRTg1OTc0OUYxMUU0OTIzMDhDNjVGNEFCQjNCNSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PpXjpvMAAAD2SURBVHjarFQBEcMgDKR3E1AJldA5wMEqAQmTgINqmILdFCChdUAdMAeMcukuSwnQbbnLlZLwJPkQIcrSiT/IGNQHNb8CGQDyRw+2QWUBqC+luzo4OKQZIAVrB+ssyKp3Bkijf0+ijzIh4wQppoBauMSjyDZfMSCDxYZMsfHF120T36AqWZMkgyguQ3GOfottJ5TKnHC+wfeRsC2oDVayPgr3bbN2tHBH3tWuJCPa0JUgKtFzMQrcZH3FNHAc0yOp1cCASALyngoN6lhDopkJWxdifwY9A3u7l29ImpxOFSWIOVsGwHKENIWxss2eBVKdOeeXAAMAk/Z9h4QhXmUAAAAASUVORK5CYII='); }
         #counts { width: 270px; float: right; }
@@ -236,14 +250,16 @@ $opcache = OpCacheService::init();
 
 <body>
 
-<nav>
-    <ul>
-        <li><a data-for="overview" href="#overview" class="active">Overview</a></li>
-        <li><a data-for="files" href="#files">File usage</a></li>
-        <li><a href="?reset=1" id="resetCache" onclick="return confirm('Are you sure you want to reset the cache?');">Reset cache</a></li>
-        <li><a href="#" id="toggleRealtime">Enable real-time update</a></li>
-    </ul>
-</nav>
+<header>
+    <nav>
+        <ul>
+            <li><a data-for="overview" href="#overview" class="active">Overview</a></li>
+            <li><a data-for="files" href="#files">File usage</a></li>
+            <li><a href="?reset=1" id="resetCache" onclick="return confirm('Are you sure you want to reset the cache?');">Reset cache</a></li>
+            <li><a href="#" id="toggleRealtime">Enable real-time update</a></li>
+        </ul>
+    </nav>
+</header>
 
 <div id="tabs">
     <div id="overview">
@@ -274,8 +290,14 @@ $opcache = OpCacheService::init();
     </div>
 </div>
 
+<footer>
+    <a href="https://github.com/amnuts/opcache-gui" target="_blank">https://github.com/amnuts/opcache-gui</a>
+</footer>
+
 <script type="text/javascript">
     var realtime = false;
+    var opstate = <?php echo json_encode($opcache->getData()); ?>;
+    var canInvalidate = <?php echo ($opcache->canInvalidate() ? 'true' : 'false'); ?>;
 
     $(function(){
         function updateStatus() {
@@ -336,44 +358,40 @@ $opcache = OpCacheService::init();
             $('#filelist table tbody').trigger('paint');
         });
     });
-</script>
 
-<script type="text/jsx">
-    var opstate = <?php echo json_encode($opcache->getData()); ?>;
-
-    var OverviewCounts = React.createClass({
+    var OverviewCounts = React.createClass({displayName: 'OverviewCounts',
         getInitialState: function() {
             return { data : opstate.overview };
         },
         render: function() {
             return (
-                <div>
-                    <div>
-                        <h3>memory usage</h3>
-                        <p><span className="large">{this.state.data.used_memory_percentage}</span><span>%</span></p>
-                    </div>
-                    <div>
-                        <h3>hit rate</h3>
-                        <p><span className="large">{this.state.data.hit_rate_percentage}</span><span>%</span></p>
-                    </div>
-                    <div id="moreinfo">
-                        <p><b>total memory:</b>{this.state.data.readable.total_memory}</p>
-                        <p><b>used memory:</b>{this.state.data.readable.used_memory}</p>
-                        <p><b>free memory:</b>{this.state.data.readable.free_memory}</p>
-                        <p><b>wasted memory:</b>{this.state.data.readable.wasted_memory} ({this.state.data.wasted_percentage}%)</p>
-                        <p><b>number of cached files:</b>{this.state.data.readable.num_cached_scripts}</p>
-                        <p><b>number of hits:</b>{this.state.data.readable.hits}</p>
-                        <p><b>number of misses:</b>{this.state.data.readable.misses}</p>
-                        <p><b>blacklist misses:</b>{this.state.data.readable.blacklist_miss}</p>
-                        <p><b>number of cached keys:</b>{this.state.data.readable.num_cached_keys}</p>
-                        <p><b>max cached keys:</b>{this.state.data.readable.max_cached_keys}</p>
-                    </div>
-                </div>
+                React.createElement("div", null,
+                    React.createElement("div", null,
+                        React.createElement("h3", null, "memory usage"),
+                        React.createElement("p", null, React.createElement("span", {className: "large"}, this.state.data.used_memory_percentage), React.createElement("span", null, "%"))
+                    ),
+                    React.createElement("div", null,
+                        React.createElement("h3", null, "hit rate"),
+                        React.createElement("p", null, React.createElement("span", {className: "large"}, this.state.data.hit_rate_percentage), React.createElement("span", null, "%"))
+                    ),
+                    React.createElement("div", {id: "moreinfo"},
+                        React.createElement("p", null, React.createElement("b", null, "total memory:"), this.state.data.readable.total_memory),
+                        React.createElement("p", null, React.createElement("b", null, "used memory:"), this.state.data.readable.used_memory),
+                        React.createElement("p", null, React.createElement("b", null, "free memory:"), this.state.data.readable.free_memory),
+                        React.createElement("p", null, React.createElement("b", null, "wasted memory:"), this.state.data.readable.wasted_memory, " (", this.state.data.wasted_percentage, "%)"),
+                        React.createElement("p", null, React.createElement("b", null, "number of cached files:"), this.state.data.readable.num_cached_scripts),
+                        React.createElement("p", null, React.createElement("b", null, "number of hits:"), this.state.data.readable.hits),
+                        React.createElement("p", null, React.createElement("b", null, "number of misses:"), this.state.data.readable.misses),
+                        React.createElement("p", null, React.createElement("b", null, "blacklist misses:"), this.state.data.readable.blacklist_miss),
+                        React.createElement("p", null, React.createElement("b", null, "number of cached keys:"), this.state.data.readable.num_cached_keys),
+                        React.createElement("p", null, React.createElement("b", null, "max cached keys:"), this.state.data.readable.max_cached_keys)
+                    )
+                )
             );
         }
     });
 
-    var GeneralInfo = React.createClass({
+    var GeneralInfo = React.createClass({displayName: 'GeneralInfo',
         getInitialState: function() {
             return {
                 version : opstate.version,
@@ -383,24 +401,24 @@ $opcache = OpCacheService::init();
         },
         render: function() {
             return (
-                <table>
-                    <thead>
-                        <tr><th colSpan="2">General info</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>Zend OPcache</td><td>{this.state.version.version}</td></tr>
-                        <tr><td>PHP</td><td>{this.state.version.php}</td></tr>
-                        <tr><td>Host</td><td>{this.state.version.host}</td></tr>
-                        <tr><td>Server Software</td><td>{this.state.version.server}</td></tr>
-                        <tr><td>Start time</td><td>{this.state.start}</td></tr>
-                        <tr><td>Last reset</td><td>{this.state.reset}</td></tr>
-                    </tbody>
-                </table>
+                React.createElement("table", null,
+                    React.createElement("thead", null,
+                        React.createElement("tr", null, React.createElement("th", {colSpan: "2"}, "General info"))
+                    ),
+                    React.createElement("tbody", null,
+                        React.createElement("tr", null, React.createElement("td", null, "Zend OPcache"), React.createElement("td", null, this.state.version.version)),
+                        React.createElement("tr", null, React.createElement("td", null, "PHP"), React.createElement("td", null, this.state.version.php)),
+                        React.createElement("tr", null, React.createElement("td", null, "Host"), React.createElement("td", null, this.state.version.host)),
+                        React.createElement("tr", null, React.createElement("td", null, "Server Software"), React.createElement("td", null, this.state.version.server)),
+                        React.createElement("tr", null, React.createElement("td", null, "Start time"), React.createElement("td", null, this.state.start)),
+                        React.createElement("tr", null, React.createElement("td", null, "Last reset"), React.createElement("td", null, this.state.reset))
+                    )
+                )
             );
         }
     });
 
-    var Directives = React.createClass({
+    var Directives = React.createClass({displayName: 'Directives',
         getInitialState: function() {
             return { data : opstate.directives };
         },
@@ -419,24 +437,24 @@ $opcache = OpCacheService::init();
                     vShow = directive.v;
                 }
                 return (
-                    <tr>
-                        <td title={directive.k}>{dShow}</td>
-                        <td>{vShow}</td>
-                    </tr>
+                    React.createElement("tr", null,
+                        React.createElement("td", {title: directive.k}, dShow),
+                        React.createElement("td", null, vShow)
+                    )
                 );
             });
             return (
-                <table>
-                    <thead>
-                        <tr><th colSpan="2">Directives</th></tr>
-                    </thead>
-                    <tbody>{directiveNodes}</tbody>
-                </table>
+                React.createElement("table", null,
+                    React.createElement("thead", null,
+                        React.createElement("tr", null, React.createElement("th", {colSpan: "2"}, "Directives"))
+                    ),
+                    React.createElement("tbody", null, directiveNodes)
+                )
             );
         }
     });
 
-    var Files = React.createClass({
+    var Files = React.createClass({displayName: 'Files',
         getInitialState: function() {
             return {
                 data : opstate.files,
@@ -455,52 +473,52 @@ $opcache = OpCacheService::init();
         },
         render: function() {
             var fileNodes = this.state.data.map(function(file) {
-                var invalidated;
+                var invalidate, invalidated;
                 if (file.timestamp == 0) {
-                    invalidated = <span><i className="invalid metainfo">has been invalidated</i></span>;
+                    invalidated = React.createElement("span", null, React.createElement("i", {className: "invalid metainfo"}, "has been invalidated"));
                 }
-                var details = <span><b>hits: </b><span>{file.readable.hits}</span></span>;/* + file.readable.hits + ', memory: ' 
-                    + file.readable.memory_consumption + ', last used: ' + file.last_used;*/
+                if (canInvalidate) {
+                    invalidate = React.createElement("span", null, ", ", React.createElement("a", {className: "metainfo", href: '?invalidate='
+                    + file.full_path, 'data-file': file.full_path, onClick: this.handleInvalidate}, "force file invalidation"));
+                }
                 return (
-                    <tr>
-                        <td>
-                            <div>
-                                <span className="pathname">{file.full_path}</span><br/>
-                                <FilesMeta data={[file.readable.hits, file.readable.memory_consumption, file.last_used]} />
-                                <?php if ($opcache->getOption('allow_invalidate') && function_exists('opcache_invalidate')): ?>
-                                <span>,&nbsp;</span><a className="metainfo" href={'?invalidate=' + file.full_path} data-file={file.full_path} onClick={this.handleInvalidate}>force file invalidation</a>
-                                <?php endif; ?>
-                                {invalidated}
-                            </div>
-                        </td>
-                    </tr>
+                    React.createElement("tr", null,
+                        React.createElement("td", null,
+                            React.createElement("div", null,
+                                React.createElement("span", {className: "pathname"}, file.full_path), React.createElement("br", null),
+                                React.createElement(FilesMeta, {data: [file.readable.hits, file.readable.memory_consumption, file.last_used]}),
+                                invalidate,
+                                invalidated
+                            )
+                        )
+                    )
                 );
             }.bind(this));
             return (
-                <div>
-                    <FilesListed showing={this.state.showing} />
-                    <table>
-                        <thead><tr><th>Script</th></tr></thead>
-                        <tbody>{fileNodes}</tbody>
-                    </table>
-                </div>
+                React.createElement("div", null,
+                    React.createElement(FilesListed, {showing: this.state.showing}),
+                    React.createElement("table", null,
+                        React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", null, "Script"))),
+                        React.createElement("tbody", null, fileNodes)
+                    )
+                )
             );
         }
     });
 
-    var FilesMeta = React.createClass({
+    var FilesMeta = React.createClass({displayName: 'FilesMeta',
         render: function() {
             return (
-                <span className="metainfo">
-                    <b>hits: </b><span>{this.props.data[0]}, </span>
-                    <b>memory: </b><span>{this.props.data[1]}, </span>
-                    <b>last used: </b><span>{this.props.data[2]}</span>
-                </span>
+                React.createElement("span", {className: "metainfo"},
+                    React.createElement("b", null, "hits: "), React.createElement("span", null, this.props.data[0], ", "),
+                    React.createElement("b", null, "memory: "), React.createElement("span", null, this.props.data[1], ", "),
+                    React.createElement("b", null, "last used: "), React.createElement("span", null, this.props.data[2])
+                )
             );
         }
     });
 
-    var FilesListed = React.createClass({
+    var FilesListed = React.createClass({displayName: 'FilesListed',
         getInitialState: function() {
             return {
                 formatted : opstate.overview.readable.num_cached_scripts,
@@ -512,14 +530,14 @@ $opcache = OpCacheService::init();
             if (this.props.showing !== null && this.props.showing != 0 && this.props.showing != this.state.total) {
                 display += ', ' + this.props.showing + ' showing due to filter';
             }
-            return (<h3>{display}</h3>);
+            return (React.createElement("h3", null, display));
         }
     });
 
-    var overviewCountsObj = React.render(<OverviewCounts/>, document.getElementById('counts'));
-    var generalInfoObj = React.render(<GeneralInfo/>, document.getElementById('generalInfo'));
-    var filesObj = React.render(<Files/>, document.getElementById('filelist'));
-    React.render(<Directives/>, document.getElementById('directives'));
+    var overviewCountsObj = React.render(React.createElement(OverviewCounts, null), document.getElementById('counts'));
+    var generalInfoObj = React.render(React.createElement(GeneralInfo, null), document.getElementById('generalInfo'));
+    var filesObj = React.render(React.createElement(Files, null), document.getElementById('filelist'));
+    React.render(React.createElement(Directives, null), document.getElementById('directives'));
 </script>
 
 </body>
