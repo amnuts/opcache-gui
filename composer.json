@@ -1,8 +1,8 @@
 {
   "name": "amnuts/opcache-gui",
-  "description": "A gui for Zend OPcache with a simple and effective interface and real-time updates",
+  "description": "A gui for Zend OPcache with a simple & effective interface and real-time updates",
   "minimum-stability": "stable",
-  "license": "MIT: http://acollington.mit-license.org/",
+  "license": "MIT",
   "authors": [
     {
       "name": "Andrew Collington",
