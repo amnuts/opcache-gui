@@ -223,27 +223,54 @@ $opcache = OpCacheService::init();
         #resetCache, #toggleRealtime, footer > a { background-position: 5px 50%; background-repeat: no-repeat; background-color: transparent; }
         footer > a { background-position: 0 50%; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAQCAYAAAAbBi9cAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyBpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBXaW5kb3dzIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjE2MENCRkExNzVBQjExRTQ5NDBGRTUzMzQyMDVDNzFFIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjE2MENCRkEyNzVBQjExRTQ5NDBGRTUzMzQyMDVDNzFFIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTYwQ0JGOUY3NUFCMTFFNDk0MEZFNTMzNDIwNUM3MUUiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6MTYwQ0JGQTA3NUFCMTFFNDk0MEZFNTMzNDIwNUM3MUUiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7HtUU1AAABN0lEQVR42qyUvWoCQRSF77hCLLKC+FOlCKTyIbYQUuhbWPkSFnZ2NpabUvANLGyz5CkkYGMlFtFAUmiSM8lZOVkWsgm58K079+fMnTusZl92BXbgDrTtZ2szd8fas/XBOzmBKaiCEFyTkL4pc9L8vgpNJJDyWtDna61EoXpO+xcFfXUVqtrf7Vx7m9Pub/EatvgHoYXD4ylztC14BBVwydvydgDPHPgNaErN3jLKIxAUmEvAXK21I18SJpXBGAxyBAaMlblOWOs1bMXFkMGeBFsi0pJNe/QNuV7563+gs8LfhrRfE6GaHLuRqfnUiKi6lJ034B44EXL0baTTJWujNGkG3kBX5uRyZuRkPl3WzDTBtzjnxxiDDq83yNxUk7GYuXM53jeLuMNavvAXkv4zrJkTaeGHAAMAIal3icPMsyQAAAAASUVORK5CYII='); font-size: 80%; }
         #resetCache { background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NjBFMUMyMjI3NDlGMTFFNEE3QzNGNjQ0OEFDQzQ1MkMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NjBFMUMyMjM3NDlGMTFFNEE3QzNGNjQ0OEFDQzQ1MkMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo2MEUxQzIyMDc0OUYxMUU0QTdDM0Y2NDQ4QUNDNDUyQyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo2MEUxQzIyMTc0OUYxMUU0QTdDM0Y2NDQ4QUNDNDUyQyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PplZ+ZkAAAD1SURBVHjazFPtDYJADIUJZAMZ4UbACWQENjBO4Ao6AW5AnODcADZQJwAnwJ55NbWhB/6zycsdpX39uDZNpsURtjgzwkDoCBecs5ITPGGMwCNAkIrQw+8ri36GhBHsavFdpILEo4wEpZxRigy009EhG760gr0VhFoyZfvJKPwsheIWIeGejBZRIxRVhMRFevbuUXBew/iE/lhlBduV0j8Jx+TvJEWPphq8n5li9utgaw6cW/h6NSt/JcnVBhQxotIgKTBrbNvIHo2G0x1rwlKqTDusxiAz6hHNL1zayTVqVKRKpa/LPljPH1sJh6l/oNSrZfwSYABtq3tFdZA5BAAAAABJRU5ErkJggg=='); }
-        #toggleRealtime { background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAUCAYAAACAl21KAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6ODE5RUU4NUE3NDlGMTFFNDkyMzA4QzY1RjRBQkIzQjUiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6ODE5RUU4NUI3NDlGMTFFNDkyMzA4QzY1RjRBQkIzQjUiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MTlFRTg1ODc0OUYxMUU0OTIzMDhDNjVGNEFCQjNCNSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4MTlFRTg1OTc0OUYxMUU0OTIzMDhDNjVGNEFCQjNCNSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PpXjpvMAAAD2SURBVHjarFQBEcMgDKR3E1AJldA5wMEqAQmTgINqmILdFCChdUAdMAeMcukuSwnQbbnLlZLwJPkQIcrSiT/IGNQHNb8CGQDyRw+2QWUBqC+luzo4OKQZIAVrB+ssyKp3Bkijf0+ijzIh4wQppoBauMSjyDZfMSCDxYZMsfHF120T36AqWZMkgyguQ3GOfottJ5TKnHC+wfeRsC2oDVayPgr3bbN2tHBH3tWuJCPa0JUgKtFzMQrcZH3FNHAc0yOp1cCASALyngoN6lhDopkJWxdifwY9A3u7l29ImpxOFSWIOVsGwHKENIWxss2eBVKdOeeXAAMAk/Z9h4QhXmUAAAAASUVORK5CYII='); }
+        #toggleRealtime { position: relative; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAUCAYAAACAl21KAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6ODE5RUU4NUE3NDlGMTFFNDkyMzA4QzY1RjRBQkIzQjUiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6ODE5RUU4NUI3NDlGMTFFNDkyMzA4QzY1RjRBQkIzQjUiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MTlFRTg1ODc0OUYxMUU0OTIzMDhDNjVGNEFCQjNCNSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4MTlFRTg1OTc0OUYxMUU0OTIzMDhDNjVGNEFCQjNCNSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PpXjpvMAAAD2SURBVHjarFQBEcMgDKR3E1AJldA5wMEqAQmTgINqmILdFCChdUAdMAeMcukuSwnQbbnLlZLwJPkQIcrSiT/IGNQHNb8CGQDyRw+2QWUBqC+luzo4OKQZIAVrB+ssyKp3Bkijf0+ijzIh4wQppoBauMSjyDZfMSCDxYZMsfHF120T36AqWZMkgyguQ3GOfottJ5TKnHC+wfeRsC2oDVayPgr3bbN2tHBH3tWuJCPa0JUgKtFzMQrcZH3FNHAc0yOp1cCASALyngoN6lhDopkJWxdifwY9A3u7l29ImpxOFSWIOVsGwHKENIWxss2eBVKdOeeXAAMAk/Z9h4QhXmUAAAAASUVORK5CYII='); }
         #counts { width: 270px; float: right; }
         #counts > div > div { background-color: #ededed; margin-bottom: 10px; }
         #counts > div > div > h3 { background-color: #cdcdcd; padding: 4px 6px; margin: 0; }
         #counts > div > div > p { margin: 0; text-align: center; }
-        #counts > div > div > p > span.large ~ span { font-size: 20pt; margin: 0; }
+        #counts > div > div > p > span.large + span { font-size: 20pt; margin: 0; }
         #counts > div > div > p > span.large { font-size: 80pt; margin: 0; padding: 0; text-align: center; }
         #info { margin-right: 280px; }
+        #frmFilter { width: 520px; }
         #moreinfo { padding: 10px; }
         #moreinfo > p { text-align: left !important; line-height: 180%; }
         .metainfo { font-size: 80%; }
+        .hide { display: none; }
+        #toggleRealtime.pulse::before {
+            content: ""; position: absolute;
+            top: 13px; left: 3px; width: 18px; height: 18px;
+            z-index: 10; opacity: 0; background-color: transparent;
+            border: 2px solid rgb(255, 116, 0); border-radius: 100%;
+            -webkit-animation: pulse 1s linear 2;
+            -moz-animation: pulse 1s linear 2;
+            animation: pulse 1s linear 2;
+        }
         @media screen and (max-width: 750px) {
-            #info { margin-right:auto; }
+            #info { margin-right:auto; clear:both; }
             nav > ul { border-bottom: 0; }
             nav > ul > li { display: block; margin: 0; }
             nav > ul > li > a { display: block; margin: 0 10px; padding: 10px 0 10px 30px; border: 0; }
             nav > ul > li > a[data-for].active { border-bottom-color: #ccc; }
             #counts { position:relative; display:block; width:100%; }
+            #toggleRealtime.pulse::before { top: 8px; }
         }
         @media screen and (max-width: 550px) {
             #frmFilter { width: 100%; }
+        }
+        @keyframes pulse {
+            0% {transform: scale(1); opacity: 0;}
+            50% {transform: scale(1.3); opacity: 0.7;}
+            100% {transform: scale(1.6); opacity: 1;}
+        }
+        @-webkit-keyframes pulse {
+            0% {-webkit-transform: scale(1); opacity: 0;}
+            50% {-webkit-transform: scale(1.3); opacity: 0.7;}
+            100% {-webkit-transform: scale(1.6); opacity: 0;}
+        }
+        @-moz-keyframes pulse {
+            0% {-moz-transform: scale(1); opacity: 0;}
+            50% {-moz-transform: scale(1.3); opacity: 0.7;}
+            100% {-moz-transform: scale(1.6); opacity: 0;}
         }
     </style>
 </head>
@@ -285,7 +312,7 @@ $opcache = OpCacheService::init();
         </div>
     </div>
     <div id="files">
-        <p><label>Start typing to filter on script path<br/><input type="text" style="width:40em;" name="filter" id="frmFilter" /><label></p>
+        <p><label>Start typing to filter on script path<br/><input type="text" name="filter" id="frmFilter" /><label></p>
         <div class="container" id="filelist"></div>
     </div>
 </div>
@@ -301,11 +328,13 @@ $opcache = OpCacheService::init();
 
     $(function(){
         function updateStatus() {
+            $('#toggleRealtime').removeClass('pulse');
             $.ajax({
                 url: "#",
                 dataType: "json",
                 cache: false,
                 success: function(data) {
+                    $('#toggleRealtime').addClass('pulse');
                     opstate = data;
                     overviewCountsObj.setState({
                         data : opstate.overview
@@ -331,7 +360,7 @@ $opcache = OpCacheService::init();
             } else {
                 clearInterval(realtime);
                 realtime = false;
-                $(this).text('Enable real-time update');
+                $(this).text('Enable real-time update').removeClass('pulse');
             }
         });
         $('nav a[data-for]').click(function(){
@@ -342,7 +371,7 @@ $opcache = OpCacheService::init();
             return false;
         });
         $(document).on('paint', '#filelist table tbody', function(event, params) {
-            var trs = $('tr:visible', $(this));
+            var trs = $('tr', $(this)).not('.hide');
             trs.filter(':odd').css({backgroundColor:'#E0ECEF'})
                .end().filter(':even').css({backgroundColor:'#EFFEFF'});
             filesObj.setState({showing: trs.length});
@@ -350,9 +379,9 @@ $opcache = OpCacheService::init();
         $('#frmFilter').bind('keyup', function(event){
             $('span.pathname').each(function(index){
                 if ($(this).text().toLowerCase().indexOf($('#frmFilter').val().toLowerCase()) == -1) {
-                    $(this).closest('tr').hide();
+                    $(this).closest('tr').addClass('hide');
                 } else {
-                    $(this).closest('tr').show();
+                    $(this).closest('tr').removeClass('hide');
                 }
             });
             $('#filelist table tbody').trigger('paint');
@@ -396,7 +425,7 @@ $opcache = OpCacheService::init();
             return {
                 version : opstate.version,
                 start : opstate.overview.readable.start_time,
-                reset : opstate.overview.readable.last_restart_time,
+                reset : opstate.overview.readable.last_restart_time
             };
         },
         render: function() {
@@ -437,7 +466,7 @@ $opcache = OpCacheService::init();
                     vShow = directive.v;
                 }
                 return (
-                    React.createElement("tr", null,
+                    React.createElement("tr", {key: directive.k},
                         React.createElement("td", {title: directive.k}, dShow),
                         React.createElement("td", null, vShow)
                     )
@@ -482,7 +511,7 @@ $opcache = OpCacheService::init();
                     + file.full_path, 'data-file': file.full_path, onClick: this.handleInvalidate}, "force file invalidation"));
                 }
                 return (
-                    React.createElement("tr", null,
+                    React.createElement("tr", {key: file.full_path},
                         React.createElement("td", null,
                             React.createElement("div", null,
                                 React.createElement("span", {className: "pathname"}, file.full_path), React.createElement("br", null),
@@ -527,7 +556,7 @@ $opcache = OpCacheService::init();
         },
         render: function() {
             var display = this.state.formatted + ' file' + (this.state.total == 1 ? '' : 's') + ' cached';
-            if (this.props.showing !== null && this.props.showing != 0 && this.props.showing != this.state.total) {
+            if (this.props.showing !== null && this.props.showing != this.state.total) {
                 display += ', ' + this.props.showing + ' showing due to filter';
             }
             return (React.createElement("h3", null, display));

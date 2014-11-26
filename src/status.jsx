@@ -35,7 +35,7 @@ var GeneralInfo = React.createClass({
         return {
             version : opstate.version,
             start : opstate.overview.readable.start_time,
-            reset : opstate.overview.readable.last_restart_time,
+            reset : opstate.overview.readable.last_restart_time
         };
     },
     render: function() {
@@ -76,7 +76,7 @@ var Directives = React.createClass({
                 vShow = directive.v;
             }
             return (
-                <tr>
+                <tr key={directive.k}>
                     <td title={directive.k}>{dShow}</td>
                     <td>{vShow}</td>
                 </tr>
@@ -121,7 +121,7 @@ var Files = React.createClass({
                     + file.full_path} data-file={file.full_path} onClick={this.handleInvalidate}>force file invalidation</a></span>;
             }
             return (
-                <tr>
+                <tr key={file.full_path}>
                     <td>
                         <div>
                             <span className="pathname">{file.full_path}</span><br/>
@@ -166,7 +166,7 @@ var FilesListed = React.createClass({
     },
     render: function() {
         var display = this.state.formatted + ' file' + (this.state.total == 1 ? '' : 's') + ' cached';
-        if (this.props.showing !== null && this.props.showing != 0 && this.props.showing != this.state.total) {
+        if (this.props.showing !== null && this.props.showing != this.state.total) {
             display += ', ' + this.props.showing + ' showing due to filter';
         }
         return (<h3>{display}</h3>);
