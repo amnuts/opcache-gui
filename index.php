@@ -459,14 +459,14 @@ $opcache = OpCacheService::init();
                 if (file.timestamp == 0) {
                     invalidated = <span><i className="invalid metainfo">has been invalidated</i></span>;
                 }
-                var details = 'hits: ' + file.readable.hits + ', memory: ' 
-                    + file.readable.memory_consumption + ', last used: ' + file.last_used;
+                var details = <span><b>hits: </b><span>{file.readable.hits}</span></span>;/* + file.readable.hits + ', memory: ' 
+                    + file.readable.memory_consumption + ', last used: ' + file.last_used;*/
                 return (
                     <tr>
                         <td>
                             <div>
                                 <span className="pathname">{file.full_path}</span><br/>
-                                <span className="metainfo">{details}</span>
+                                <FilesMeta data={[file.readable.hits, file.readable.memory_consumption, file.last_used]} />
                                 <?php if ($opcache->getOption('allow_invalidate') && function_exists('opcache_invalidate')): ?>
                                 <span>,&nbsp;</span><a className="metainfo" href={'?invalidate=' + file.full_path} data-file={file.full_path} onClick={this.handleInvalidate}>force file invalidation</a>
                                 <?php endif; ?>
@@ -488,6 +488,18 @@ $opcache = OpCacheService::init();
         }
     });
 
+    var FilesMeta = React.createClass({
+        render: function() {
+            return (
+                <span className="metainfo">
+                    <b>hits: </b><span>{this.props.data[0]}, </span>
+                    <b>memory: </b><span>{this.props.data[1]}, </span>
+                    <b>last used: </b><span>{this.props.data[2]}</span>
+                </span>
+            );
+        }
+    });
+
     var FilesListed = React.createClass({
         getInitialState: function() {
             return {
@@ -502,7 +514,7 @@ $opcache = OpCacheService::init();
             }
             return (<h3>{display}</h3>);
         }
-    })
+    });
 
     var overviewCountsObj = React.render(<OverviewCounts/>, document.getElementById('counts'));
     var generalInfoObj = React.render(<GeneralInfo/>, document.getElementById('generalInfo'));
