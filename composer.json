@@ -1,12 +1,14 @@
 {
   "name": "amnuts/opcache-gui",
   "description": "A gui for Zend OPcache with a simple & effective interface and real-time updates",
+  "keywords": ["opcache", "cache", "gui", "opcodes", "interface"],
   "minimum-stability": "stable",
   "license": "MIT",
   "authors": [
     {
       "name": "Andrew Collington",
-      "email": "andy@amnuts.com"
+      "email": "andy@amnuts.com",
+      "homepage": "http://www.amnuts.com/"
     }
   ],
   "require": {
