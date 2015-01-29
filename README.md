@@ -1,6 +1,6 @@
 # opcache-gui
 
-A simple, responsive interface for Zend OPcache information showing the statistics, settings and cached files, and also provides a real-time update for the information (using jQuery and React).
+A clean and responsive interface for Zend OPcache information, showing statistics, settings and cached files, and providing a real-time update for the information (using jQuery and React).
 
 [![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=acollington&url=https://github.com/amnuts/opcache-gui&title=opcache-gui&language=&tags=github&category=software)
 
@@ -13,6 +13,20 @@ Version 2.0.0 introduces the use of React.js provides the ability to seamlessly 
 The overview will show you all the core information.  From here you'll be able to see what host and platform you're running on, what version of OPcache you're using, when it was last reset, the functions that are available, all the directives and all the statistics associated with the OPcache (number of hits, memory used, free and wasted memory, etc.)
 
 ![Overview](http://amnuts.com/images/opcache/screenshot/overview-v2.png)
+
+### Getting started
+
+There are two ways to getting started using this gui.
+
+1. Simply to copy/paste or download the index.php to your server.
+2. Install via composer by adding this to your composer.json file:
+```json
+{
+    "require": {
+        "amnuts/opcache-gui": "*"
+    }
+ }
+```
 
 ### File usage
 
@@ -30,9 +44,9 @@ The status.jsx file is provided solely for you to be able to edit the jsx code s
 
 The composer.json file is provided to allow you to deploy the opcache gui a little easier by using composer.
 
-## Previous releases
+## Releases
 
-Previous releases of the GUI are available at:
+Releases of the GUI are available at:
 
 https://github.com/amnuts/opcache-gui/releases/
 

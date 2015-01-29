@@ -1,6 +1,6 @@
 {
   "name": "amnuts/opcache-gui",
-  "description": "A gui for Zend OPcache with a simple & effective interface and real-time updates",
+  "description": "A clean and effective interface for Zend OPcache, with real(ish)-time monitoring, filtering and the ability to invalidate files",
   "keywords": ["opcache", "cache", "gui", "opcodes", "interface"],
   "minimum-stability": "stable",
   "license": "MIT",
@@ -8,11 +8,21 @@
     {
       "name": "Andrew Collington",
       "email": "andy@amnuts.com",
-      "homepage": "http://www.amnuts.com/"
+      "homepage": "http://www.amnuts.com/",
+      "role": "Developer"
+    },
+    {
+      "name": "Contributors",
+      "homepage": "https://github.com/amnuts/opcache-gui/graphs/contributors"
     }
   ],
+  "support": {
+    "email": "andy@amnuts.com",
+    "issues": "https://github.com/amnuts/opcache-gui/issues"
+  },
   "require": {
-    "ext-Zend-OPcache": "*"
+    "ext-Zend-OPcache": "*",
+    "php": ">=5.4"
   }
 }
 
