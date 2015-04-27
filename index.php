@@ -107,7 +107,7 @@ class OpCacheService
                 $size /= 1024;
                 ++$i;
             }
-            return sprintf("%.{$precision}f%s%s", $size, (($space && $i) ? ' ' : ''), $val[$i]);
+            return sprintf("%.{$precision}f%s %s", $size, (($space && $i) ? ' ' : ''), $val[$i]);
         };
 
         $files = [];
@@ -404,16 +404,16 @@ $opcache = OpCacheService::init();
                         React.createElement("p", null, React.createElement("span", {className: "large"}, this.state.data.hit_rate_percentage), React.createElement("span", null, "%"))
                     ),
                     React.createElement("div", {id: "moreinfo"},
-                        React.createElement("p", null, React.createElement("b", null, "total memory:"), this.state.data.readable.total_memory),
-                        React.createElement("p", null, React.createElement("b", null, "used memory:"), this.state.data.readable.used_memory),
-                        React.createElement("p", null, React.createElement("b", null, "free memory:"), this.state.data.readable.free_memory),
-                        React.createElement("p", null, React.createElement("b", null, "wasted memory:"), this.state.data.readable.wasted_memory, " (", this.state.data.wasted_percentage, "%)"),
-                        React.createElement("p", null, React.createElement("b", null, "number of cached files:"), this.state.data.readable.num_cached_scripts),
-                        React.createElement("p", null, React.createElement("b", null, "number of hits:"), this.state.data.readable.hits),
-                        React.createElement("p", null, React.createElement("b", null, "number of misses:"), this.state.data.readable.misses),
-                        React.createElement("p", null, React.createElement("b", null, "blacklist misses:"), this.state.data.readable.blacklist_miss),
-                        React.createElement("p", null, React.createElement("b", null, "number of cached keys:"), this.state.data.readable.num_cached_keys),
-                        React.createElement("p", null, React.createElement("b", null, "max cached keys:"), this.state.data.readable.max_cached_keys)
+                        React.createElement("p", null, React.createElement("b", null, "total memory: "), this.state.data.readable.total_memory),
+                        React.createElement("p", null, React.createElement("b", null, "used memory: "), this.state.data.readable.used_memory),
+                        React.createElement("p", null, React.createElement("b", null, "free memory: "), this.state.data.readable.free_memory),
+                        React.createElement("p", null, React.createElement("b", null, "wasted memory: "), this.state.data.readable.wasted_memory, " (", this.state.data.wasted_percentage, "%)"),
+                        React.createElement("p", null, React.createElement("b", null, "number of cached files: "), this.state.data.readable.num_cached_scripts),
+                        React.createElement("p", null, React.createElement("b", null, "number of hits: "), this.state.data.readable.hits),
+                        React.createElement("p", null, React.createElement("b", null, "number of misses: "), this.state.data.readable.misses),
+                        React.createElement("p", null, React.createElement("b", null, "blacklist misses: "), this.state.data.readable.blacklist_miss),
+                        React.createElement("p", null, React.createElement("b", null, "number of cached keys: "), this.state.data.readable.num_cached_keys),
+                        React.createElement("p", null, React.createElement("b", null, "max cached keys: "), this.state.data.readable.max_cached_keys)
                     )
                 )
             );
