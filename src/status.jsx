@@ -14,16 +14,16 @@ var OverviewCounts = React.createClass({
                     <p><span className="large">{this.state.data.hit_rate_percentage}</span><span>%</span></p>
                 </div>
                 <div id="moreinfo">
-                    <p><b>total memory:</b>{this.state.data.readable.total_memory}</p>
-                    <p><b>used memory:</b>{this.state.data.readable.used_memory}</p>
-                    <p><b>free memory:</b>{this.state.data.readable.free_memory}</p>
-                    <p><b>wasted memory:</b>{this.state.data.readable.wasted_memory} ({this.state.data.wasted_percentage}%)</p>
-                    <p><b>number of cached files:</b>{this.state.data.readable.num_cached_scripts}</p>
-                    <p><b>number of hits:</b>{this.state.data.readable.hits}</p>
-                    <p><b>number of misses:</b>{this.state.data.readable.misses}</p>
-                    <p><b>blacklist misses:</b>{this.state.data.readable.blacklist_miss}</p>
-                    <p><b>number of cached keys:</b>{this.state.data.readable.num_cached_keys}</p>
-                    <p><b>max cached keys:</b>{this.state.data.readable.max_cached_keys}</p>
+                    <p><b>total memory:</b> {this.state.data.readable.total_memory}</p>
+                    <p><b>used memory:</b> {this.state.data.readable.used_memory}</p>
+                    <p><b>free memory:</b> {this.state.data.readable.free_memory}</p>
+                    <p><b>wasted memory:</b> {this.state.data.readable.wasted_memory} ({this.state.data.wasted_percentage}%)</p>
+                    <p><b>number of cached files:</b> {this.state.data.readable.num_cached_scripts}</p>
+                    <p><b>number of hits:</b> {this.state.data.readable.hits}</p>
+                    <p><b>number of misses:</b> {this.state.data.readable.misses}</p>
+                    <p><b>blacklist misses:</b> {this.state.data.readable.blacklist_miss}</p>
+                    <p><b>number of cached keys:</b> {this.state.data.readable.num_cached_keys}</p>
+                    <p><b>max cached keys:</b> {this.state.data.readable.max_cached_keys}</p>
                 </div>
             </div>
         );

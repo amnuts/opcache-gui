@@ -6,7 +6,7 @@
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 2.0.0
+ * @version 2.0.2
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, http://acollington.mit-license.org/
  */
@@ -107,7 +107,7 @@ class OpCacheService
                 $size /= 1024;
                 ++$i;
             }
-            return sprintf("%.{$precision}f%s %s", $size, (($space && $i) ? ' ' : ''), $val[$i]);
+            return sprintf("%.{$precision}f%s%s", $size, (($space && $i) ? ' ' : ''), $val[$i]);
         };
 
         $files = [];
@@ -195,7 +195,7 @@ $opcache = OpCacheService::init();
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>OPcache statistics on <?php echo $opcache->getData('version', 'host'); ?></title>
-    <script src="//cdn.jsdelivr.net/react/0.12.2/react.min.js"></script>
+    <script src="//cdn.jsdelivr.net/react/0.13.2/react.min.js"></script>
     <script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
     <style type="text/css">
         body { font-family:sans-serif; font-size:90%; padding: 0; margin: 0 }
@@ -388,7 +388,7 @@ $opcache = OpCacheService::init();
         });
     });
 
-    var OverviewCounts = React.createClass({displayName: 'OverviewCounts',
+    var OverviewCounts = React.createClass({displayName: "OverviewCounts",
         getInitialState: function() {
             return { data : opstate.overview };
         },
@@ -404,23 +404,23 @@ $opcache = OpCacheService::init();
                         React.createElement("p", null, React.createElement("span", {className: "large"}, this.state.data.hit_rate_percentage), React.createElement("span", null, "%"))
                     ),
                     React.createElement("div", {id: "moreinfo"},
-                        React.createElement("p", null, React.createElement("b", null, "total memory: "), this.state.data.readable.total_memory),
-                        React.createElement("p", null, React.createElement("b", null, "used memory: "), this.state.data.readable.used_memory),
-                        React.createElement("p", null, React.createElement("b", null, "free memory: "), this.state.data.readable.free_memory),
-                        React.createElement("p", null, React.createElement("b", null, "wasted memory: "), this.state.data.readable.wasted_memory, " (", this.state.data.wasted_percentage, "%)"),
-                        React.createElement("p", null, React.createElement("b", null, "number of cached files: "), this.state.data.readable.num_cached_scripts),
-                        React.createElement("p", null, React.createElement("b", null, "number of hits: "), this.state.data.readable.hits),
-                        React.createElement("p", null, React.createElement("b", null, "number of misses: "), this.state.data.readable.misses),
-                        React.createElement("p", null, React.createElement("b", null, "blacklist misses: "), this.state.data.readable.blacklist_miss),
-                        React.createElement("p", null, React.createElement("b", null, "number of cached keys: "), this.state.data.readable.num_cached_keys),
-                        React.createElement("p", null, React.createElement("b", null, "max cached keys: "), this.state.data.readable.max_cached_keys)
+                        React.createElement("p", null, React.createElement("b", null, "total memory:"), " ", this.state.data.readable.total_memory),
+                        React.createElement("p", null, React.createElement("b", null, "used memory:"), " ", this.state.data.readable.used_memory),
+                        React.createElement("p", null, React.createElement("b", null, "free memory:"), " ", this.state.data.readable.free_memory),
+                        React.createElement("p", null, React.createElement("b", null, "wasted memory:"), " ", this.state.data.readable.wasted_memory, " (", this.state.data.wasted_percentage, "%)"),
+                        React.createElement("p", null, React.createElement("b", null, "number of cached files:"), " ", this.state.data.readable.num_cached_scripts),
+                        React.createElement("p", null, React.createElement("b", null, "number of hits:"), " ", this.state.data.readable.hits),
+                        React.createElement("p", null, React.createElement("b", null, "number of misses:"), " ", this.state.data.readable.misses),
+                        React.createElement("p", null, React.createElement("b", null, "blacklist misses:"), " ", this.state.data.readable.blacklist_miss),
+                        React.createElement("p", null, React.createElement("b", null, "number of cached keys:"), " ", this.state.data.readable.num_cached_keys),
+                        React.createElement("p", null, React.createElement("b", null, "max cached keys:"), " ", this.state.data.readable.max_cached_keys)
                     )
                 )
             );
         }
     });
 
-    var GeneralInfo = React.createClass({displayName: 'GeneralInfo',
+    var GeneralInfo = React.createClass({displayName: "GeneralInfo",
         getInitialState: function() {
             return {
                 version : opstate.version,
@@ -447,7 +447,7 @@ $opcache = OpCacheService::init();
         }
     });
 
-    var Directives = React.createClass({displayName: 'Directives',
+    var Directives = React.createClass({displayName: "Directives",
         getInitialState: function() {
             return { data : opstate.directives };
         },
@@ -483,7 +483,7 @@ $opcache = OpCacheService::init();
         }
     });
 
-    var Files = React.createClass({displayName: 'Files',
+    var Files = React.createClass({displayName: "Files",
         getInitialState: function() {
             return {
                 data : opstate.files,
@@ -508,7 +508,7 @@ $opcache = OpCacheService::init();
                 }
                 if (canInvalidate) {
                     invalidate = React.createElement("span", null, ", ", React.createElement("a", {className: "metainfo", href: '?invalidate='
-                    + file.full_path, 'data-file': file.full_path, onClick: this.handleInvalidate}, "force file invalidation"));
+                    + file.full_path, "data-file": file.full_path, onClick: this.handleInvalidate}, "force file invalidation"));
                 }
                 return (
                     React.createElement("tr", {key: file.full_path},
@@ -535,7 +535,7 @@ $opcache = OpCacheService::init();
         }
     });
 
-    var FilesMeta = React.createClass({displayName: 'FilesMeta',
+    var FilesMeta = React.createClass({displayName: "FilesMeta",
         render: function() {
             return (
                 React.createElement("span", {className: "metainfo"},
@@ -547,7 +547,7 @@ $opcache = OpCacheService::init();
         }
     });
 
-    var FilesListed = React.createClass({displayName: 'FilesListed',
+    var FilesListed = React.createClass({displayName: "FilesListed",
         getInitialState: function() {
             return {
                 formatted : opstate.overview.readable.num_cached_scripts,
