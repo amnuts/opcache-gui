@@ -6,9 +6,25 @@
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 2.0.2
+ * @version 2.1.0
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, http://acollington.mit-license.org/
+ */
+
+
+/*
+ * User configuration
+ */
+
+$options = [
+    'allow_invalidate' => true,  // give a link to invalidate files
+    'size_precision'   => 2,     // Digits after decimal point
+    'size_space'       => false, // have '1MB' or '1 MB' when showing sizes
+    'charts'           => true   // show gauge chart or just big numbers
+];
+
+/*
+ * Shouldn't need to alter anything else below here
  */
 
 if (!extension_loaded('Zend OPcache')) {
@@ -18,14 +34,18 @@ if (!extension_loaded('Zend OPcache')) {
 class OpCacheService
 {
     protected $data;
-    protected $options = [
-        'allow_invalidate' => true
+    protected $options;
+    protected $defaults = [
+        'allow_invalidate' => true,
+        'size_precision'   => 2,
+        'size_space'       => false,
+        'charts'           => true
     ];
 
     private function __construct($options = [])
     {
+        $this->options = array_merge($this->defaults, $options);
         $this->data = $this->compileState();
-        $this->options = array_merge($this->options, $options);
     }
 
     public static function init($options = [])
@@ -95,20 +115,25 @@ class OpCacheService
         return $success;
     }
 
+    protected function size($size)
+    {
+        $i = 0;
+        $val = array('b', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+        while (($size / 1024) > 1) {
+            $size /= 1024;
+            ++$i;
+        }
+        return sprintf('%.'.$this->getOption('size_precision').'f%s%s',
+            number_format($size),
+            ($this->getOption('size_space') ? ' ' : ''),
+            $val[$i]
+        );
+    }
+
     protected function compileState()
     {
         $status = opcache_get_status();
         $config = opcache_get_configuration();
-        $memsize = function($size, $precision = 3, $space = false)
-        {
-            $i = 0;
-            $val = array(' bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-            while (($size / 1024) > 1) {
-                $size /= 1024;
-                ++$i;
-            }
-            return sprintf("%.{$precision}f%s%s", $size, (($space && $i) ? ' ' : ''), $val[$i]);
-        };
 
         $files = [];
         if (!empty($status['scripts'])) {
@@ -119,7 +144,7 @@ class OpCacheService
                 $file['full_path'] = str_replace('\\', '/', $file['full_path']);
                 $file['readable'] = [
                     'hits'               => number_format($file['hits']),
-                    'memory_consumption' => $memsize($file['memory_consumption'])
+                    'memory_consumption' => $this->size($file['memory_consumption'])
                 ];
             }
             $files = array_values($status['scripts']);
@@ -133,10 +158,10 @@ class OpCacheService
                 'hit_rate_percentage'     => round($status['opcache_statistics']['opcache_hit_rate']),
                 'wasted_percentage'       => round($status['memory_usage']['current_wasted_percentage'], 2),
                 'readable' => [
-                    'total_memory'       => $memsize($config['directives']['opcache.memory_consumption']),
-                    'used_memory'        => $memsize($status['memory_usage']['used_memory']),
-                    'free_memory'        => $memsize($status['memory_usage']['free_memory']),
-                    'wasted_memory'      => $memsize($status['memory_usage']['wasted_memory']),
+                    'total_memory'       => $this->size($config['directives']['opcache.memory_consumption']),
+                    'used_memory'        => $this->size($status['memory_usage']['used_memory']),
+                    'free_memory'        => $this->size($status['memory_usage']['free_memory']),
+                    'wasted_memory'      => $this->size($status['memory_usage']['wasted_memory']),
                     'num_cached_scripts' => number_format($status['opcache_statistics']['num_cached_scripts']),
                     'hits'               => number_format($status['opcache_statistics']['hits']),
                     'misses'             => number_format($status['opcache_statistics']['misses']),
@@ -186,7 +211,7 @@ class OpCacheService
     }
 }
 
-$opcache = OpCacheService::init();
+$opcache = OpCacheService::init($options);
 
 ?>
 <!doctype html>
@@ -206,7 +231,7 @@ $opcache = OpCacheService::init();
         nav > ul > li > a:hover { background-color: #f4f4f4; text-decoration: underline; }
         nav > ul > li > a.active:hover { background-color: initial; }
         nav > ul > li > a[data-for].active { border: 1px solid #ccc; border-bottom-color: #ffffff; border-top: 3px solid #6ca6ef; }
-        table { margin: 0 0 1em 0; border-collapse: collapse; border-color: #fff; width: 100%; }
+        table { margin: 0 0 1em 0; border-collapse: collapse; border-color: #fff; width: 100%; table-layout: fixed; }
         table caption { text-align: left; font-size: 1.5em; }
         table tr { background-color: #99D0DF; border-color: #fff; }
         table th { text-align: left; padding: 6px; background-color: #6ca6ef; color: #fff; border-color: #fff; font-weight: normal; }
@@ -217,6 +242,7 @@ $opcache = OpCacheService::init();
         footer { border-top: 1px solid #ccc; padding: 1em 2em; }
         footer a { padding: 2em; text-decoration: none; opacity: 0.7; }
         footer a:hover { opacity: 1; }
+        canvas { display: block; width: 250px; height: 250px; margin: 0 auto; }
         #tabs { padding: 2em; }
         #tabs > div { display: none; }
         #tabs > div#overview { display:block; }
@@ -226,7 +252,7 @@ $opcache = OpCacheService::init();
         #toggleRealtime { position: relative; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAUCAYAAACAl21KAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6ODE5RUU4NUE3NDlGMTFFNDkyMzA4QzY1RjRBQkIzQjUiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6ODE5RUU4NUI3NDlGMTFFNDkyMzA4QzY1RjRBQkIzQjUiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MTlFRTg1ODc0OUYxMUU0OTIzMDhDNjVGNEFCQjNCNSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4MTlFRTg1OTc0OUYxMUU0OTIzMDhDNjVGNEFCQjNCNSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PpXjpvMAAAD2SURBVHjarFQBEcMgDKR3E1AJldA5wMEqAQmTgINqmILdFCChdUAdMAeMcukuSwnQbbnLlZLwJPkQIcrSiT/IGNQHNb8CGQDyRw+2QWUBqC+luzo4OKQZIAVrB+ssyKp3Bkijf0+ijzIh4wQppoBauMSjyDZfMSCDxYZMsfHF120T36AqWZMkgyguQ3GOfottJ5TKnHC+wfeRsC2oDVayPgr3bbN2tHBH3tWuJCPa0JUgKtFzMQrcZH3FNHAc0yOp1cCASALyngoN6lhDopkJWxdifwY9A3u7l29ImpxOFSWIOVsGwHKENIWxss2eBVKdOeeXAAMAk/Z9h4QhXmUAAAAASUVORK5CYII='); }
         #counts { width: 270px; float: right; }
         #counts > div > div { background-color: #ededed; margin-bottom: 10px; }
-        #counts > div > div > h3 { background-color: #cdcdcd; padding: 4px 6px; margin: 0; }
+        #counts > div > div > h3 { background-color: #cdcdcd; padding: 4px 6px; margin: 0; text-align: center; }
         #counts > div > div > p { margin: 0; text-align: center; }
         #counts > div > div > p > span.large + span { font-size: 20pt; margin: 0; }
         #counts > div > div > p > span.large { font-size: 80pt; margin: 0; padding: 0; text-align: center; }
@@ -325,6 +351,60 @@ $opcache = OpCacheService::init();
     var realtime = false;
     var opstate = <?php echo json_encode($opcache->getData()); ?>;
     var canInvalidate = <?php echo ($opcache->canInvalidate() ? 'true' : 'false'); ?>;
+    var useCharts = <?php echo ($opcache->getOption('charts') ? 'true' : 'false'); ?>;
+
+<?php if ($opcache->getOption('charts')): ?>
+    var Gauge = function(el, colour) {
+        this.canvas  = $(el).get(0);
+        this.ctx     = this.canvas.getContext('2d');
+        this.width   = this.canvas.width;
+        this.height  = this.canvas.height;
+        this.colour  = colour || '#6ca6ef';
+        this.loop    = null;
+        this.degrees = 0;
+        this.newdegs = 0;
+        this.text    = '';
+        this.init = function() {
+            this.ctx.clearRect(0, 0, this.width, this.height);
+            this.ctx.beginPath();
+            this.ctx.strokeStyle = '#e2e2e2';
+            this.ctx.lineWidth = 30;
+            this.ctx.arc(this.width/2, this.height/2, 100, 0, Math.PI*2, false);
+            this.ctx.stroke();
+            this.ctx.beginPath();
+            this.ctx.strokeStyle = this.colour;
+            this.ctx.lineWidth = 30;
+            this.ctx.arc(this.width/2, this.height/2, 100, 0 - (90 * Math.PI / 180), (this.degrees * Math.PI / 180) - (90 * Math.PI / 180), false);
+            this.ctx.stroke();
+            this.ctx.fillStyle = this.colour;
+            this.ctx.font = '60px sans-serif';
+            this.text = Math.round((this.degrees/360)*100) + '%';
+            this.ctx.fillText(this.text, (this.width/2) - (this.ctx.measureText(this.text).width/2), (this.height/2) + 20);
+        };
+        this.draw = function() {
+            if (typeof this.loop != 'undefined') {
+                clearInterval(this.loop);
+            }
+            var self = this;
+            self.loop = setInterval(function(){ self.animate(); }, 1000/(this.newdegs - this.degrees));
+        };
+        this.animate = function() {
+            if (this.degrees == this.newdegs) {
+                clearInterval(this.loop);
+            }
+            if (this.degrees < this.newdegs) {
+                ++this.degrees;
+            } else {
+                --this.degrees;
+            }
+            this.init();
+        };
+        this.setValue = function(val) {
+            this.newdegs = Math.round(3.6 * val);
+            this.draw();
+        };
+    }
+    <?php endif; ?>
 
     $(function(){
         function updateStatus() {
@@ -388,20 +468,63 @@ $opcache = OpCacheService::init();
         });
     });
 
+    var MemoryUsage = React.createClass({displayName: "MemoryUsage",
+        componentDidMount: function() {
+            if (this.props.chart) {
+                this.props.memoryUsageGauge = new Gauge('#memoryUsageCanvas');
+                this.props.memoryUsageGauge.setValue(this.props.value);
+            }
+        },
+        componentDidUpdate: function() {
+            if (typeof this.props.memoryUsageGauge != 'undefined') {
+                this.props.memoryUsageGauge.setValue(this.props.value);
+            }
+        },
+        render: function() {
+            if (this.props.chart == true) {
+                return(React.createElement("canvas", {id: "memoryUsageCanvas", width: "250", height: "250", "data-value": this.props.value}));
+            }
+            return(React.createElement("p", null, React.createElement("span", {className: "large"}, this.props.value), React.createElement("span", null, "%")));
+        }
+    });
+
+    var HitRate = React.createClass({displayName: "HitRate",
+        componentDidMount: function() {
+            if (this.props.chart) {
+                this.props.hitRateGauge = new Gauge('#hitRateCanvas');
+                this.props.hitRateGauge.setValue(this.props.value)
+            }
+        },
+        componentDidUpdate: function() {
+            if (typeof this.props.hitRateGauge != 'undefined') {
+                this.props.hitRateGauge.setValue(this.props.value);
+            }
+        },
+        render: function() {
+            if (this.props.chart == true) {
+                return(React.createElement("canvas", {id: "hitRateCanvas", width: "250", height: "250", "data-value": this.props.value}));
+            }
+            return(React.createElement("p", null, React.createElement("span", {className: "large"}, this.props.value), React.createElement("span", null, "%")));
+        }
+    });
+
     var OverviewCounts = React.createClass({displayName: "OverviewCounts",
         getInitialState: function() {
-            return { data : opstate.overview };
+            return {
+                data  : opstate.overview,
+                chart : useCharts
+            };
         },
         render: function() {
             return (
                 React.createElement("div", null,
                     React.createElement("div", null,
                         React.createElement("h3", null, "memory usage"),
-                        React.createElement("p", null, React.createElement("span", {className: "large"}, this.state.data.used_memory_percentage), React.createElement("span", null, "%"))
+                        React.createElement("p", null, React.createElement(MemoryUsage, {chart: this.state.chart, value: this.state.data.used_memory_percentage}))
                     ),
                     React.createElement("div", null,
                         React.createElement("h3", null, "hit rate"),
-                        React.createElement("p", null, React.createElement("span", {className: "large"}, this.state.data.hit_rate_percentage), React.createElement("span", null, "%"))
+                        React.createElement("p", null, React.createElement(HitRate, {chart: this.state.chart, value: this.state.data.hit_rate_percentage}))
                     ),
                     React.createElement("div", {id: "moreinfo"},
                         React.createElement("p", null, React.createElement("b", null, "total memory:"), " ", this.state.data.readable.total_memory),
@@ -567,6 +690,7 @@ $opcache = OpCacheService::init();
     var generalInfoObj = React.render(React.createElement(GeneralInfo, null), document.getElementById('generalInfo'));
     var filesObj = React.render(React.createElement(Files, null), document.getElementById('filelist'));
     React.render(React.createElement(Directives, null), document.getElementById('directives'));
+
 </script>
 
 </body>

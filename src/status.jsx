@@ -1,17 +1,60 @@
+var MemoryUsage = React.createClass({
+    componentDidMount: function() {
+        if (this.props.chart) {
+            this.props.memoryUsageGauge = new Gauge('#memoryUsageCanvas');
+            this.props.memoryUsageGauge.setValue(this.props.value);
+        }
+    },
+    componentDidUpdate: function() {
+        if (typeof this.props.memoryUsageGauge != 'undefined') {
+            this.props.memoryUsageGauge.setValue(this.props.value);
+        }
+    },
+    render: function() {
+        if (this.props.chart == true) {
+            return(<canvas id="memoryUsageCanvas" width="250" height="250" data-value={this.props.value} />);
+        }
+        return(<p><span className="large">{this.props.value}</span><span>%</span></p>);
+    }
+});
+
+var HitRate = React.createClass({
+    componentDidMount: function() {
+        if (this.props.chart) {
+            this.props.hitRateGauge = new Gauge('#hitRateCanvas');
+            this.props.hitRateGauge.setValue(this.props.value)
+        }
+    },
+    componentDidUpdate: function() {
+        if (typeof this.props.hitRateGauge != 'undefined') {
+            this.props.hitRateGauge.setValue(this.props.value);
+        }
+    },
+    render: function() {
+        if (this.props.chart == true) {
+            return(<canvas id="hitRateCanvas" width="250" height="250" data-value={this.props.value} />);
+        }
+        return(<p><span className="large">{this.props.value}</span><span>%</span></p>);
+    }
+});
+
 var OverviewCounts = React.createClass({
     getInitialState: function() {
-        return { data : opstate.overview };
+        return {
+            data  : opstate.overview,
+            chart : useCharts
+        };
     },
     render: function() {
         return (
             <div>
                 <div>
                     <h3>memory usage</h3>
-                    <p><span className="large">{this.state.data.used_memory_percentage}</span><span>%</span></p>
+                    <p><MemoryUsage chart={this.state.chart} value={this.state.data.used_memory_percentage} /></p>
                 </div>
                 <div>
                     <h3>hit rate</h3>
-                    <p><span className="large">{this.state.data.hit_rate_percentage}</span><span>%</span></p>
+                    <p><HitRate chart={this.state.chart} value={this.state.data.hit_rate_percentage} /></p>
                 </div>
                 <div id="moreinfo">
                     <p><b>total memory:</b> {this.state.data.readable.total_memory}</p>
