@@ -6,7 +6,7 @@
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 2.1.0
+ * @version 2.1.1
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, http://acollington.mit-license.org/
  */
@@ -18,6 +18,9 @@
 
 $options = [
     'allow_invalidate' => true,  // give a link to invalidate files
+    'allow_reset'      => true,  // give option to reset the whole cache
+    'allow_realtime'   => true,  // give option to enable/disable real-time updates
+    'refresh_time'     => 5,     // how often the data will refresh, in seconds
     'size_precision'   => 2,     // Digits after decimal point
     'size_space'       => false, // have '1MB' or '1 MB' when showing sizes
     'charts'           => true   // show gauge chart or just big numbers
@@ -37,6 +40,9 @@ class OpCacheService
     protected $options;
     protected $defaults = [
         'allow_invalidate' => true,
+        'allow_reset'      => true,
+        'allow_realtime'   => true,
+        'refresh_time'     => 5,
         'size_precision'   => 2,
         'size_space'       => false,
         'charts'           => true
@@ -54,17 +60,17 @@ class OpCacheService
         if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
             && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
         ) {
-            if ((isset($_GET['reset']))) {
+            if (isset($_GET['reset']) && $self->getOption('allow_reset')) {
                 echo '{ "success": "' . ($self->resetCache() ? 'yes' : 'no') . '" }';
-            } else if ((isset($_GET['invalidate']))) {
+            } else if (isset($_GET['invalidate']) && $self->getOption('allow_invalidate')) {
                 echo '{ "success": "' . ($self->resetCache($_GET['invalidate']) ? 'yes' : 'no') . '" }';
             } else {
                 echo json_encode($self->getData(@$_GET['section'] ?: null));
             }
             exit;
-        } else if ((isset($_GET['reset']))) {
+        } else if (isset($_GET['reset']) && $self->getOption('allow_invalidate')) {
             $self->resetCache();
-        } else if ((isset($_GET['invalidate']))) {
+        } else if (isset($_GET['invalidate']) && $self->getOption('allow_invalidate')) {
             $self->resetCache($_GET['invalidate']);
         }
         return $self;
@@ -308,8 +314,12 @@ $opcache = OpCacheService::init($options);
         <ul>
             <li><a data-for="overview" href="#overview" class="active">Overview</a></li>
             <li><a data-for="files" href="#files">File usage</a></li>
+            <?php if ($opcache->getOption('allow_reset')): ?>
             <li><a href="?reset=1" id="resetCache" onclick="return confirm('Are you sure you want to reset the cache?');">Reset cache</a></li>
+            <?php endif; ?>
+            <?php if ($opcache->getOption('allow_realtime')): ?>
             <li><a href="#" id="toggleRealtime">Enable real-time update</a></li>
+            <?php endif; ?>
         </ul>
     </nav>
 </header>
@@ -407,6 +417,7 @@ $opcache = OpCacheService::init($options);
     <?php endif; ?>
 
     $(function(){
+        <?php if ($opcache->getOption('allow_realtime')): ?>
         function updateStatus() {
             $('#toggleRealtime').removeClass('pulse');
             $.ajax({
@@ -435,7 +446,7 @@ $opcache = OpCacheService::init($options);
         }
         $('#toggleRealtime').click(function(){
             if (realtime === false) {
-                realtime = setInterval(function(){updateStatus()}, 5000);
+                realtime = setInterval(function(){updateStatus()}, <?php echo (int)$opcache->getOption('refresh_time') * 1000; ?>);
                 $(this).text('Disable real-time update');
             } else {
                 clearInterval(realtime);
@@ -443,6 +454,7 @@ $opcache = OpCacheService::init($options);
                 $(this).text('Enable real-time update').removeClass('pulse');
             }
         });
+        <?php endif; ?>
         $('nav a[data-for]').click(function(){
             $('#tabs > div').hide();
             $('#' + $(this).data('for')).show();
@@ -590,7 +602,8 @@ $opcache = OpCacheService::init($options);
                 }
                 return (
                     React.createElement("tr", {key: directive.k},
-                        React.createElement("td", {title: directive.k}, dShow),
+                        React.createElement("td", {title: 'View ' + directive.k + ' manual entry'}, React.createElement("a", {href: 'http://php.net/manual/en/opcache.configuration.php#ini.'
+                        + (directive.k).replace(/_/g,'-'), target: "_blank"}, dShow)),
                         React.createElement("td", null, vShow)
                     )
                 );
@@ -690,7 +703,6 @@ $opcache = OpCacheService::init($options);
     var generalInfoObj = React.render(React.createElement(GeneralInfo, null), document.getElementById('generalInfo'));
     var filesObj = React.render(React.createElement(Files, null), document.getElementById('filelist'));
     React.render(React.createElement(Directives, null), document.getElementById('directives'));
-
 </script>
 
 </body>

@@ -120,7 +120,8 @@ var Directives = React.createClass({
             }
             return (
                 <tr key={directive.k}>
-                    <td title={directive.k}>{dShow}</td>
+                    <td title={'View ' + directive.k + ' manual entry'}><a href={'http://php.net/manual/en/opcache.configuration.php#ini.'
+                        + (directive.k).replace(/_/g,'-')} target="_blank">{dShow}</a></td>
                     <td>{vShow}</td>
                 </tr>
             );

@@ -1,6 +1,6 @@
 {
   "name": "amnuts/opcache-gui",
-  "description": "A clean and effective interface for Zend OPcache, with real(ish)-time monitoring, filtering and the ability to invalidate files",
+  "description": "A clean, effective and responsive interface for Zend OPcache, with real(ish)-time monitoring, filtering and the ability to invalidate files",
   "keywords": ["opcache", "cache", "gui", "opcodes", "interface"],
   "minimum-stability": "stable",
   "license": "MIT",
