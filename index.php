@@ -65,7 +65,7 @@ class OpCacheService
             } else if (isset($_GET['invalidate']) && $self->getOption('allow_invalidate')) {
                 echo '{ "success": "' . ($self->resetCache($_GET['invalidate']) ? 'yes' : 'no') . '" }';
             } else {
-                echo json_encode($self->getData(@$_GET['section'] ?: null));
+                echo json_encode($self->getData((empty($_GET['section']) ? null : $_GET['section'])));
             }
             exit;
         } else if (isset($_GET['reset']) && $self->getOption('allow_invalidate')) {
