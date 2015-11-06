@@ -21,14 +21,7 @@ The overview will show you all the core information.  From here you'll be able t
 There are two ways to getting started using this gui.
 
 1. Simply to copy/paste or download the index.php to your server.
-2. Install via composer by adding this to your composer.json file:
-```json
-{
-    "require": {
-        "amnuts/opcache-gui": "*"
-    }
- }
-```
+2. Install via composer by running the command `composer require amnuts/opcache-gui`
 
 If you want to set the configuration options just alter the array at the top of the script:
 ```php
