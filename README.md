@@ -6,6 +6,8 @@ A clean and responsive interface for Zend OPcache information, showing statistic
 
 ## What's new
 
+Version 2.2.0 provides the ability to turn on/off the file list (default is on)
+
 Version 2.1.0 now provides a much easier way to configure some options, be it the poll time, toggling the ability to reset the cache, real-time updates, etc. It also allows you to show the big values (memory usage and hit rate) as gauge graphs instead of big numbers.
 
 Version 2.0.0 introduces the use of React.js provides the ability to seamlessly update more of the information in real-time (well, every five seconds by default) - so now the files as well as the overview get refreshed. There is an updated look, removing the gradients and going for a flatter feel. And the code in general has had an overhaul.
@@ -26,6 +28,7 @@ There are two ways to getting started using this gui.
 If you want to set the configuration options just alter the array at the top of the script:
 ```php
 $options = [
+    'allow_filelist'   => true,  // show/hide the files tab
     'allow_invalidate' => true,  // give a link to invalidate files
     'allow_reset'      => true,  // give option to reset the whole cache
     'allow_realtime'   => true,  // give option to enable/disable real-time updates
@@ -39,6 +42,8 @@ $options = [
 ### File usage
 
 All the files currently in the cache are listed here with their associated statistics.  You can filter the results very easily to key in on the particular scripts you're looking for, and you can optionally set levels of the path to be hidden (handy if they all share a common root and you don't want that displayed). It will also indicate if the file cache has expired.
+
+If you do not want to show the file list at all then you can use the `allow_filelist` configuration option; setting it to `false` will suppress the file list altogether.
 
 ![File list showing filtered results](http://amnuts.com/images/opcache/screenshot/files-v2.png)
 
@@ -54,7 +59,7 @@ The interface can poll every so often to get a fresh look at the opcache.  You c
 
 ## Project files
 
-The status.jsx file is provided solely for you to be able to edit the jsx code should you wish.  For production purposes it's best to have the jsx code pre-compiled which is what's used in index.php.  You in no way need to use status.jsx to use the opcache gui.
+The status.jsx file is provided solely for you to be able to edit the jsx code should you wish.  For production purposes it's best to have the jsx code pre-compiled which is what's used in index.php.  You do not need to use status.jsx at all in order to use the opcache gui.  However, should you wish to compile the jsx code then you'll need to use [babel](https://babeljs.io/) or the [react-tools](https://www.npmjs.com/package/react-tools) (no longer supported with newer versions of React).
 
 The composer.json file is provided to allow you to deploy the opcache gui a little easier by using composer.
 
