@@ -141,7 +141,8 @@ var Files = React.createClass({
     getInitialState: function() {
         return {
             data : opstate.files,
-            showing: null
+            showing: null,
+            allowFiles: allowFiles
         };
     },
     handleInvalidate: function(e) {
@@ -155,37 +156,45 @@ var Files = React.createClass({
         }
     },
     render: function() {
-        var fileNodes = this.state.data.map(function(file) {
-            var invalidate, invalidated;
-            if (file.timestamp == 0) {
-                invalidated = <span><i className="invalid metainfo">has been invalidated</i></span>;
-            }
-            if (canInvalidate) {
-                invalidate = <span>,&nbsp;<a className="metainfo" href={'?invalidate='
-                    + file.full_path} data-file={file.full_path} onClick={this.handleInvalidate}>force file invalidation</a></span>;
-            }
+        if (this.state.allowFiles) {
+            var fileNodes = this.state.data.map(function(file) {
+                var invalidate, invalidated;
+                if (file.timestamp == 0) {
+                    invalidated = <span><i className="invalid metainfo">has been invalidated</i></span>;
+                }
+                if (canInvalidate) {
+                    invalidate = <span>,&nbsp;<a className="metainfo" href={'?invalidate='
+                        + file.full_path} data-file={file.full_path} onClick={this.handleInvalidate}>force file invalidation</a></span>;
+                }
+                return (
+                    <tr key={file.full_path}>
+                        <td>
+                            <div>
+                                <span className="pathname">{file.full_path}</span><br/>
+                                <FilesMeta data={[file.readable.hits, file.readable.memory_consumption, file.last_used]} />
+                                {invalidate}
+                                {invalidated}
+                            </div>
+                        </td>
+                    </tr>
+                );
+            }.bind(this));
             return (
-                <tr key={file.full_path}>
-                    <td>
-                        <div>
-                            <span className="pathname">{file.full_path}</span><br/>
-                            <FilesMeta data={[file.readable.hits, file.readable.memory_consumption, file.last_used]} />
-                            {invalidate}
-                            {invalidated}
-                        </div>
-                    </td>
-                </tr>
+                <div>
+                    <FilesListed showing={this.state.showing}/>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Script</th>
+                        </tr>
+                        </thead>
+                        <tbody>{fileNodes}</tbody>
+                    </table>
+                </div>
             );
-        }.bind(this));
-        return (
-            <div>
-                <FilesListed showing={this.state.showing} />
-                <table>
-                    <thead><tr><th>Script</th></tr></thead>
-                    <tbody>{fileNodes}</tbody>
-                </table>
-            </div>
-        );
+        } else {
+            return <span></span>;
+        }
     }
 });
 

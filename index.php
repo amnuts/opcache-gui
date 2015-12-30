@@ -6,7 +6,7 @@
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 2.1.1
+ * @version 2.2.0
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, http://acollington.mit-license.org/
  */
@@ -17,6 +17,7 @@
  */
 
 $options = [
+    'allow_filelist'   => true,  // show/hide the files tab
     'allow_invalidate' => true,  // give a link to invalidate files
     'allow_reset'      => true,  // give option to reset the whole cache
     'allow_realtime'   => true,  // give option to enable/disable real-time updates
@@ -39,6 +40,7 @@ class OpCacheService
     protected $data;
     protected $options;
     protected $defaults = [
+        'allow_filelist'   => true,
         'allow_invalidate' => true,
         'allow_reset'      => true,
         'allow_realtime'   => true,
@@ -142,7 +144,7 @@ class OpCacheService
         $config = opcache_get_configuration();
 
         $files = [];
-        if (!empty($status['scripts'])) {
+        if (!empty($status['scripts']) && $this->getOption('allow_filelist')) {
             uasort($status['scripts'], function($a, $b) {
                 return $a['hits'] < $b['hits'];
             });
@@ -313,7 +315,9 @@ $opcache = OpCacheService::init($options);
     <nav>
         <ul>
             <li><a data-for="overview" href="#overview" class="active">Overview</a></li>
+            <?php if ($opcache->getOption('allow_filelist')): ?>
             <li><a data-for="files" href="#files">File usage</a></li>
+            <?php endif; ?>
             <?php if ($opcache->getOption('allow_reset')): ?>
             <li><a href="?reset=1" id="resetCache" onclick="return confirm('Are you sure you want to reset the cache?');">Reset cache</a></li>
             <?php endif; ?>
@@ -348,7 +352,9 @@ $opcache = OpCacheService::init($options);
         </div>
     </div>
     <div id="files">
+        <?php if ($opcache->getOption('allow_filelist')): ?>
         <p><label>Start typing to filter on script path<br/><input type="text" name="filter" id="frmFilter" /><label></p>
+        <?php endif; ?>
         <div class="container" id="filelist"></div>
     </div>
 </div>
@@ -362,8 +368,9 @@ $opcache = OpCacheService::init($options);
     var opstate = <?php echo json_encode($opcache->getData()); ?>;
     var canInvalidate = <?php echo ($opcache->canInvalidate() ? 'true' : 'false'); ?>;
     var useCharts = <?php echo ($opcache->getOption('charts') ? 'true' : 'false'); ?>;
+    var allowFiles = <?php echo ($opcache->getOption('allow_filelist') ? 'true' : 'false'); ?>;
 
-<?php if ($opcache->getOption('charts')): ?>
+    <?php if ($opcache->getOption('charts')): ?>
     var Gauge = function(el, colour) {
         this.canvas  = $(el).get(0);
         this.ctx     = this.canvas.getContext('2d');
@@ -480,7 +487,7 @@ $opcache = OpCacheService::init($options);
         });
     });
 
-    var MemoryUsage = React.createClass({displayName: "MemoryUsage",
+    var MemoryUsage = React.createClass({displayName: 'MemoryUsage',
         componentDidMount: function() {
             if (this.props.chart) {
                 this.props.memoryUsageGauge = new Gauge('#memoryUsageCanvas');
@@ -494,13 +501,13 @@ $opcache = OpCacheService::init($options);
         },
         render: function() {
             if (this.props.chart == true) {
-                return(React.createElement("canvas", {id: "memoryUsageCanvas", width: "250", height: "250", "data-value": this.props.value}));
+                return(React.createElement("canvas", {id: "memoryUsageCanvas", width: "250", height: "250", 'data-value': this.props.value}));
             }
             return(React.createElement("p", null, React.createElement("span", {className: "large"}, this.props.value), React.createElement("span", null, "%")));
         }
     });
 
-    var HitRate = React.createClass({displayName: "HitRate",
+    var HitRate = React.createClass({displayName: 'HitRate',
         componentDidMount: function() {
             if (this.props.chart) {
                 this.props.hitRateGauge = new Gauge('#hitRateCanvas');
@@ -514,13 +521,13 @@ $opcache = OpCacheService::init($options);
         },
         render: function() {
             if (this.props.chart == true) {
-                return(React.createElement("canvas", {id: "hitRateCanvas", width: "250", height: "250", "data-value": this.props.value}));
+                return(React.createElement("canvas", {id: "hitRateCanvas", width: "250", height: "250", 'data-value': this.props.value}));
             }
             return(React.createElement("p", null, React.createElement("span", {className: "large"}, this.props.value), React.createElement("span", null, "%")));
         }
     });
 
-    var OverviewCounts = React.createClass({displayName: "OverviewCounts",
+    var OverviewCounts = React.createClass({displayName: 'OverviewCounts',
         getInitialState: function() {
             return {
                 data  : opstate.overview,
@@ -555,7 +562,7 @@ $opcache = OpCacheService::init($options);
         }
     });
 
-    var GeneralInfo = React.createClass({displayName: "GeneralInfo",
+    var GeneralInfo = React.createClass({displayName: 'GeneralInfo',
         getInitialState: function() {
             return {
                 version : opstate.version,
@@ -582,7 +589,7 @@ $opcache = OpCacheService::init($options);
         }
     });
 
-    var Directives = React.createClass({displayName: "Directives",
+    var Directives = React.createClass({displayName: 'Directives',
         getInitialState: function() {
             return { data : opstate.directives };
         },
@@ -619,11 +626,12 @@ $opcache = OpCacheService::init($options);
         }
     });
 
-    var Files = React.createClass({displayName: "Files",
+    var Files = React.createClass({displayName: 'Files',
         getInitialState: function() {
             return {
                 data : opstate.files,
-                showing: null
+                showing: null,
+                allowFiles: allowFiles
             };
         },
         handleInvalidate: function(e) {
@@ -637,41 +645,49 @@ $opcache = OpCacheService::init($options);
             }
         },
         render: function() {
-            var fileNodes = this.state.data.map(function(file) {
-                var invalidate, invalidated;
-                if (file.timestamp == 0) {
-                    invalidated = React.createElement("span", null, React.createElement("i", {className: "invalid metainfo"}, "has been invalidated"));
-                }
-                if (canInvalidate) {
-                    invalidate = React.createElement("span", null, ", ", React.createElement("a", {className: "metainfo", href: '?invalidate='
-                    + file.full_path, "data-file": file.full_path, onClick: this.handleInvalidate}, "force file invalidation"));
-                }
-                return (
-                    React.createElement("tr", {key: file.full_path},
-                        React.createElement("td", null,
-                            React.createElement("div", null,
-                                React.createElement("span", {className: "pathname"}, file.full_path), React.createElement("br", null),
-                                React.createElement(FilesMeta, {data: [file.readable.hits, file.readable.memory_consumption, file.last_used]}),
-                                invalidate,
-                                invalidated
+            if (this.state.allowFiles) {
+                var fileNodes = this.state.data.map(function(file) {
+                    var invalidate, invalidated;
+                    if (file.timestamp == 0) {
+                        invalidated = React.createElement("span", null, React.createElement("i", {className: "invalid metainfo"}, "has been invalidated"));
+                    }
+                    if (canInvalidate) {
+                        invalidate = React.createElement("span", null, ", ", React.createElement("a", {className: "metainfo", href: '?invalidate='
+                        + file.full_path, 'data-file': file.full_path, onClick: this.handleInvalidate}, "force file invalidation"));
+                    }
+                    return (
+                        React.createElement("tr", {key: file.full_path},
+                            React.createElement("td", null,
+                                React.createElement("div", null,
+                                    React.createElement("span", {className: "pathname"}, file.full_path), React.createElement("br", null),
+                                    React.createElement(FilesMeta, {data: [file.readable.hits, file.readable.memory_consumption, file.last_used]}),
+                                    invalidate,
+                                    invalidated
+                                )
                             )
+                        )
+                    );
+                }.bind(this));
+                return (
+                    React.createElement("div", null,
+                        React.createElement(FilesListed, {showing: this.state.showing}),
+                        React.createElement("table", null,
+                            React.createElement("thead", null,
+                                React.createElement("tr", null,
+                                    React.createElement("th", null, "Script")
+                                )
+                            ),
+                            React.createElement("tbody", null, fileNodes)
                         )
                     )
                 );
-            }.bind(this));
-            return (
-                React.createElement("div", null,
-                    React.createElement(FilesListed, {showing: this.state.showing}),
-                    React.createElement("table", null,
-                        React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", null, "Script"))),
-                        React.createElement("tbody", null, fileNodes)
-                    )
-                )
-            );
+            } else {
+                return React.createElement("span", null);
+            }
         }
     });
 
-    var FilesMeta = React.createClass({displayName: "FilesMeta",
+    var FilesMeta = React.createClass({displayName: 'FilesMeta',
         render: function() {
             return (
                 React.createElement("span", {className: "metainfo"},
@@ -683,7 +699,7 @@ $opcache = OpCacheService::init($options);
         }
     });
 
-    var FilesListed = React.createClass({displayName: "FilesListed",
+    var FilesListed = React.createClass({displayName: 'FilesListed',
         getInitialState: function() {
             return {
                 formatted : opstate.overview.readable.num_cached_scripts,
