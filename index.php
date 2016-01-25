@@ -366,9 +366,9 @@ $opcache = OpCacheService::init($options);
 <script type="text/javascript">
     var realtime = false;
     var opstate = <?php echo json_encode($opcache->getData()); ?>;
-    var canInvalidate = <?php echo ($opcache->canInvalidate() ? 'true' : 'false'); ?>;
-    var useCharts = <?php echo ($opcache->getOption('charts') ? 'true' : 'false'); ?>;
-    var allowFiles = <?php echo ($opcache->getOption('allow_filelist') ? 'true' : 'false'); ?>;
+    var canInvalidate = <?php echo json_encode($opcache->canInvalidate()); ?>;
+    var useCharts = <?php echo json_encode($opcache->getOption('charts')); ?>;
+    var allowFiles = <?php echo json_encode($opcache->getOption('allow_filelist')); ?>;
 
     <?php if ($opcache->getOption('charts')): ?>
     var Gauge = function(el, colour) {
