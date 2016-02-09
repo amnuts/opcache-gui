@@ -1,13 +1,18 @@
 var MemoryUsage = React.createClass({
+    getInitialState: function() {
+        return {
+            memoryUsageGauge : null
+        };
+    },
     componentDidMount: function() {
         if (this.props.chart) {
-            this.props.memoryUsageGauge = new Gauge('#memoryUsageCanvas');
-            this.props.memoryUsageGauge.setValue(this.props.value);
+            this.state.memoryUsageGauge = new Gauge('#memoryUsageCanvas');
+            this.state.memoryUsageGauge.setValue(this.props.value);
         }
     },
     componentDidUpdate: function() {
-        if (typeof this.props.memoryUsageGauge != 'undefined') {
-            this.props.memoryUsageGauge.setValue(this.props.value);
+        if (this.state.memoryUsageGauge != null) {
+            this.state.memoryUsageGauge.setValue(this.props.value);
         }
     },
     render: function() {
@@ -19,15 +24,20 @@ var MemoryUsage = React.createClass({
 });
 
 var HitRate = React.createClass({
+    getInitialState: function() {
+        return {
+            hitRateGauge : null
+        };
+    },
     componentDidMount: function() {
         if (this.props.chart) {
-            this.props.hitRateGauge = new Gauge('#hitRateCanvas');
-            this.props.hitRateGauge.setValue(this.props.value)
+            this.state.hitRateGauge = new Gauge('#hitRateCanvas');
+            this.state.hitRateGauge.setValue(this.props.value)
         }
     },
     componentDidUpdate: function() {
-        if (typeof this.props.hitRateGauge != 'undefined') {
-            this.props.hitRateGauge.setValue(this.props.value);
+        if (this.state.hitRateGauge != null) {
+            this.state.hitRateGauge.setValue(this.props.value);
         }
     },
     render: function() {
