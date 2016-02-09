@@ -132,9 +132,7 @@ class OpCacheService
             ++$i;
         }
         return sprintf('%.'.$this->getOption('size_precision').'f%s%s',
-            number_format($size),
-            ($this->getOption('size_space') ? ' ' : ''),
-            $val[$i]
+            $size, ($this->getOption('size_space') ? ' ' : ''), $val[$i]
         );
     }
 
