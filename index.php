@@ -661,7 +661,7 @@ $opcache = OpCacheService::init($options);
                 var fileNodes = this.state.data.map(function(file) {
                     var invalidate, invalidated;
                     if (file.timestamp == 0) {
-                        invalidated = React.createElement("span", null, React.createElement("i", {className: "invalid metainfo"}, "has been invalidated"));
+                        invalidated = React.createElement("span", null, React.createElement("i", {className: "invalid metainfo"}, " - has been invalidated"));
                     }
                     if (canInvalidate) {
                         invalidate = React.createElement("span", null, ", ", React.createElement("a", {className: "metainfo", href: '?invalidate='

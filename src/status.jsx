@@ -170,7 +170,7 @@ var Files = React.createClass({
             var fileNodes = this.state.data.map(function(file) {
                 var invalidate, invalidated;
                 if (file.timestamp == 0) {
-                    invalidated = <span><i className="invalid metainfo">has been invalidated</i></span>;
+                    invalidated = <span><i className="invalid metainfo"> - has been invalidated</i></span>;
                 }
                 if (canInvalidate) {
                     invalidate = <span>,&nbsp;<a className="metainfo" href={'?invalidate='
