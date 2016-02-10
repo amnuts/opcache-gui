@@ -72,8 +72,12 @@ class OpCacheService
             exit;
         } else if (isset($_GET['reset']) && $self->getOption('allow_reset')) {
             $self->resetCache();
+            header('Location: ?');
+            exit;
         } else if (isset($_GET['invalidate']) && $self->getOption('allow_invalidate')) {
             $self->resetCache($_GET['invalidate']);
+            header('Location: ?');
+            exit;
         }
         return $self;
     }
