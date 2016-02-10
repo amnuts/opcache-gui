@@ -6,6 +6,8 @@ A clean and responsive interface for Zend OPcache information, showing statistic
 
 ## What's new
 
+Version 2.2.1 has the gauges now updating with the real-time pulse and a couple rounding issues fixed
+
 Version 2.2.0 provides the ability to turn on/off the file list (default is on)
 
 Version 2.1.0 now provides a much easier way to configure some options, be it the poll time, toggling the ability to reset the cache, real-time updates, etc. It also allows you to show the big values (memory usage and hit rate) as gauge graphs instead of big numbers.
