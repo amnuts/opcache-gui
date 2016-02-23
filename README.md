@@ -6,6 +6,8 @@ A clean and responsive interface for Zend OPcache information, showing statistic
 
 ## What's new
 
+Version 2.2.2 brings in optimisations for the file listing when filtering
+
 Version 2.2.1 has the gauges now updating with the real-time pulse and a couple rounding issues fixed
 
 Version 2.2.0 provides the ability to turn on/off the file list (default is on)
