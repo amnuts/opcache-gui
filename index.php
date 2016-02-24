@@ -24,7 +24,8 @@ $options = [
     'refresh_time'     => 5,     // how often the data will refresh, in seconds
     'size_precision'   => 2,     // Digits after decimal point
     'size_space'       => false, // have '1MB' or '1 MB' when showing sizes
-    'charts'           => true   // show gauge chart or just big numbers
+    'charts'           => true,  // show gauge chart or just big numbers
+    'debounce_rate'    => 250    // milliseconds after key press to send keyup event when filtering
 ];
 
 /*
@@ -47,7 +48,8 @@ class OpCacheService
         'refresh_time'     => 5,
         'size_precision'   => 2,
         'size_space'       => false,
-        'charts'           => true
+        'charts'           => true,
+        'debounce_rate'    => 250
     ];
 
     private function __construct($options = [])
@@ -509,7 +511,7 @@ $opcache = OpCacheService::init($options);
             trs.filter(':not(.hide):odd').addClass('alternate');
             filesObj.setState({showing: trs.filter(':not(.hide)').length});
         });
-        $('#frmFilter').bind('keyup', debounce(keyUp));
+        $('#frmFilter').bind('keyup', debounce(keyUp, <?php echo $opcache->getOption('debounce_rate'); ?>));
     });
 
     var MemoryUsage = React.createClass({displayName: "MemoryUsage",
