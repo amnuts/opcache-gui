@@ -236,7 +236,7 @@ var FilesListed = React.createClass({
     }
 });
 
-var overviewCountsObj = React.render(<OverviewCounts/>, document.getElementById('counts'));
-var generalInfoObj = React.render(<GeneralInfo/>, document.getElementById('generalInfo'));
-var filesObj = React.render(<Files/>, document.getElementById('filelist'));
-React.render(<Directives/>, document.getElementById('directives'));
+var overviewCountsObj = ReactDOM.render(<OverviewCounts/>, document.getElementById('counts'));
+var generalInfoObj = ReactDOM.render(<GeneralInfo/>, document.getElementById('generalInfo'));
+var filesObj = ReactDOM.render(<Files/>, document.getElementById('filelist'));
+ReactDOM.render(<Directives/>, document.getElementById('directives'));

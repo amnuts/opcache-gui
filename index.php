@@ -232,8 +232,9 @@ $opcache = OpCacheService::init($options);
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>OPcache statistics on <?php echo $opcache->getData('version', 'host'); ?></title>
-    <script src="//cdn.jsdelivr.net/react/0.13.2/react.min.js"></script>
-    <script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script src="//cdn.jsdelivr.net/react/15.0.1/react.min.js"></script>
+    <script src="//cdn.jsdelivr.net/react/15.0.1/react-dom.min.js"></script>
+    <script src="//code.jquery.com/jquery-2.2.3.min.js"></script>
     <style type="text/css">
         body { font-family:sans-serif; font-size:90%; padding: 0; margin: 0 }
         nav { padding-top: 20px; }
@@ -752,10 +753,10 @@ $opcache = OpCacheService::init($options);
         }
     });
 
-    var overviewCountsObj = React.render(React.createElement(OverviewCounts, null), document.getElementById('counts'));
-    var generalInfoObj = React.render(React.createElement(GeneralInfo, null), document.getElementById('generalInfo'));
-    var filesObj = React.render(React.createElement(Files, null), document.getElementById('filelist'));
-    React.render(React.createElement(Directives, null), document.getElementById('directives'));
+    var overviewCountsObj = ReactDOM.render(React.createElement(OverviewCounts, null), document.getElementById('counts'));
+    var generalInfoObj = ReactDOM.render(React.createElement(GeneralInfo, null), document.getElementById('generalInfo'));
+    var filesObj = ReactDOM.render(React.createElement(Files, null), document.getElementById('filelist'));
+    ReactDOM.render(React.createElement(Directives, null), document.getElementById('directives'));
 </script>
 
 </body>
