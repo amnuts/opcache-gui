@@ -167,7 +167,7 @@ var Files = React.createClass({
     },
     render: function() {
         if (this.state.allowFiles) {
-            var fileNodes = this.state.data.map(function(file) {
+            var fileNodes = this.state.data.map(function(file, i) {
                 var invalidate, invalidated;
                 if (file.timestamp == 0) {
                     invalidated = <span><i className="invalid metainfo"> - has been invalidated</i></span>;
@@ -177,7 +177,7 @@ var Files = React.createClass({
                         + file.full_path} data-file={file.full_path} onClick={this.handleInvalidate}>force file invalidation</a></span>;
                 }
                 return (
-                    <tr key={file.full_path}>
+                    <tr key={file.full_path} data-path={file.full_path.toLowerCase()} className={i%2?'alternate':''}>
                         <td>
                             <div>
                                 <span className="pathname">{file.full_path}</span><br/>
@@ -236,7 +236,7 @@ var FilesListed = React.createClass({
     }
 });
 
-var overviewCountsObj = React.render(<OverviewCounts/>, document.getElementById('counts'));
-var generalInfoObj = React.render(<GeneralInfo/>, document.getElementById('generalInfo'));
-var filesObj = React.render(<Files/>, document.getElementById('filelist'));
-React.render(<Directives/>, document.getElementById('directives'));
+var overviewCountsObj = ReactDOM.render(<OverviewCounts/>, document.getElementById('counts'));
+var generalInfoObj = ReactDOM.render(<GeneralInfo/>, document.getElementById('generalInfo'));
+var filesObj = ReactDOM.render(<Files/>, document.getElementById('filelist'));
+ReactDOM.render(<Directives/>, document.getElementById('directives'));
