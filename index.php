@@ -6,7 +6,7 @@
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 2.2.2
+ * @version 2.2.3
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, http://acollington.mit-license.org/
  */
@@ -269,8 +269,8 @@ $opcache = OpCacheService::init($options);
         #counts > div > div { background-color: #ededed; margin-bottom: 10px; }
         #counts > div > div > h3 { background-color: #cdcdcd; padding: 4px 6px; margin: 0; text-align: center; }
         #counts > div > div > p { margin: 0; text-align: center; }
-        #counts > div > div > p > span.large + span { font-size: 20pt; margin: 0; }
-        #counts > div > div > p > span.large { font-size: 80pt; margin: 0; padding: 0; text-align: center; }
+        #counts > div > div > p span.large + span { font-size: 20pt; margin: 0; color: #6ca6ef; }
+        #counts > div > div > p span.large { color: #6ca6ef; font-size: 80pt; margin: 0; padding: 0; text-align: center; }
         #info { margin-right: 280px; }
         #frmFilter { width: 520px; }
         #moreinfo { padding: 10px; }
