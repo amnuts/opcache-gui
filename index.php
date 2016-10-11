@@ -640,7 +640,7 @@ $opcache = OpCacheService::init($options);
                 var vShow;
                 if (directive.v === true || directive.v === false) {
                     vShow = React.createElement('i', {}, directive.v.toString());
-                } else if (directive.v == '') {
+                } else if (directive.v === '') {
                     vShow = React.createElement('i', {}, 'no value');
                 } else {
                     vShow = directive.v;
