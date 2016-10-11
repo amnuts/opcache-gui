@@ -180,10 +180,10 @@ class OpCacheService
                     'blacklist_miss'     => number_format($status['opcache_statistics']['blacklist_misses']),
                     'num_cached_keys'    => number_format($status['opcache_statistics']['num_cached_keys']),
                     'max_cached_keys'    => number_format($status['opcache_statistics']['max_cached_keys']),
-                    'start_time'         => date_format(date_create("@{$status['opcache_statistics']['start_time']}"), 'Y-m-d H:i:s'),
+                    'start_time'         => date('Y-m-d H:i:s', $status['opcache_statistics']['start_time']),
                     'last_restart_time'  => ($status['opcache_statistics']['last_restart_time'] == 0
                             ? 'never'
-                            : date_format(date_create("@{$status['opcache_statistics']['last_restart_time']}"), 'Y-m-d H:i:s')
+                            : date('Y-m-d H:i:s', $status['opcache_statistics']['last_restart_time'])
                         )
                 ]
             ]
