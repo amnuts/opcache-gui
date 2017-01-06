@@ -6,7 +6,7 @@
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 2.2.2
+ * @version 2.2.3
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, http://acollington.mit-license.org/
  */
@@ -180,10 +180,10 @@ class OpCacheService
                     'blacklist_miss'     => number_format($status['opcache_statistics']['blacklist_misses']),
                     'num_cached_keys'    => number_format($status['opcache_statistics']['num_cached_keys']),
                     'max_cached_keys'    => number_format($status['opcache_statistics']['max_cached_keys']),
-                    'start_time'         => date_format(date_create("@{$status['opcache_statistics']['start_time']}"), 'Y-m-d H:i:s'),
+                    'start_time'         => date('Y-m-d H:i:s', $status['opcache_statistics']['start_time']),
                     'last_restart_time'  => ($status['opcache_statistics']['last_restart_time'] == 0
                             ? 'never'
-                            : date_format(date_create("@{$status['opcache_statistics']['last_restart_time']}"), 'Y-m-d H:i:s')
+                            : date('Y-m-d H:i:s', $status['opcache_statistics']['last_restart_time'])
                         )
                 ]
             ]
@@ -269,8 +269,8 @@ $opcache = OpCacheService::init($options);
         #counts > div > div { background-color: #ededed; margin-bottom: 10px; }
         #counts > div > div > h3 { background-color: #cdcdcd; padding: 4px 6px; margin: 0; text-align: center; }
         #counts > div > div > p { margin: 0; text-align: center; }
-        #counts > div > div > p > span.large + span { font-size: 20pt; margin: 0; }
-        #counts > div > div > p > span.large { font-size: 80pt; margin: 0; padding: 0; text-align: center; }
+        #counts > div > div > p span.large + span { font-size: 20pt; margin: 0; color: #6ca6ef; }
+        #counts > div > div > p span.large { color: #6ca6ef; font-size: 80pt; margin: 0; padding: 0; text-align: center; }
         #info { margin-right: 280px; }
         #frmFilter { width: 520px; }
         #moreinfo { padding: 10px; }
@@ -640,7 +640,7 @@ $opcache = OpCacheService::init($options);
                 var vShow;
                 if (directive.v === true || directive.v === false) {
                     vShow = React.createElement('i', {}, directive.v.toString());
-                } else if (directive.v == '') {
+                } else if (directive.v === '') {
                     vShow = React.createElement('i', {}, 'no value');
                 } else {
                     vShow = directive.v;
