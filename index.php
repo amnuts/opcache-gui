@@ -230,15 +230,15 @@ class OpCacheService
 $opcache = OpCacheService::init($options);
 
 ?>
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8"/>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>OPcache statistics on <?php echo $opcache->getData('version', 'host'); ?></title>
-    <script src="//cdn.jsdelivr.net/react/15.0.1/react.min.js"></script>
-    <script src="//cdn.jsdelivr.net/react/15.0.1/react-dom.min.js"></script>
-    <script src="//code.jquery.com/jquery-2.2.3.min.js"></script>
+    <script src="//cdn.jsdelivr.net/react/15.4.2/react.min.js"></script>
+    <script src="//cdn.jsdelivr.net/react/15.4.2/react-dom.min.js"></script>
+    <script src="//cdn.jsdelivr.net/jquery/3.1.1/jquery.min.js"></script>
     <style type="text/css">
         body { font-family:sans-serif; font-size:90%; padding: 0; margin: 0 }
         nav { padding-top: 20px; }
@@ -252,7 +252,7 @@ $opcache = OpCacheService::init($options);
         table caption { text-align: left; font-size: 1.5em; }
         table tr { background-color: #99D0DF; border-color: #fff; }
         table th { text-align: left; padding: 6px; background-color: #6ca6ef; color: #fff; border-color: #fff; font-weight: normal; }
-        table td { padding: 4px 6px; line-height: 1.4em; vertical-align: top; border-color: #fff; }
+        table td { padding: 4px 6px; line-height: 1.4em; vertical-align: top; border-color: #fff; overflow: hidden; overflow-wrap: break-word; text-overflow: ellipsis;}
         table tr:nth-child(odd) { background-color: #EFFEFF; }
         table tr:nth-child(even) { background-color: #E0ECEF; }
         #filelist table tr { background-color: #EFFEFF; }
@@ -261,7 +261,7 @@ $opcache = OpCacheService::init($options);
         footer { border-top: 1px solid #ccc; padding: 1em 2em; }
         footer a { padding: 2em; text-decoration: none; opacity: 0.7; }
         footer a:hover { opacity: 1; }
-        canvas { display: block; width: 250px; height: 250px; margin: 0 auto; }
+        canvas { display: block; max-width: 100%; height: auto; margin: 0 auto; }
         #tabs { padding: 2em; }
         #tabs > div { display: none; }
         #tabs > div#overview { display:block; }
@@ -364,7 +364,10 @@ $opcache = OpCacheService::init($options);
     </div>
     <div id="files">
         <?php if ($opcache->getOption('allow_filelist')): ?>
-        <p><label>Start typing to filter on script path<br/><input type="text" name="filter" id="frmFilter" /><label></p>
+        <form action="#">
+            <label for="frmFilter">Start typing to filter on script path</label><br>
+            <input type="text" name="filter" id="frmFilter">
+        </form>
         <?php endif; ?>
         <div class="container" id="filelist"></div>
     </div>
