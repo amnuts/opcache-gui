@@ -23,6 +23,11 @@
   "require": {
     "ext-Zend-OPcache": "*",
     "php": ">=5.4"
+  },
+  "autoload": {
+    "psr-4" : {
+      "OpcacheGui\\" : "/"
+    }
   }
 }
 
