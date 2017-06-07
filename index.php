@@ -38,7 +38,8 @@ if (!extension_loaded('Zend OPcache')) {
     die('The Zend OPcache extension does not appear to be installed');
 }
 
-if (empty(ini_get('opcache.enable'))) {
+$ocEnabled = ini_get('opcache.enable');
+if (empty($ocEnabled)) {
     die('The Zend OPcache extension is installed but not turned on');
 }
 
