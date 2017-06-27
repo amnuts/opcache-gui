@@ -187,6 +187,10 @@ class OpCacheService
                     'blacklist_miss'     => number_format($status['opcache_statistics']['blacklist_misses']),
                     'num_cached_keys'    => number_format($status['opcache_statistics']['num_cached_keys']),
                     'max_cached_keys'    => number_format($status['opcache_statistics']['max_cached_keys']),
+                    'buffer_size'        => $this->size($status['interned_strings_usage']['buffer_size']),
+                    'strings_used_memory'=> $this->size($status['interned_strings_usage']['used_memory']),
+                    'strings_free_memory'=> $this->size($status['interned_strings_usage']['free_memory']),
+                    'number_of_strings'  => number_format($status['interned_strings_usage']['number_of_strings']),
                     'start_time'         => date('Y-m-d H:i:s', $status['opcache_statistics']['start_time']),
                     'last_restart_time'  => ($status['opcache_statistics']['last_restart_time'] == 0
                             ? 'never'
@@ -594,16 +598,23 @@ $opcache = OpCacheService::init($options);
                         React.createElement("p", null, React.createElement(HitRate, {chart: this.state.chart, value: this.state.data.hit_rate_percentage}))
                     ),
                     React.createElement("div", {id: "moreinfo"},
+                        React.createElement("h3", null, "memory usage"),
                         React.createElement("p", null, React.createElement("b", null, "total memory:"), " ", this.state.data.readable.total_memory),
                         React.createElement("p", null, React.createElement("b", null, "used memory:"), " ", this.state.data.readable.used_memory),
                         React.createElement("p", null, React.createElement("b", null, "free memory:"), " ", this.state.data.readable.free_memory),
                         React.createElement("p", null, React.createElement("b", null, "wasted memory:"), " ", this.state.data.readable.wasted_memory, " (", this.state.data.wasted_percentage, "%)"),
+                        React.createElement("h3", null, "opcache statistics"),
                         React.createElement("p", null, React.createElement("b", null, "number of cached files:"), " ", this.state.data.readable.num_cached_scripts),
                         React.createElement("p", null, React.createElement("b", null, "number of hits:"), " ", this.state.data.readable.hits),
                         React.createElement("p", null, React.createElement("b", null, "number of misses:"), " ", this.state.data.readable.misses),
                         React.createElement("p", null, React.createElement("b", null, "blacklist misses:"), " ", this.state.data.readable.blacklist_miss),
                         React.createElement("p", null, React.createElement("b", null, "number of cached keys:"), " ", this.state.data.readable.num_cached_keys),
-                        React.createElement("p", null, React.createElement("b", null, "max cached keys:"), " ", this.state.data.readable.max_cached_keys)
+                        React.createElement("p", null, React.createElement("b", null, "max cached keys:"), " ", this.state.data.readable.max_cached_keys),
+                        React.createElement("h3", null, "interned strings usage"),
+                        React.createElement("p", null, React.createElement("b", null, "buffer size:"), " ", this.state.data.readable.buffer_size),
+                        React.createElement("p", null, React.createElement("b", null, "used memory:"), " ", this.state.data.readable.strings_used_memory),
+                        React.createElement("p", null, React.createElement("b", null, "free memory:"), " ", this.state.data.readable.strings_free_memory),
+                        React.createElement("p", null, React.createElement("b", null, "number of strings:"), " ", this.state.data.readable.number_of_strings)
                     )
                 )
             );
