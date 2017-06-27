@@ -6,21 +6,29 @@ A clean and responsive interface for Zend OPcache information, showing statistic
 
 ## What's new
 
-Version 2.2.2 brings in optimisations for the file listing when filtering
+**Version 2.3.0**\
+Adds information for interned strings and PHP 5.4 compatibility
 
-Version 2.2.1 has the gauges now updating with the real-time pulse and a couple rounding issues fixed
+**Version 2.2.2**\
+Brings in optimisations for the file listing when filtering
 
-Version 2.2.0 provides the ability to turn on/off the file list (default is on)
+**Version 2.2.1**\
+Has the gauges now updating with the real-time pulse and a couple rounding issues fixed
 
-Version 2.1.0 now provides a much easier way to configure some options, be it the poll time, toggling the ability to reset the cache, real-time updates, etc. It also allows you to show the big values (memory usage and hit rate) as gauge graphs instead of big numbers.
+**Version 2.2.0**\
+Provides the ability to turn on/off the file list (default is on)
 
-Version 2.0.0 introduces the use of React.js provides the ability to seamlessly update more of the information in real-time (well, every five seconds by default) - so now the files as well as the overview get refreshed. There is an updated look, removing the gradients and going for a flatter feel. And the code in general has had an overhaul.
+**Version 2.1.0**\
+Now provides a much easier way to configure some options, be it the poll time, toggling the ability to reset the cache, real-time updates, etc. It also allows you to show the big values (memory usage and hit rate) as gauge graphs instead of big numbers.
+
+**Version 2.0.0**\
+Introduces the use of React.js provides the ability to seamlessly update more of the information in real-time (well, every five seconds by default) - so now the files as well as the overview get refreshed. There is an updated look, removing the gradients and going for a flatter feel. And the code in general has had an overhaul.
 
 ### Overview
 
 The overview will show you all the core information.  From here you'll be able to see what host and platform you're running on, what version of OPcache you're using, when it was last reset, the functions that are available, all the directives and all the statistics associated with the OPcache (number of hits, memory used, free and wasted memory, etc.)
 
-![Overview](http://amnuts.com/images/opcache/screenshot/overview-v2.1.1.png)
+![Overview](http://amnuts.com/images/opcache/screenshot/overview-v2.3.0.png)
 
 ### Getting started
 
