@@ -67,16 +67,23 @@ var OverviewCounts = React.createClass({
                     <p><HitRate chart={this.state.chart} value={this.state.data.hit_rate_percentage} /></p>
                 </div>
                 <div id="moreinfo">
+                    <h3>memory usage</h3>
                     <p><b>total memory:</b> {this.state.data.readable.total_memory}</p>
                     <p><b>used memory:</b> {this.state.data.readable.used_memory}</p>
                     <p><b>free memory:</b> {this.state.data.readable.free_memory}</p>
                     <p><b>wasted memory:</b> {this.state.data.readable.wasted_memory} ({this.state.data.wasted_percentage}%)</p>
+                    <h3>opcache statistics</h3>
                     <p><b>number of cached files:</b> {this.state.data.readable.num_cached_scripts}</p>
                     <p><b>number of hits:</b> {this.state.data.readable.hits}</p>
                     <p><b>number of misses:</b> {this.state.data.readable.misses}</p>
                     <p><b>blacklist misses:</b> {this.state.data.readable.blacklist_miss}</p>
                     <p><b>number of cached keys:</b> {this.state.data.readable.num_cached_keys}</p>
                     <p><b>max cached keys:</b> {this.state.data.readable.max_cached_keys}</p>
+                    <h3>interned strings usage</h3>
+                    <p><b>buffer size:</b> {this.state.data.readable.buffer_size}</p>
+                    <p><b>used memory:</b> {this.state.data.readable.strings_used_memory}</p>
+                    <p><b>free memory:</b> {this.state.data.readable.strings_free_memory}</p>
+                    <p><b>number of strings:</b> {this.state.data.readable.number_of_strings}</p>
                 </div>
             </div>
         );
