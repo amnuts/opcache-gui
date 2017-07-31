@@ -1,4 +1,4 @@
-var MemoryUsage = React.createClass({
+var MemoryUsageGraph = React.createClass({
     getInitialState: function() {
         return {
             memoryUsageGauge : null
@@ -23,7 +23,7 @@ var MemoryUsage = React.createClass({
     }
 });
 
-var HitRate = React.createClass({
+var HitRateGraph = React.createClass({
     getInitialState: function() {
         return {
             hitRateGauge : null
@@ -48,6 +48,56 @@ var HitRate = React.createClass({
     }
 });
 
+var MemoryUsagePanel = React.createClass({
+    render: function() {
+        return (
+            <div className="moreinfo">
+                <h3>memory usage</h3>
+                <div>
+                    <p><b>total memory:</b> {this.props.total}</p>
+                    <p><b>used memory:</b> {this.props.used}</p>
+                    <p><b>free memory:</b> {this.props.free}</p>
+                    <p><b>wasted memory:</b> {this.props.wasted} ({this.props.wastedPercent}%)</p>
+                </div>
+            </div>
+        );
+    }
+});
+
+var StatisticsPanel = React.createClass({
+    render: function() {
+        return (
+            <div className="moreinfo">
+                <h3>opcache statistics</h3>
+                <div>
+                    <p><b>number of cached files:</b> {this.props.num_cached_scripts}</p>
+                    <p><b>number of hits:</b> {this.props.hits}</p>
+                    <p><b>number of misses:</b> {this.props.misses}</p>
+                    <p><b>blacklist misses:</b> {this.props.blacklist_miss}</p>
+                    <p><b>number of cached keys:</b> {this.props.num_cached_keys}</p>
+                    <p><b>max cached keys:</b> {this.props.max_cached_keys}</p>
+                </div>
+            </div>
+        );
+    }
+});
+
+var InternedStringsPanel = React.createClass({
+    render: function() {
+        return (
+            <div className="moreinfo">
+                <h3>interned strings usage</h3>
+                <div>
+                    <p><b>buffer size:</b> {this.props.buffer_size}</p>
+                    <p><b>used memory:</b> {this.props.strings_used_memory}</p>
+                    <p><b>free memory:</b> {this.props.strings_free_memory}</p>
+                    <p><b>number of strings:</b> {this.props.number_of_strings}</p>
+                </div>
+            </div>
+        );
+    }
+});
+
 var OverviewCounts = React.createClass({
     getInitialState: function() {
         return {
@@ -56,35 +106,41 @@ var OverviewCounts = React.createClass({
         };
     },
     render: function() {
+        var interned = (this.state.data.readable.interned != null 
+            ? <InternedStringsPanel
+                    buffer_size={this.state.data.readable.interned.buffer_size}
+                    strings_used_memory={this.state.data.readable.interned.strings_used_memory}
+                    strings_free_memory={this.state.data.readable.interned.strings_free_memory}
+                    number_of_strings={this.state.data.readable.interned.number_of_strings}
+              /> 
+            : ''
+        );
         return (
             <div>
                 <div>
-                    <h3>memory usage</h3>
-                    <p><MemoryUsage chart={this.state.chart} value={this.state.data.used_memory_percentage} /></p>
+                    <h3>memory</h3>
+                    <p><MemoryUsageGraph chart={this.state.chart} value={this.state.data.used_memory_percentage} /></p>
                 </div>
                 <div>
                     <h3>hit rate</h3>
-                    <p><HitRate chart={this.state.chart} value={this.state.data.hit_rate_percentage} /></p>
+                    <p><HitRateGraph chart={this.state.chart} value={this.state.data.hit_rate_percentage} /></p>
                 </div>
-                <div id="moreinfo">
-                    <h3>memory usage</h3>
-                    <p><b>total memory:</b> {this.state.data.readable.total_memory}</p>
-                    <p><b>used memory:</b> {this.state.data.readable.used_memory}</p>
-                    <p><b>free memory:</b> {this.state.data.readable.free_memory}</p>
-                    <p><b>wasted memory:</b> {this.state.data.readable.wasted_memory} ({this.state.data.wasted_percentage}%)</p>
-                    <h3>opcache statistics</h3>
-                    <p><b>number of cached files:</b> {this.state.data.readable.num_cached_scripts}</p>
-                    <p><b>number of hits:</b> {this.state.data.readable.hits}</p>
-                    <p><b>number of misses:</b> {this.state.data.readable.misses}</p>
-                    <p><b>blacklist misses:</b> {this.state.data.readable.blacklist_miss}</p>
-                    <p><b>number of cached keys:</b> {this.state.data.readable.num_cached_keys}</p>
-                    <p><b>max cached keys:</b> {this.state.data.readable.max_cached_keys}</p>
-                    <h3>interned strings usage</h3>
-                    <p><b>buffer size:</b> {this.state.data.readable.buffer_size}</p>
-                    <p><b>used memory:</b> {this.state.data.readable.strings_used_memory}</p>
-                    <p><b>free memory:</b> {this.state.data.readable.strings_free_memory}</p>
-                    <p><b>number of strings:</b> {this.state.data.readable.number_of_strings}</p>
-                </div>
+                <MemoryUsagePanel
+                    total={this.state.data.readable.total_memory}
+                    used={this.state.data.readable.used_memory}
+                    free={this.state.data.readable.free_memory}
+                    wasted={this.state.data.readable.wasted_memory}
+                    wastedPercent={this.state.data.wasted_percentage}
+                />
+                <StatisticsPanel
+                    num_cached_scripts={this.state.data.readable.num_cached_scripts}
+                    hits={this.state.data.readable.hits}
+                    misses={this.state.data.readable.misses}
+                    blacklist_miss={this.state.data.readable.blacklist_miss}
+                    num_cached_keys={this.state.data.readable.num_cached_keys}
+                    max_cached_keys={this.state.data.readable.max_cached_keys}
+                />
+                {interned}
             </div>
         );
     }
