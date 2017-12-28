@@ -3,8 +3,12 @@
 A clean and responsive interface for Zend OPcache information, showing statistics, settings and cached files, and providing a real-time update for the information (using jQuery and React).
 
 [![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=acollington&url=https://github.com/amnuts/opcache-gui&title=opcache-gui&language=&tags=github&category=software)
+If you like this software or find it helpful then please consider [signing up to Flattr and leaving a micro-donation](https://flattr.com/@acollington).  If you don't want to do that, I hope you find it useful anyway! :-).
 
 ## What's new
+
+**Version 2.4.0**\
+Adds cookie store for the real-time state allowing real-time to be activated on load.  Cookie name and TTL length can be adjusted in the config
 
 **Version 2.3.0**\
 Adds information for interned strings and PHP 5.4 compatibility

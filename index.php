@@ -8,7 +8,7 @@ namespace OpcacheGui;
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 2.3.0
+ * @version 2.4.0
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, http://acollington.mit-license.org/
  */
@@ -19,15 +19,17 @@ namespace OpcacheGui;
  */
 
 $options = [
-    'allow_filelist'   => true,  // show/hide the files tab
-    'allow_invalidate' => true,  // give a link to invalidate files
-    'allow_reset'      => true,  // give option to reset the whole cache
-    'allow_realtime'   => true,  // give option to enable/disable real-time updates
-    'refresh_time'     => 5,     // how often the data will refresh, in seconds
-    'size_precision'   => 2,     // Digits after decimal point
-    'size_space'       => false, // have '1MB' or '1 MB' when showing sizes
-    'charts'           => true,  // show gauge chart or just big numbers
-    'debounce_rate'    => 250    // milliseconds after key press to send keyup event when filtering
+    'allow_filelist'   => true,          // show/hide the files tab
+    'allow_invalidate' => true,          // give a link to invalidate files
+    'allow_reset'      => true,          // give option to reset the whole cache
+    'allow_realtime'   => true,          // give option to enable/disable real-time updates
+    'refresh_time'     => 5,             // how often the data will refresh, in seconds
+    'size_precision'   => 2,             // Digits after decimal point
+    'size_space'       => false,         // have '1MB' or '1 MB' when showing sizes
+    'charts'           => true,          // show gauge chart or just big numbers
+    'debounce_rate'    => 250,           // milliseconds after key press to send keyup event when filtering
+    'cookie_name'      => 'opcachegui',  // name of cookie
+    'cookie_ttl'       => 365            // days to store cookie
 ];
 
 /*
@@ -56,7 +58,9 @@ class OpCacheService
         'size_precision'   => 2,
         'size_space'       => false,
         'charts'           => true,
-        'debounce_rate'    => 250
+        'debounce_rate'    => 250,
+        'cookie_name'      => 'opcachegui',
+        'cookie_ttl'       => 365
     ];
 
     private function __construct($options = [])
@@ -426,7 +430,6 @@ $opcache = OpCacheService::init($options);
         });
         $('#filelist table tbody').trigger('paint');
     };
-
     <?php if ($opcache->getOption('charts')): ?>
     var Gauge = function(el, colour) {
         this.canvas  = $(el).get(0);
@@ -482,6 +485,21 @@ $opcache = OpCacheService::init($options);
 
     $(function(){
         <?php if ($opcache->getOption('allow_realtime')): ?>
+        function setCookie() {
+            var d = new Date();
+            var secure = (window.location.protocol === 'https:' ? ';secure' : '');
+            d.setTime(d.getTime() + (<?php echo ($opcache->getOption('cookie_ttl')); ?> * 86400000));
+            var expires = "expires="+d.toUTCString();
+            document.cookie = "<?php echo ($opcache->getOption('cookie_name')); ?>=true;" + expires + ";path=/" + secure;
+        };
+        function removeCookie() {
+            var secure = (window.location.protocol === 'https:' ? ';secure' : '');
+            document.cookie = "<?php echo ($opcache->getOption('cookie_name')); ?>=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/" + secure;
+        };
+        function getCookie() {
+            var v = document.cookie.match('(^|;) ?<?php echo ($opcache->getOption('cookie_name')); ?>=([^;]*)(;|$)');
+            return v ? v[2] : null;
+        };
         function updateStatus() {
             $('#toggleRealtime').removeClass('pulse');
             $.ajax({
@@ -512,12 +530,18 @@ $opcache = OpCacheService::init($options);
             if (realtime === false) {
                 realtime = setInterval(function(){updateStatus()}, <?php echo (int)$opcache->getOption('refresh_time') * 1000; ?>);
                 $(this).text('Disable real-time update');
+                setCookie();
             } else {
                 clearInterval(realtime);
                 realtime = false;
                 $(this).text('Enable real-time update').removeClass('pulse');
+                removeCookie();
             }
         });
+        if (getCookie() == 'true') {
+            realtime = setInterval(function(){updateStatus()}, <?php echo (int)$opcache->getOption('refresh_time') * 1000; ?>);
+            $('#toggleRealtime').text('Disable real-time update');
+        }
         <?php endif; ?>
         $('nav a[data-for]').click(function(){
             $('#tabs > div').hide();
