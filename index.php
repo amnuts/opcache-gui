@@ -220,7 +220,7 @@ class OpCacheService
             $config['version'],
             [
                 'php'    => phpversion(),
-                'server' => empty($_SERVER['SERVER_SOFTWARE']) ? $_SERVER['SERVER_SOFTWARE'] : '',
+                'server' => empty($_SERVER['SERVER_SOFTWARE']) ? '' : $_SERVER['SERVER_SOFTWARE'],
                 'host'   => (function_exists('gethostname')
                     ? gethostname()
                     : (php_uname('n')
