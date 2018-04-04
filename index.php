@@ -12,7 +12,32 @@ namespace OpcacheGui;
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, http://acollington.mit-license.org/
  */
+define('USE_AUTHENTICATION', 0);
+define('USERNAME', 'opcache');
+define('PASSWORD', 'opcache');
 
+if ( USE_AUTHENTICATION == 1 ) {
+    if (!empty($_SERVER['AUTH_TYPE']) && !empty($_SERVER['REMOTE_USER']) && strcasecmp($_SERVER['REMOTE_USER'], 'anonymous'))
+    {
+        if (!in_array(strtolower($_SERVER['REMOTE_USER']), array_map('strtolower', $user_allowed))
+        && !in_array('all', array_map('strtolower', $user_allowed)))
+        {
+            echo 'You are not authorised to view this page. Please contact server admin to get permission. Exiting.';
+            exit;
+        }
+    }
+    else if ( !isset($_SERVER['PHP_AUTH_USER'] ) || !isset( $_SERVER['PHP_AUTH_PW'] ) ||
+              $_SERVER['PHP_AUTH_USER'] != USERNAME || $_SERVER['PHP_AUTH_PW'] != PASSWORD ) {
+        header( 'WWW-Authenticate: Basic realm="OPCACHE Log In!"' );
+        header( 'HTTP/1.0 401 Unauthorized' );
+        exit;
+    }
+    else if ( $_SERVER['PHP_AUTH_PW'] == 'opcache' )
+    {
+        echo "Please change the default password to get this page working. Exiting.";
+        exit;
+    }
+}
 
 /*
  * User configuration
@@ -200,7 +225,7 @@ class OpCacheService
                 ]
             ]
         );
-
+        
         if (!empty($status['interned_strings_usage'])) {
             $overview['readable']['interned'] = [
                 'buffer_size' => $this->size($status['interned_strings_usage']['buffer_size']),
