@@ -12,7 +12,7 @@ namespace OpcacheGui;
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, http://acollington.mit-license.org/
  */
-define('USE_AUTHENTICATION', 1);
+define('USE_AUTHENTICATION', 0);
 define('USERNAME', 'opcache');
 define('PASSWORD', 'opcache');
 
