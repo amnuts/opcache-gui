@@ -157,6 +157,10 @@ class OpCacheService
     {
         $status = opcache_get_status();
         $config = opcache_get_configuration();
+        $missingConfig = array_diff_key(ini_get_all('zend opcache', false), $config['directives']);
+        if (!empty($missingConfig)) {
+            $config['directives'] = array_merge($config['directives'], $missingConfig);
+        }
 
         $files = [];
         if (!empty($status['scripts']) && $this->getOption('allow_filelist')) {
