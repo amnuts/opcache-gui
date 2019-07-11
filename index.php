@@ -213,7 +213,13 @@ class OpCacheService
         $directives = [];
         ksort($config['directives']);
         foreach ($config['directives'] as $k => $v) {
-            $directives[] = ['k' => $k, 'v' => $v];
+            if (in_array($k, ['opcache.max_file_size', 'opcache.memory_consumption']) && $v) {
+                $v = $this->size($v) . " ({$v})";
+            }
+            $directives[] = [
+                'k' => $k,
+                'v' => $v
+            ];
         }
 
         $version = array_merge(
