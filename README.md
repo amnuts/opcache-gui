@@ -7,6 +7,13 @@ If you like this software or find it helpful then please consider [signing up to
 
 ## What's new
 
+**Version 2.4.1**\
+Mostly bug fixes
+* `memory_consumption` and `max_file_size` config settings now display as human-readable sizes
+* four missing directives have been included
+* better handling if `file_cache_only` is active
+* cache-control header set to not cache the page
+
 **Version 2.4.0**\
 Adds cookie store for the real-time state allowing real-time to be activated on load.  Cookie name and TTL length can be adjusted in the config
 
