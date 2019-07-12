@@ -13,7 +13,6 @@ namespace OpcacheGui;
  * @license MIT, http://acollington.mit-license.org/
  */
 
-
 /*
  * User configuration
  */
@@ -42,8 +41,11 @@ if (!extension_loaded('Zend OPcache')) {
 
 $ocEnabled = ini_get('opcache.enable');
 if (empty($ocEnabled)) {
-    die('The Zend OPcache extension is installed but not turned on');
+    die('The Zend OPcache extension is installed but not active');
 }
+
+header('Cache-Control: no-cache, must-revalidate');
+header('Pragma: no-cache');
 
 class OpCacheService
 {
