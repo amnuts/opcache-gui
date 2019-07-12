@@ -177,33 +177,37 @@ class OpCacheService
             $files = array_values($status['scripts']);
         }
 
-        $overview = array_merge(
-            $status['memory_usage'], $status['opcache_statistics'], [
-                'used_memory_percentage'  => round(100 * (
-                        ($status['memory_usage']['used_memory'] + $status['memory_usage']['wasted_memory'])
-                        / $config['directives']['opcache.memory_consumption'])),
-                'hit_rate_percentage'     => round($status['opcache_statistics']['opcache_hit_rate']),
-                'wasted_percentage'       => round($status['memory_usage']['current_wasted_percentage'], 2),
-                'readable' => [
-                    'total_memory'       => $this->size($config['directives']['opcache.memory_consumption']),
-                    'used_memory'        => $this->size($status['memory_usage']['used_memory']),
-                    'free_memory'        => $this->size($status['memory_usage']['free_memory']),
-                    'wasted_memory'      => $this->size($status['memory_usage']['wasted_memory']),
-                    'num_cached_scripts' => number_format($status['opcache_statistics']['num_cached_scripts']),
-                    'hits'               => number_format($status['opcache_statistics']['hits']),
-                    'misses'             => number_format($status['opcache_statistics']['misses']),
-                    'blacklist_miss'     => number_format($status['opcache_statistics']['blacklist_misses']),
-                    'num_cached_keys'    => number_format($status['opcache_statistics']['num_cached_keys']),
-                    'max_cached_keys'    => number_format($status['opcache_statistics']['max_cached_keys']),
-                    'interned'           => null,
-                    'start_time'         => date('Y-m-d H:i:s', $status['opcache_statistics']['start_time']),
-                    'last_restart_time'  => ($status['opcache_statistics']['last_restart_time'] == 0
+        if ($config['directives']['opcache.file_cache_only']) {
+            $overview = false;
+        } else {
+            $overview = array_merge(
+                $status['memory_usage'], $status['opcache_statistics'], [
+                    'used_memory_percentage' => round(100 * (
+                            ($status['memory_usage']['used_memory'] + $status['memory_usage']['wasted_memory'])
+                            / $config['directives']['opcache.memory_consumption'])),
+                    'hit_rate_percentage' => round($status['opcache_statistics']['opcache_hit_rate']),
+                    'wasted_percentage' => round($status['memory_usage']['current_wasted_percentage'], 2),
+                    'readable' => [
+                        'total_memory' => $this->size($config['directives']['opcache.memory_consumption']),
+                        'used_memory' => $this->size($status['memory_usage']['used_memory']),
+                        'free_memory' => $this->size($status['memory_usage']['free_memory']),
+                        'wasted_memory' => $this->size($status['memory_usage']['wasted_memory']),
+                        'num_cached_scripts' => number_format($status['opcache_statistics']['num_cached_scripts']),
+                        'hits' => number_format($status['opcache_statistics']['hits']),
+                        'misses' => number_format($status['opcache_statistics']['misses']),
+                        'blacklist_miss' => number_format($status['opcache_statistics']['blacklist_misses']),
+                        'num_cached_keys' => number_format($status['opcache_statistics']['num_cached_keys']),
+                        'max_cached_keys' => number_format($status['opcache_statistics']['max_cached_keys']),
+                        'interned' => null,
+                        'start_time' => date('Y-m-d H:i:s', $status['opcache_statistics']['start_time']),
+                        'last_restart_time' => ($status['opcache_statistics']['last_restart_time'] == 0
                             ? 'never'
                             : date('Y-m-d H:i:s', $status['opcache_statistics']['last_restart_time'])
                         )
+                    ]
                 ]
-            ]
-        );
+            );
+        }
 
         if (!empty($status['interned_strings_usage'])) {
             $overview['readable']['interned'] = [
@@ -304,6 +308,7 @@ $opcache = OpCacheService::init($options);
         #counts > div > div > p span.large { color: #6ca6ef; font-size: 80pt; margin: 0; padding: 0; text-align: center; }
         #info { margin-right: 280px; }
         #frmFilter { width: 520px; }
+        #fileCacheOnly { margin-top: 0; }
         .moreinfo > div { padding: 10px; }
         .moreinfo > div > p { margin: 0; line-height: 1.75em; }
         .metainfo { font-size: 80%; }
@@ -864,6 +869,25 @@ $opcache = OpCacheService::init($options);
             };
         },
         render: function () {
+            if (this.state.data == false) {
+                return React.createElement(
+                    "p",
+                    { id: "fileCacheOnly" },
+                    "You have ",
+                    React.createElement(
+                        "i",
+                        null,
+                        "opcache.file_cache_only"
+                    ),
+                    " turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by ",
+                    React.createElement(
+                        "i",
+                        null,
+                        "opcache_get_statistics()"
+                    ),
+                    "."
+                );
+            }
             var interned = this.state.data.readable.interned != null ? React.createElement(InternedStringsPanel, {
                 buffer_size: this.state.data.readable.interned.buffer_size,
                 strings_used_memory: this.state.data.readable.interned.strings_used_memory,
@@ -925,11 +949,39 @@ $opcache = OpCacheService::init($options);
         getInitialState: function () {
             return {
                 version: opstate.version,
-                start: opstate.overview.readable.start_time,
-                reset: opstate.overview.readable.last_restart_time
+                start: opstate.overview ? opstate.overview.readable.start_time : null,
+                reset: opstate.overview ? opstate.overview.readable.last_restart_time : null
             };
         },
         render: function () {
+            var startTime = this.state.start ? React.createElement(
+                "tr",
+                null,
+                React.createElement(
+                    "td",
+                    null,
+                    "Start time"
+                ),
+                React.createElement(
+                    "td",
+                    null,
+                    this.state.start
+                )
+            ) : '';
+            var lastReset = this.state.reset ? React.createElement(
+                "tr",
+                null,
+                React.createElement(
+                    "td",
+                    null,
+                    "Last reset"
+                ),
+                React.createElement(
+                    "td",
+                    null,
+                    this.state.reset
+                )
+            ) : '';
             return React.createElement(
                 "table",
                 null,
@@ -1005,34 +1057,8 @@ $opcache = OpCacheService::init($options);
                             this.state.version.server
                         )
                     ),
-                    React.createElement(
-                        "tr",
-                        null,
-                        React.createElement(
-                            "td",
-                            null,
-                            "Start time"
-                        ),
-                        React.createElement(
-                            "td",
-                            null,
-                            this.state.start
-                        )
-                    ),
-                    React.createElement(
-                        "tr",
-                        null,
-                        React.createElement(
-                            "td",
-                            null,
-                            "Last reset"
-                        ),
-                        React.createElement(
-                            "td",
-                            null,
-                            this.state.reset
-                        )
-                    )
+                    startTime,
+                    lastReset
                 )
             );
         }
@@ -1137,7 +1163,7 @@ $opcache = OpCacheService::init($options);
                         invalidate = React.createElement(
                             "span",
                             null,
-                            ", ",
+                            ",\xA0",
                             React.createElement(
                                 "a",
                                 { className: "metainfo", href: '?invalidate=' + file.full_path, "data-file": file.full_path, onClick: this.handleInvalidate },
@@ -1244,8 +1270,8 @@ $opcache = OpCacheService::init($options);
     var FilesListed = React.createClass({
         getInitialState: function () {
             return {
-                formatted: opstate.overview.readable.num_cached_scripts,
-                total: opstate.overview.num_cached_scripts
+                formatted: opstate.overview ? opstate.overview.readable.num_cached_scripts : 0,
+                total: opstate.overview ? opstate.overview.num_cached_scripts : 0
             };
         },
         render: function () {

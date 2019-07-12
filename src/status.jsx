@@ -106,6 +106,13 @@ var OverviewCounts = React.createClass({
         };
     },
     render: function() {
+        if (this.state.data == false) {
+            return (
+                <p id="fileCacheOnly">
+                    You have <i>opcache.file_cache_only</i> turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by <i>opcache_get_statistics()</i>.
+                </p>
+            );
+        }
         var interned = (this.state.data.readable.interned != null 
             ? <InternedStringsPanel
                     buffer_size={this.state.data.readable.interned.buffer_size}
@@ -150,11 +157,17 @@ var GeneralInfo = React.createClass({
     getInitialState: function() {
         return {
             version : opstate.version,
-            start : opstate.overview.readable.start_time,
-            reset : opstate.overview.readable.last_restart_time
+            start : opstate.overview ? opstate.overview.readable.start_time : null,
+            reset : opstate.overview ? opstate.overview.readable.last_restart_time : null
         };
     },
     render: function() {
+        var startTime = this.state.start
+            ? <tr><td>Start time</td><td>{this.state.start}</td></tr>
+            : '';
+        var lastReset = this.state.reset
+            ? <tr><td>Last reset</td><td>{this.state.reset}</td></tr>
+            : '';
         return (
             <table>
                 <thead>
@@ -165,8 +178,8 @@ var GeneralInfo = React.createClass({
                     <tr><td>PHP</td><td>{this.state.version.php}</td></tr>
                     <tr><td>Host</td><td>{this.state.version.host}</td></tr>
                     <tr><td>Server Software</td><td>{this.state.version.server}</td></tr>
-                    <tr><td>Start time</td><td>{this.state.start}</td></tr>
-                    <tr><td>Last reset</td><td>{this.state.reset}</td></tr>
+                    { startTime }
+                    { lastReset }
                 </tbody>
             </table>
         );
@@ -286,8 +299,8 @@ var FilesMeta = React.createClass({
 var FilesListed = React.createClass({
     getInitialState: function() {
         return {
-            formatted : opstate.overview.readable.num_cached_scripts,
-            total     : opstate.overview.num_cached_scripts
+            formatted : opstate.overview ? opstate.overview.readable.num_cached_scripts : 0,
+            total     : opstate.overview ? opstate.overview.num_cached_scripts : 0
         };
     },
     render: function() {
