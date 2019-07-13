@@ -42,7 +42,7 @@ Introduces the use of React.js provides the ability to seamlessly update more of
 
 The overview will show you all the core information.  From here you'll be able to see what host and platform you're running on, what version of OPcache you're using, when it was last reset, the functions that are available, all the directives and all the statistics associated with the OPcache (number of hits, memory used, free and wasted memory, etc.)
 
-![Overview](http://amnuts.com/images/opcache/screenshot/overview-v2.3.0.png)
+![Overview](http://amnuts.com/images/opcache/screenshot/overview-v2.5.0.png)
 
 ### Getting started
 
