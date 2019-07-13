@@ -8,7 +8,7 @@ namespace OpcacheGui;
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 2.4.1
+ * @version 2.5.0
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, http://acollington.mit-license.org/
  */
@@ -28,7 +28,12 @@ $options = [
     'charts'           => true,          // show gauge chart or just big numbers
     'debounce_rate'    => 250,           // milliseconds after key press to send keyup event when filtering
     'cookie_name'      => 'opcachegui',  // name of cookie
-    'cookie_ttl'       => 365            // days to store cookie
+    'cookie_ttl'       => 365,           // days to store cookie
+    'highlight'        => [              // highlight charts/big numbers
+        'memory' => true,
+        'hits'   => true,
+        'keys'   => true
+    ]
 ];
 
 /*
@@ -188,6 +193,9 @@ class OpCacheService
                             ($status['memory_usage']['used_memory'] + $status['memory_usage']['wasted_memory'])
                             / $config['directives']['opcache.memory_consumption'])),
                     'hit_rate_percentage' => round($status['opcache_statistics']['opcache_hit_rate']),
+                    'used_key_percentage' => round(100 * (
+                            $status['opcache_statistics']['num_cached_keys']
+                            / $status['opcache_statistics']['max_cached_keys'])),
                     'wasted_percentage' => round($status['memory_usage']['current_wasted_percentage'], 2),
                     'readable' => [
                         'total_memory' => $this->size($config['directives']['opcache.memory_consumption']),
@@ -416,6 +424,7 @@ $opcache = OpCacheService::init($options);
     var opstate = <?php echo json_encode($opcache->getData()); ?>;
     var canInvalidate = <?php echo json_encode($opcache->canInvalidate()); ?>;
     var useCharts = <?php echo json_encode($opcache->getOption('charts')); ?>;
+    var highlight = <?php echo json_encode($opcache->getOption('highlight')); ?>;
     var allowFiles = <?php echo json_encode($opcache->getOption('allow_filelist')); ?>;
     var debounce = function(func, wait, immediate) {
         var timeout;
@@ -576,64 +585,26 @@ $opcache = OpCacheService::init($options);
         $('#frmFilter').bind('keyup', debounce(keyUp, <?php echo $opcache->getOption('debounce_rate'); ?>));
     });
 
-    var MemoryUsageGraph = React.createClass({
+    var UsageGraph = React.createClass({
         getInitialState: function () {
             return {
-                memoryUsageGauge: null
+                gauge: null
             };
         },
         componentDidMount: function () {
             if (this.props.chart) {
-                this.state.memoryUsageGauge = new Gauge('#memoryUsageCanvas');
-                this.state.memoryUsageGauge.setValue(this.props.value);
+                this.state.gauge = new Gauge('#' + this.props.gaugeId);
+                this.state.gauge.setValue(this.props.value);
             }
         },
         componentDidUpdate: function () {
-            if (this.state.memoryUsageGauge != null) {
-                this.state.memoryUsageGauge.setValue(this.props.value);
+            if (this.state.gauge != null) {
+                this.state.gauge.setValue(this.props.value);
             }
         },
         render: function () {
             if (this.props.chart == true) {
-                return React.createElement("canvas", { id: "memoryUsageCanvas", width: "250", height: "250", "data-value": this.props.value });
-            }
-            return React.createElement(
-                "p",
-                null,
-                React.createElement(
-                    "span",
-                    { className: "large" },
-                    this.props.value
-                ),
-                React.createElement(
-                    "span",
-                    null,
-                    "%"
-                )
-            );
-        }
-    });
-
-    var HitRateGraph = React.createClass({
-        getInitialState: function () {
-            return {
-                hitRateGauge: null
-            };
-        },
-        componentDidMount: function () {
-            if (this.props.chart) {
-                this.state.hitRateGauge = new Gauge('#hitRateCanvas');
-                this.state.hitRateGauge.setValue(this.props.value);
-            }
-        },
-        componentDidUpdate: function () {
-            if (this.state.hitRateGauge != null) {
-                this.state.hitRateGauge.setValue(this.props.value);
-            }
-        },
-        render: function () {
-            if (this.props.chart == true) {
-                return React.createElement("canvas", { id: "hitRateCanvas", width: "250", height: "250", "data-value": this.props.value });
+                return React.createElement("canvas", { id: this.props.gaugeId, width: "250", height: "250", "data-value": this.props.value });
             }
             return React.createElement(
                 "p",
@@ -867,7 +838,8 @@ $opcache = OpCacheService::init($options);
         getInitialState: function () {
             return {
                 data: opstate.overview,
-                chart: useCharts
+                chart: useCharts,
+                highlight: highlight
             };
         },
         render: function () {
@@ -896,37 +868,58 @@ $opcache = OpCacheService::init($options);
                 strings_free_memory: this.state.data.readable.interned.strings_free_memory,
                 number_of_strings: this.state.data.readable.interned.number_of_strings
             }) : '';
-            return React.createElement(
+
+            var memoryHighlight = this.state.highlight.memory ? React.createElement(
                 "div",
                 null,
                 React.createElement(
-                    "div",
+                    "h3",
                     null,
-                    React.createElement(
-                        "h3",
-                        null,
-                        "memory"
-                    ),
-                    React.createElement(
-                        "p",
-                        null,
-                        React.createElement(MemoryUsageGraph, { chart: this.state.chart, value: this.state.data.used_memory_percentage })
-                    )
+                    "memory"
                 ),
                 React.createElement(
-                    "div",
+                    "p",
                     null,
-                    React.createElement(
-                        "h3",
-                        null,
-                        "hit rate"
-                    ),
-                    React.createElement(
-                        "p",
-                        null,
-                        React.createElement(HitRateGraph, { chart: this.state.chart, value: this.state.data.hit_rate_percentage })
-                    )
+                    React.createElement(UsageGraph, { chart: this.state.chart, value: this.state.data.used_memory_percentage, gaugeId: "memoryUsageCanvas" })
+                )
+            ) : null;
+
+            var hitsHighlight = this.state.highlight.hits ? React.createElement(
+                "div",
+                null,
+                React.createElement(
+                    "h3",
+                    null,
+                    "hit rate"
                 ),
+                React.createElement(
+                    "p",
+                    null,
+                    React.createElement(UsageGraph, { chart: this.state.chart, value: this.state.data.hit_rate_percentage, gaugeId: "hitRateCanvas" })
+                )
+            ) : null;
+
+            var keysHighlight = this.state.highlight.keys ? React.createElement(
+                "div",
+                null,
+                React.createElement(
+                    "h3",
+                    null,
+                    "keys"
+                ),
+                React.createElement(
+                    "p",
+                    null,
+                    React.createElement(UsageGraph, { chart: this.state.chart, value: this.state.data.used_key_percentage, gaugeId: "keyUsageCanvas" })
+                )
+            ) : null;
+
+            return React.createElement(
+                "div",
+                null,
+                memoryHighlight,
+                hitsHighlight,
+                keysHighlight,
                 React.createElement(MemoryUsagePanel, {
                     total: this.state.data.readable.total_memory,
                     used: this.state.data.readable.used_memory,

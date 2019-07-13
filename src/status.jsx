@@ -1,48 +1,23 @@
-var MemoryUsageGraph = React.createClass({
+var UsageGraph = React.createClass({
     getInitialState: function() {
         return {
-            memoryUsageGauge : null
+            gauge : null
         };
     },
     componentDidMount: function() {
         if (this.props.chart) {
-            this.state.memoryUsageGauge = new Gauge('#memoryUsageCanvas');
-            this.state.memoryUsageGauge.setValue(this.props.value);
+            this.state.gauge = new Gauge('#' + this.props.gaugeId);
+            this.state.gauge.setValue(this.props.value);
         }
     },
     componentDidUpdate: function() {
-        if (this.state.memoryUsageGauge != null) {
-            this.state.memoryUsageGauge.setValue(this.props.value);
+        if (this.state.gauge != null) {
+            this.state.gauge.setValue(this.props.value);
         }
     },
     render: function() {
         if (this.props.chart == true) {
-            return(<canvas id="memoryUsageCanvas" width="250" height="250" data-value={this.props.value} />);
-        }
-        return(<p><span className="large">{this.props.value}</span><span>%</span></p>);
-    }
-});
-
-var HitRateGraph = React.createClass({
-    getInitialState: function() {
-        return {
-            hitRateGauge : null
-        };
-    },
-    componentDidMount: function() {
-        if (this.props.chart) {
-            this.state.hitRateGauge = new Gauge('#hitRateCanvas');
-            this.state.hitRateGauge.setValue(this.props.value)
-        }
-    },
-    componentDidUpdate: function() {
-        if (this.state.hitRateGauge != null) {
-            this.state.hitRateGauge.setValue(this.props.value);
-        }
-    },
-    render: function() {
-        if (this.props.chart == true) {
-            return(<canvas id="hitRateCanvas" width="250" height="250" data-value={this.props.value} />);
+            return(<canvas id={this.props.gaugeId} width="250" height="250" data-value={this.props.value} />);
         }
         return(<p><span className="large">{this.props.value}</span><span>%</span></p>);
     }
@@ -102,7 +77,8 @@ var OverviewCounts = React.createClass({
     getInitialState: function() {
         return {
             data  : opstate.overview,
-            chart : useCharts
+            chart : useCharts,
+            highlight: highlight
         };
     },
     render: function() {
@@ -122,16 +98,34 @@ var OverviewCounts = React.createClass({
               /> 
             : ''
         );
-        return (
-            <div>
+
+        var memoryHighlight = this.state.highlight.memory ? (
                 <div>
                     <h3>memory</h3>
-                    <p><MemoryUsageGraph chart={this.state.chart} value={this.state.data.used_memory_percentage} /></p>
+                    <p><UsageGraph chart={this.state.chart} value={this.state.data.used_memory_percentage} gaugeId="memoryUsageCanvas"/></p>
                 </div>
+            ) : null;
+
+        var hitsHighlight = this.state.highlight.hits ? (
                 <div>
                     <h3>hit rate</h3>
-                    <p><HitRateGraph chart={this.state.chart} value={this.state.data.hit_rate_percentage} /></p>
+                    <p><UsageGraph chart={this.state.chart} value={this.state.data.hit_rate_percentage} gaugeId="hitRateCanvas"/></p>
                 </div>
+            ) : null;
+
+        var keysHighlight = this.state.highlight.keys ? (
+                <div>
+                    <h3>keys</h3>
+                    <p><UsageGraph chart={this.state.chart} value={this.state.data.used_key_percentage} gaugeId="keyUsageCanvas"/></p>
+                </div>
+            ) : null;
+
+
+        return (
+            <div>
+                {memoryHighlight}
+                {hitsHighlight}
+                {keysHighlight}
                 <MemoryUsagePanel
                     total={this.state.data.readable.total_memory}
                     used={this.state.data.readable.used_memory}

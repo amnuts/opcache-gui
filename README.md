@@ -3,9 +3,12 @@
 A clean and responsive interface for Zend OPcache information, showing statistics, settings and cached files, and providing a real-time update for the information (using jQuery and React).
 
 [![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=acollington&url=https://github.com/amnuts/opcache-gui&title=opcache-gui&language=&tags=github&category=software)
-If you like this software or find it helpful then please consider [signing up to Flattr and leaving a micro-donation](https://flattr.com/@acollington).  If you don't want to do that, I hope you find it useful anyway! :-).
+If you like this software or find it helpful then maybe you'll consider supporting my efforts in some way by [signing up to Flattr and leaving a micro-donation](https://flattr.com/@acollington).
 
 ## What's new
+
+**Version 2.5.0**\
+Added a new highlight chart to show the cached keys percentage with options to turn on/off the individual highlight graphs. 
 
 **Version 2.4.1**\
 Mostly bug fixes
@@ -51,15 +54,22 @@ There are two ways to getting started using this gui.
 If you want to set the configuration options just alter the array at the top of the script:
 ```php
 $options = [
-    'allow_filelist'   => true,  // show/hide the files tab
-    'allow_invalidate' => true,  // give a link to invalidate files
-    'allow_reset'      => true,  // give option to reset the whole cache
-    'allow_realtime'   => true,  // give option to enable/disable real-time updates
-    'refresh_time'     => 5,     // how often the data will refresh, in seconds
-    'size_precision'   => 2,     // Digits after decimal point
-    'size_space'       => false, // have '1MB' or '1 MB' when showing sizes
-    'charts'           => true,  // show gauge chart or just big numbers
-    'debounce_rate'    => 250    // milliseconds after key press to send keyup event when filtering
+    'allow_filelist'   => true,          // show/hide the files tab
+    'allow_invalidate' => true,          // give a link to invalidate files
+    'allow_reset'      => true,          // give option to reset the whole cache
+    'allow_realtime'   => true,          // give option to enable/disable real-time updates
+    'refresh_time'     => 5,             // how often the data will refresh, in seconds
+    'size_precision'   => 2,             // Digits after decimal point
+    'size_space'       => false,         // have '1MB' or '1 MB' when showing sizes
+    'charts'           => true,          // show gauge chart or just big numbers
+    'debounce_rate'    => 250,           // milliseconds after key press to send keyup event when filtering
+    'cookie_name'      => 'opcachegui',  // name of cookie
+    'cookie_ttl'       => 365,           // days to store cookie
+    'highlight'        => [              // highlight charts/big numbers
+        'memory' => true,
+        'hits'   => true,
+        'keys'   => true
+    ]
 ];
 ```
 
