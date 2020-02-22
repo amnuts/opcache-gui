@@ -184,7 +184,7 @@ class OpCacheService
             $files = array_values($status['scripts']);
         }
 
-        if ($config['directives']['opcache.file_cache_only']) {
+        if ($config['directives']['opcache.file_cache_only'] || !empty($status['file_cache_only'])) {
             $overview = false;
         } else {
             $overview = array_merge(
