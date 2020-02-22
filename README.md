@@ -108,6 +108,11 @@ The composer.json file is provided to allow you to deploy the opcache gui a litt
 
 ## Releases
 
+**Version 2.5.1**\
+* optimisation_level now shows the levels of optimisations that will be performed rather than an abstract number
+* Fixed issue #43
+* Fixed issue #44
+
 **Version 2.5.0**\
 Added a new highlight chart to show the cached keys percentage with options to turn on/off the individual highlight graphs. 
 
