@@ -8,7 +8,7 @@ namespace OpcacheGui;
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 2.5.1
+ * @version 2.5.2
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, http://acollington.mit-license.org/
  */
@@ -54,7 +54,7 @@ header('Pragma: no-cache');
 
 class OpCacheService
 {
-    const VERSION = '2.5.1';
+    const VERSION = '2.5.2';
 
     protected $data;
     protected $options;
@@ -76,8 +76,9 @@ class OpCacheService
     private function __construct($options = [])
     {
         $this->optimizationLevels = [
-            1<<0 => 'Simple local optimizations',
-            1<<2 => 'Jump optimization',
+            1<<0 => 'CSE, STRING construction',
+            1<<1 => 'Constant conversion and jumps',
+            1<<2 => '++, +=, series of jumps',
             1<<3 => 'INIT_FCALL_BY_NAME -> DO_FCALL',
             1<<4 => 'CFG based optimization',
             1<<5 => 'DFA based optimization',
@@ -90,8 +91,9 @@ class OpCacheService
             1<<12 => 'Remove unused variables',
             1<<13 => 'DCE (dead code elimination)',
             1<<14 => '(unsafe) Collect constants',
-            1<<15 => 'Inline functions',
+            1<<15 => 'Inline functions'
         ];
+
         $this->options = array_merge($this->defaults, $options);
         $this->data = $this->compileState();
     }
