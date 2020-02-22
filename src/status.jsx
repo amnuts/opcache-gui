@@ -196,7 +196,13 @@ var Directives = React.createClass({
             } else if (directive.v === '') {
                 vShow = React.createElement('i', {}, 'no value');
             } else {
-                vShow = directive.v;
+                if (Array.isArray(directive.v)) {
+                    vShow = directive.v.map((item, key) => {
+                        return <span key={key}>{item}<br/></span>
+                    });
+                } else {
+                    vShow = directive.v;
+                }
             }
             return (
                 <tr key={directive.k}>

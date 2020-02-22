@@ -58,6 +58,7 @@ class OpCacheService
 
     protected $data;
     protected $options;
+    protected $optimizationLevels;
     protected $defaults = [
         'allow_filelist'   => true,
         'allow_invalidate' => true,
@@ -74,6 +75,23 @@ class OpCacheService
 
     private function __construct($options = [])
     {
+        $this->optimizationLevels = [
+            1<<0 => 'Simple local optimizations',
+            1<<2 => 'Jump optimization',
+            1<<3 => 'INIT_FCALL_BY_NAME -> DO_FCALL',
+            1<<4 => 'CFG based optimization',
+            1<<5 => 'DFA based optimization',
+            1<<6 => 'CALL GRAPH optimization',
+            1<<7 => 'SCCP (constant propagation)',
+            1<<8 => 'TMP VAR usage',
+            1<<9 => 'NOP removal',
+            1<<10 => 'Merge equal constants',
+            1<<11 => 'Adjust used stack',
+            1<<12 => 'Remove unused variables',
+            1<<13 => 'DCE (dead code elimination)',
+            1<<14 => '(unsafe) Collect constants',
+            1<<15 => 'Inline functions',
+        ];
         $this->options = array_merge($this->defaults, $options);
         $this->data = $this->compileState();
     }
@@ -235,6 +253,14 @@ class OpCacheService
         foreach ($config['directives'] as $k => $v) {
             if (in_array($k, ['opcache.max_file_size', 'opcache.memory_consumption']) && $v) {
                 $v = $this->size($v) . " ({$v})";
+            } elseif ($k == 'opcache.optimization_level') {
+                $levels = [];
+                foreach ($this->optimizationLevels as $level => $info) {
+                    if ($level & $v) {
+                        $levels[] = $info;
+                    }
+                }
+                $v = empty($levels) ? 'none' : $levels;
             }
             $directives[] = [
                 'k' => $k,
@@ -1077,7 +1103,18 @@ $opcache = OpCacheService::init($options);
                 } else if (directive.v === '') {
                     vShow = React.createElement('i', {}, 'no value');
                 } else {
-                    vShow = directive.v;
+                    if (Array.isArray(directive.v)) {
+                        vShow = directive.v.map(function (item, key) {
+                            return React.createElement(
+                                "span",
+                                { key: key },
+                                item,
+                                React.createElement("br", null)
+                            );
+                        });
+                    } else {
+                        vShow = directive.v;
+                    }
                 }
                 return React.createElement(
                     "tr",
