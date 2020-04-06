@@ -17,7 +17,7 @@ var UsageGraph = React.createClass({
     },
     render: function() {
         if (this.props.chart == true) {
-            return(<canvas id={this.props.gaugeId} width="250" height="250" data-value={this.props.value} />);
+            return(<canvas id={this.props.gaugeId} className="graph-widget" width="250" height="250" data-value={this.props.value} />);
         }
         return(<p><span className="large">{this.props.value}</span><span>%</span></p>);
     }
@@ -26,9 +26,9 @@ var UsageGraph = React.createClass({
 var MemoryUsagePanel = React.createClass({
     render: function() {
         return (
-            <div className="moreinfo">
-                <h3>memory usage</h3>
-                <div>
+            <div className="widget-panel">
+                <h3 className="widget-header">memory usage</h3>
+                <div className="widget-value widget-info">
                     <p><b>total memory:</b> {this.props.total}</p>
                     <p><b>used memory:</b> {this.props.used}</p>
                     <p><b>free memory:</b> {this.props.free}</p>
@@ -42,9 +42,9 @@ var MemoryUsagePanel = React.createClass({
 var StatisticsPanel = React.createClass({
     render: function() {
         return (
-            <div className="moreinfo">
-                <h3>opcache statistics</h3>
-                <div>
+            <div className="widget-panel">
+                <h3 className="widget-header">opcache statistics</h3>
+                <div className="widget-value widget-info">
                     <p><b>number of cached files:</b> {this.props.num_cached_scripts}</p>
                     <p><b>number of hits:</b> {this.props.hits}</p>
                     <p><b>number of misses:</b> {this.props.misses}</p>
@@ -60,9 +60,9 @@ var StatisticsPanel = React.createClass({
 var InternedStringsPanel = React.createClass({
     render: function() {
         return (
-            <div className="moreinfo">
-                <h3>interned strings usage</h3>
-                <div>
+            <div className="widget-panel">
+                <h3 className="widget-header">interned strings usage</h3>
+                <div className="widget-value widget-info">
                     <p><b>buffer size:</b> {this.props.buffer_size}</p>
                     <p><b>used memory:</b> {this.props.strings_used_memory}</p>
                     <p><b>free memory:</b> {this.props.strings_free_memory}</p>
@@ -84,7 +84,7 @@ var OverviewCounts = React.createClass({
     render: function() {
         if (this.state.data == false) {
             return (
-                <p id="fileCacheOnly">
+                <p class="file-cache-only">
                     You have <i>opcache.file_cache_only</i> turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by <i>opcache_get_statistics()</i>.
                 </p>
             );
@@ -100,23 +100,23 @@ var OverviewCounts = React.createClass({
         );
 
         var memoryHighlight = this.state.highlight.memory ? (
-                <div>
-                    <h3>memory</h3>
-                    <p><UsageGraph chart={this.state.chart} value={this.state.data.used_memory_percentage} gaugeId="memoryUsageCanvas"/></p>
+                <div className="widget-panel">
+                    <h3 className="widget-header">memory</h3>
+                    <p className="widget-value"><UsageGraph chart={this.state.chart} value={this.state.data.used_memory_percentage} gaugeId="memoryUsageCanvas"/></p>
                 </div>
             ) : null;
 
         var hitsHighlight = this.state.highlight.hits ? (
-                <div>
-                    <h3>hit rate</h3>
-                    <p><UsageGraph chart={this.state.chart} value={this.state.data.hit_rate_percentage} gaugeId="hitRateCanvas"/></p>
+                <div className="widget-panel">
+                    <h3 className="widget-header">hit rate</h3>
+                    <p className="widget-value"><UsageGraph chart={this.state.chart} value={this.state.data.hit_rate_percentage} gaugeId="hitRateCanvas"/></p>
                 </div>
             ) : null;
 
         var keysHighlight = this.state.highlight.keys ? (
-                <div>
-                    <h3>keys</h3>
-                    <p><UsageGraph chart={this.state.chart} value={this.state.data.used_key_percentage} gaugeId="keyUsageCanvas"/></p>
+                <div className="widget-panel">
+                    <h3 className="widget-header">keys</h3>
+                    <p className="widget-value"><UsageGraph chart={this.state.chart} value={this.state.data.used_key_percentage} gaugeId="keyUsageCanvas"/></p>
                 </div>
             ) : null;
 
@@ -163,7 +163,7 @@ var GeneralInfo = React.createClass({
             ? <tr><td>Last reset</td><td>{this.state.reset}</td></tr>
             : '';
         return (
-            <table>
+            <table className="tables general-info-table">
                 <thead>
                     <tr><th colSpan="2">General info</th></tr>
                 </thead>
@@ -213,7 +213,7 @@ var Directives = React.createClass({
             );
         });
         return (
-            <table>
+            <table className="tables directives-table">
                 <thead>
                     <tr><th colSpan="2">Directives</th></tr>
                 </thead>
@@ -249,18 +249,16 @@ var Files = React.createClass({
                     invalidated = <span><i className="invalid metainfo"> - has been invalidated</i></span>;
                 }
                 if (canInvalidate) {
-                    invalidate = <span>,&nbsp;<a className="metainfo" href={'?invalidate='
+                    invalidate = <span>,&nbsp;<a className="file-metainfo" href={'?invalidate='
                         + file.full_path} data-file={file.full_path} onClick={this.handleInvalidate}>force file invalidation</a></span>;
                 }
                 return (
                     <tr key={file.full_path} data-path={file.full_path.toLowerCase()} className={i%2?'alternate':''}>
                         <td>
-                            <div>
-                                <span className="pathname">{file.full_path}</span><br/>
-                                <FilesMeta data={[file.readable.hits, file.readable.memory_consumption, file.last_used]} />
-                                {invalidate}
-                                {invalidated}
-                            </div>
+                            <span className="file-pathname">{file.full_path}</span>
+                            <FilesMeta data={[file.readable.hits, file.readable.memory_consumption, file.last_used]} />
+                            {invalidate}
+                            {invalidated}
                         </td>
                     </tr>
                 );
@@ -268,7 +266,7 @@ var Files = React.createClass({
             return (
                 <div>
                     <FilesListed showing={this.state.showing}/>
-                    <table>
+                    <table className="tables file-list-table">
                         <thead>
                         <tr>
                             <th>Script</th>
@@ -287,7 +285,7 @@ var Files = React.createClass({
 var FilesMeta = React.createClass({
     render: function() {
         return (
-            <span className="metainfo">
+            <span className="file-metainfo">
                 <b>hits: </b><span>{this.props.data[0]}, </span>
                 <b>memory: </b><span>{this.props.data[1]}, </span>
                 <b>last used: </b><span>{this.props.data[2]}</span>

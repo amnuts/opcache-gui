@@ -8,7 +8,7 @@ namespace OpcacheGui;
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 2.5.2
+ * @version 2.6.0
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, http://acollington.mit-license.org/
  */
@@ -23,7 +23,7 @@ $options = [
     'allow_reset'      => true,          // give option to reset the whole cache
     'allow_realtime'   => true,          // give option to enable/disable real-time updates
     'refresh_time'     => 5,             // how often the data will refresh, in seconds
-    'size_precision'   => 2,             // Digits after decimal point
+    'size_precision'   => 0,             // Digits after decimal point
     'size_space'       => false,         // have '1MB' or '1 MB' when showing sizes
     'charts'           => true,          // show gauge chart or just big numbers
     'debounce_rate'    => 250,           // milliseconds after key press to send keyup event when filtering
@@ -54,7 +54,7 @@ header('Pragma: no-cache');
 
 class OpCacheService
 {
-    const VERSION = '2.5.2';
+    const VERSION = '2.6.0';
 
     protected $data;
     protected $options;
@@ -311,68 +311,66 @@ $opcache = OpCacheService::init($options);
     <script src="//cdn.jsdelivr.net/react/15.4.2/react-dom.min.js"></script>
     <script src="//cdn.jsdelivr.net/jquery/3.1.1/jquery.min.js"></script>
     <style type="text/css">
-        body { font-family:sans-serif; font-size:90%; padding: 0; margin: 0 }
-        nav { padding-top: 20px; }
-        nav > ul { list-style-type: none; padding-left: 8px; margin: 0; border-bottom: 1px solid #ccc; }
-        nav > ul > li { display: inline-block; padding: 0; margin: 0 0 -1px 0; }
-        nav > ul > li > a { display: block; margin: 0 10px; padding: 15px 30px; border: 1px solid transparent; border-bottom-color: #ccc; text-decoration: none; }
-        nav > ul > li > a:hover { background-color: #f4f4f4; text-decoration: underline; }
-        nav > ul > li > a.active:hover { background-color: initial; }
-        nav > ul > li > a[data-for].active { border: 1px solid #ccc; border-bottom-color: #ffffff; border-top: 3px solid #6ca6ef; }
-        table { margin: 0 0 1em 0; border-collapse: collapse; border-color: #fff; width: 100%; table-layout: fixed; }
-        table caption { text-align: left; font-size: 1.5em; }
-        table tr { background-color: #99D0DF; border-color: #fff; }
-        table th { text-align: left; padding: 6px; background-color: #6ca6ef; color: #fff; border-color: #fff; font-weight: normal; }
-        table td { padding: 4px 6px; line-height: 1.4em; vertical-align: top; border-color: #fff; overflow: hidden; overflow-wrap: break-word; text-overflow: ellipsis;}
-        table tr:nth-child(odd) { background-color: #EFFEFF; }
-        table tr:nth-child(even) { background-color: #E0ECEF; }
-        #filelist table tr { background-color: #EFFEFF; }
-        #filelist table tr.alternate { background-color: #E0ECEF; }
-        td.pathname { width: 70%; }
-        footer { border-top: 1px solid #ccc; padding: 1em 2em; }
-        footer a { padding: 2em; text-decoration: none; opacity: 0.7; }
-        footer a:hover { opacity: 1; }
-        canvas { display: block; max-width: 100%; height: auto; margin: 0 auto; }
-        #tabs { padding: 2em; }
-        #tabs > div { display: none; }
-        #tabs > div#overview { display:block; }
-        #resetCache, #toggleRealtime, footer > a { background-position: 5px 50%; background-repeat: no-repeat; background-color: transparent; }
-        footer > a { background-position: 0 50%; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAQCAYAAAAbBi9cAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyBpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBXaW5kb3dzIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjE2MENCRkExNzVBQjExRTQ5NDBGRTUzMzQyMDVDNzFFIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjE2MENCRkEyNzVBQjExRTQ5NDBGRTUzMzQyMDVDNzFFIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTYwQ0JGOUY3NUFCMTFFNDk0MEZFNTMzNDIwNUM3MUUiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6MTYwQ0JGQTA3NUFCMTFFNDk0MEZFNTMzNDIwNUM3MUUiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7HtUU1AAABN0lEQVR42qyUvWoCQRSF77hCLLKC+FOlCKTyIbYQUuhbWPkSFnZ2NpabUvANLGyz5CkkYGMlFtFAUmiSM8lZOVkWsgm58K079+fMnTusZl92BXbgDrTtZ2szd8fas/XBOzmBKaiCEFyTkL4pc9L8vgpNJJDyWtDna61EoXpO+xcFfXUVqtrf7Vx7m9Pub/EatvgHoYXD4ylztC14BBVwydvydgDPHPgNaErN3jLKIxAUmEvAXK21I18SJpXBGAxyBAaMlblOWOs1bMXFkMGeBFsi0pJNe/QNuV7563+gs8LfhrRfE6GaHLuRqfnUiKi6lJ034B44EXL0baTTJWujNGkG3kBX5uRyZuRkPl3WzDTBtzjnxxiDDq83yNxUk7GYuXM53jeLuMNavvAXkv4zrJkTaeGHAAMAIal3icPMsyQAAAAASUVORK5CYII='); font-size: 80%; }
-        #resetCache { background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NjBFMUMyMjI3NDlGMTFFNEE3QzNGNjQ0OEFDQzQ1MkMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NjBFMUMyMjM3NDlGMTFFNEE3QzNGNjQ0OEFDQzQ1MkMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo2MEUxQzIyMDc0OUYxMUU0QTdDM0Y2NDQ4QUNDNDUyQyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo2MEUxQzIyMTc0OUYxMUU0QTdDM0Y2NDQ4QUNDNDUyQyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PplZ+ZkAAAD1SURBVHjazFPtDYJADIUJZAMZ4UbACWQENjBO4Ao6AW5AnODcADZQJwAnwJ55NbWhB/6zycsdpX39uDZNpsURtjgzwkDoCBecs5ITPGGMwCNAkIrQw+8ri36GhBHsavFdpILEo4wEpZxRigy009EhG760gr0VhFoyZfvJKPwsheIWIeGejBZRIxRVhMRFevbuUXBew/iE/lhlBduV0j8Jx+TvJEWPphq8n5li9utgaw6cW/h6NSt/JcnVBhQxotIgKTBrbNvIHo2G0x1rwlKqTDusxiAz6hHNL1zayTVqVKRKpa/LPljPH1sJh6l/oNSrZfwSYABtq3tFdZA5BAAAAABJRU5ErkJggg=='); }
-        #toggleRealtime { position: relative; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAUCAYAAACAl21KAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6ODE5RUU4NUE3NDlGMTFFNDkyMzA4QzY1RjRBQkIzQjUiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6ODE5RUU4NUI3NDlGMTFFNDkyMzA4QzY1RjRBQkIzQjUiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MTlFRTg1ODc0OUYxMUU0OTIzMDhDNjVGNEFCQjNCNSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4MTlFRTg1OTc0OUYxMUU0OTIzMDhDNjVGNEFCQjNCNSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PpXjpvMAAAD2SURBVHjarFQBEcMgDKR3E1AJldA5wMEqAQmTgINqmILdFCChdUAdMAeMcukuSwnQbbnLlZLwJPkQIcrSiT/IGNQHNb8CGQDyRw+2QWUBqC+luzo4OKQZIAVrB+ssyKp3Bkijf0+ijzIh4wQppoBauMSjyDZfMSCDxYZMsfHF120T36AqWZMkgyguQ3GOfottJ5TKnHC+wfeRsC2oDVayPgr3bbN2tHBH3tWuJCPa0JUgKtFzMQrcZH3FNHAc0yOp1cCASALyngoN6lhDopkJWxdifwY9A3u7l29ImpxOFSWIOVsGwHKENIWxss2eBVKdOeeXAAMAk/Z9h4QhXmUAAAAASUVORK5CYII='); }
-        #counts { width: 270px; float: right; }
-        #counts > div > div { background-color: #ededed; margin-bottom: 10px; }
-        #counts > div > div > h3 { background-color: #cdcdcd; padding: 4px 6px; margin: 0; text-align: center; }
-        #counts > div > div > p { margin: 0; text-align: center; }
-        #counts > div > div > p span.large + span { font-size: 20pt; margin: 0; color: #6ca6ef; }
-        #counts > div > div > p span.large { color: #6ca6ef; font-size: 80pt; margin: 0; padding: 0; text-align: center; }
-        #info { margin-right: 280px; }
-        #frmFilter { width: 520px; }
-        #fileCacheOnly { margin-top: 0; }
-        .moreinfo > div { padding: 10px; }
-        .moreinfo > div > p { margin: 0; line-height: 1.75em; }
-        .metainfo { font-size: 80%; }
-        .hide { display: none; }
-        #toggleRealtime.pulse::before {
+        .opcache-gui { font-family:sans-serif; font-size:90%; padding: 0; margin: 0 }
+        .opcache-gui .hide { display: none; }
+        .opcache-gui .main-nav { padding-top: 20px; }
+        .opcache-gui .nav-tab-list { list-style-type: none; padding-left: 8px; margin: 0; border-bottom: 1px solid #ccc; }
+        .opcache-gui .nav-tab { display: inline-block; padding: 0; margin: 0 0 -1px 0; }
+        .opcache-gui .nav-tab-link { display: block; margin: 0 10px; padding: 15px 30px; border: 1px solid transparent; border-bottom-color: #ccc; text-decoration: none; }
+        .opcache-gui .nav-tab-link:hover { background-color: #f4f4f4; text-decoration: underline; }
+        .opcache-gui .nav-tab-link.active:hover { background-color: initial; }
+        .opcache-gui .nav-tab-link[data-for].active { border: 1px solid #ccc; border-bottom-color: #ffffff; border-top: 3px solid #6ca6ef; }
+        .opcache-gui .nav-tab-link-reset { background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NjBFMUMyMjI3NDlGMTFFNEE3QzNGNjQ0OEFDQzQ1MkMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NjBFMUMyMjM3NDlGMTFFNEE3QzNGNjQ0OEFDQzQ1MkMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo2MEUxQzIyMDc0OUYxMUU0QTdDM0Y2NDQ4QUNDNDUyQyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo2MEUxQzIyMTc0OUYxMUU0QTdDM0Y2NDQ4QUNDNDUyQyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PplZ+ZkAAAD1SURBVHjazFPtDYJADIUJZAMZ4UbACWQENjBO4Ao6AW5AnODcADZQJwAnwJ55NbWhB/6zycsdpX39uDZNpsURtjgzwkDoCBecs5ITPGGMwCNAkIrQw+8ri36GhBHsavFdpILEo4wEpZxRigy009EhG760gr0VhFoyZfvJKPwsheIWIeGejBZRIxRVhMRFevbuUXBew/iE/lhlBduV0j8Jx+TvJEWPphq8n5li9utgaw6cW/h6NSt/JcnVBhQxotIgKTBrbNvIHo2G0x1rwlKqTDusxiAz6hHNL1zayTVqVKRKpa/LPljPH1sJh6l/oNSrZfwSYABtq3tFdZA5BAAAAABJRU5ErkJggg=='); }
+        .opcache-gui .nav-tab-link-realtime { position: relative; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAUCAYAAACAl21KAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6ODE5RUU4NUE3NDlGMTFFNDkyMzA4QzY1RjRBQkIzQjUiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6ODE5RUU4NUI3NDlGMTFFNDkyMzA4QzY1RjRBQkIzQjUiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MTlFRTg1ODc0OUYxMUU0OTIzMDhDNjVGNEFCQjNCNSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4MTlFRTg1OTc0OUYxMUU0OTIzMDhDNjVGNEFCQjNCNSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PpXjpvMAAAD2SURBVHjarFQBEcMgDKR3E1AJldA5wMEqAQmTgINqmILdFCChdUAdMAeMcukuSwnQbbnLlZLwJPkQIcrSiT/IGNQHNb8CGQDyRw+2QWUBqC+luzo4OKQZIAVrB+ssyKp3Bkijf0+ijzIh4wQppoBauMSjyDZfMSCDxYZMsfHF120T36AqWZMkgyguQ3GOfottJ5TKnHC+wfeRsC2oDVayPgr3bbN2tHBH3tWuJCPa0JUgKtFzMQrcZH3FNHAc0yOp1cCASALyngoN6lhDopkJWxdifwY9A3u7l29ImpxOFSWIOVsGwHKENIWxss2eBVKdOeeXAAMAk/Z9h4QhXmUAAAAASUVORK5CYII='); }
+        .opcache-gui .nav-tab-link-realtime.pulse::before {
             content: ""; position: absolute;
             top: 13px; left: 3px; width: 18px; height: 18px;
             z-index: 10; opacity: 0; background-color: transparent;
             border: 2px solid rgb(255, 116, 0); border-radius: 100%;
-            -webkit-animation: pulse 1s linear 2;
-            -moz-animation: pulse 1s linear 2;
             animation: pulse 1s linear 2;
         }
+        .opcache-gui .tab-content-container { padding: 2em; }
+        .opcache-gui .tab-content { display: none; }
+        .opcache-gui .tab-content-overview { display:block; }
+        .opcache-gui .tab-content-overview-counts { width: 270px; float: right; }
+        .opcache-gui .tab-content-overview-info { margin-right: 280px; }
+        .opcache-gui .graph-widget { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+        .opcache-gui .widget-panel { background-color: #ededed; margin-bottom: 10px; }
+        .opcache-gui .widget-header { background-color: #cdcdcd; padding: 4px 6px; margin: 0; text-align: center; }
+        .opcache-gui .widget-value { margin: 0; text-align: center; }
+        .opcache-gui .widget-value span.large + span { font-size: 20pt; margin: 0; color: #6ca6ef; }
+        .opcache-gui .widget-value span.large { color: #6ca6ef; font-size: 80pt; margin: 0; padding: 0; text-align: center; }
+        .opcache-gui .widget-info { margin: 0; padding: 10px; }
+        .opcache-gui .widget-info * { margin: 0; line-height: 1.75em; text-align: left; }
+        .opcache-gui .tables { margin: 0 0 1em 0; border-collapse: collapse; border-color: #fff; width: 100%; table-layout: fixed; }
+        .opcache-gui .tables tr { background-color: #99D0DF; border-color: #fff; }
+        .opcache-gui .tables th { text-align: left; padding: 6px; background-color: #6ca6ef; color: #fff; border-color: #fff; font-weight: normal; }
+        .opcache-gui .tables td { padding: 4px 6px; line-height: 1.4em; vertical-align: top; border-color: #fff; overflow: hidden; overflow-wrap: break-word; text-overflow: ellipsis;}
+        .opcache-gui .tables tr:nth-child(odd) { background-color: #EFFEFF; }
+        .opcache-gui .tables tr:nth-child(even) { background-color: #E0ECEF; }
+        .opcache-gui .tables.file-list-table tr { background-color: #EFFEFF; }
+        .opcache-gui .tables.file-list-table tr.alternate { background-color: #E0ECEF; }
+        .opcache-gui .file-filter { width: 520px; }
+        .opcache-gui .file-metainfo { font-size: 80%; }
+        .opcache-gui .file-pathname { width: 70%; display: block; }
+        .opcache-gui .nav-tab-link-reset,
+        .opcache-gui .nav-tab-link-realtime,
+        .opcache-gui .github-link { background-position: 5px 50%; background-repeat: no-repeat; background-color: transparent; }
+        .opcache-gui .main-footer { border-top: 1px solid #ccc; padding: 1em 2em; }
+        .opcache-gui .github-link { background-position: 0 50%; padding: 2em; text-decoration: none; opacity: 0.7; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAQCAYAAAAbBi9cAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyBpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBXaW5kb3dzIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjE2MENCRkExNzVBQjExRTQ5NDBGRTUzMzQyMDVDNzFFIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjE2MENCRkEyNzVBQjExRTQ5NDBGRTUzMzQyMDVDNzFFIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTYwQ0JGOUY3NUFCMTFFNDk0MEZFNTMzNDIwNUM3MUUiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6MTYwQ0JGQTA3NUFCMTFFNDk0MEZFNTMzNDIwNUM3MUUiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7HtUU1AAABN0lEQVR42qyUvWoCQRSF77hCLLKC+FOlCKTyIbYQUuhbWPkSFnZ2NpabUvANLGyz5CkkYGMlFtFAUmiSM8lZOVkWsgm58K079+fMnTusZl92BXbgDrTtZ2szd8fas/XBOzmBKaiCEFyTkL4pc9L8vgpNJJDyWtDna61EoXpO+xcFfXUVqtrf7Vx7m9Pub/EatvgHoYXD4ylztC14BBVwydvydgDPHPgNaErN3jLKIxAUmEvAXK21I18SJpXBGAxyBAaMlblOWOs1bMXFkMGeBFsi0pJNe/QNuV7563+gs8LfhrRfE6GaHLuRqfnUiKi6lJ034B44EXL0baTTJWujNGkG3kBX5uRyZuRkPl3WzDTBtzjnxxiDDq83yNxUk7GYuXM53jeLuMNavvAXkv4zrJkTaeGHAAMAIal3icPMsyQAAAAASUVORK5CYII='); font-size: 80%; }
+        .opcache-gui .github-link:hover { opacity: 1; }
+        .opcache-gui .file-cache-only { margin-top: 0; }
         @media screen and (max-width: 750px) {
-            #info { margin-right:auto; clear:both; }
-            nav > ul { border-bottom: 0; }
-            nav > ul > li { display: block; margin: 0; }
-            nav > ul > li > a { display: block; margin: 0 10px; padding: 10px 0 10px 30px; border: 0; }
-            nav > ul > li > a[data-for].active { border-bottom-color: #ccc; }
-            #counts { position:relative; display:block; width:100%; }
-            #toggleRealtime.pulse::before { top: 8px; }
+            .opcache-gui .nav-tab-list { border-bottom: 0; }
+            .opcache-gui .nav-tab { display: block; margin: 0; }
+            .opcache-gui .nav-tab-link { display: block; margin: 0 10px; padding: 10px 0 10px 30px; border: 0; }
+            .opcache-gui .nav-tab-link[data-for].active { border-bottom-color: #ccc; }
+            .opcache-gui .tab-content-overview-info { margin-right:auto; clear:both; }
+            .opcache-gui .tab-content-overview-counts { position:relative; display:block; width:100%; }
+            .opcache-gui .nav-tab-link-realtime.pulse::before { top: 8px; }
         }
         @media screen and (max-width: 550px) {
-            #frmFilter { width: 100%; }
+            .opcache-gui .file-filter { width: 100%; }
         }
         @keyframes pulse {
             0% {transform: scale(1); opacity: 0;}
@@ -392,34 +390,34 @@ $opcache = OpCacheService::init($options);
     </style>
 </head>
 
-<body>
+<body class="opcache-gui">
 
 <header>
-    <nav>
-        <ul>
-            <li><a data-for="overview" href="#overview" class="active">Overview</a></li>
+    <nav class="main-nav">
+        <ul class="nav-tab-list">
+            <li class="nav-tab"><a data-for="overview" href="#overview" class="active nav-tab-link">Overview</a></li>
             <?php if ($opcache->getOption('allow_filelist')): ?>
-            <li><a data-for="files" href="#files">File usage</a></li>
+            <li class="nav-tab"><a data-for="files" href="#files" class="nav-tab-link">File usage</a></li>
             <?php endif; ?>
             <?php if ($opcache->getOption('allow_reset')): ?>
-            <li><a href="?reset=1" id="resetCache" onclick="return confirm('Are you sure you want to reset the cache?');">Reset cache</a></li>
+            <li class="nav-tab"><a href="?reset=1" id="resetCache" onclick="return confirm('Are you sure you want to reset the cache?');" class="nav-tab-link nav-tab-link-reset">Reset cache</a></li>
             <?php endif; ?>
             <?php if ($opcache->getOption('allow_realtime')): ?>
-            <li><a href="#" id="toggleRealtime">Enable real-time update</a></li>
+            <li class="nav-tab"><a href="#" id="toggleRealtime" class="nav-tab-link nav-tab-link-realtime">Enable real-time update</a></li>
             <?php endif; ?>
         </ul>
     </nav>
 </header>
 
-<div id="tabs">
-    <div id="overview">
-        <div class="container">
-            <div id="counts"></div>
-            <div id="info">
+<div id="tabs" class="tab-content-container">
+    <div id="overview" class="tab-content tab-content-overview">
+        <div>
+            <div id="counts" class="tab-content-overview-counts"></div>
+            <div id="info" class="tab-content-overview-info">
                 <div id="generalInfo"></div>
                 <div id="directives"></div>
                 <div id="functions">
-                    <table>
+                    <table class="tables">
                         <thead>
                             <tr><th>Available functions</th></tr>
                         </thead>
@@ -434,19 +432,19 @@ $opcache = OpCacheService::init($options);
             </div>
         </div>
     </div>
-    <div id="files">
+    <div id="files" class="tab-content tab-content-files">
         <?php if ($opcache->getOption('allow_filelist')): ?>
         <form action="#">
             <label for="frmFilter">Start typing to filter on script path</label><br>
-            <input type="text" name="filter" id="frmFilter">
+            <input type="text" name="filter" id="frmFilter" class="file-filter">
         </form>
         <?php endif; ?>
-        <div class="container" id="filelist"></div>
+        <div id="filelist"></div>
     </div>
 </div>
 
-<footer>
-    <a href="https://github.com/amnuts/opcache-gui" target="_blank" title="opcache-gui (currently version <?php echo OpCacheService::VERSION; ?>) on GitHub">https://github.com/amnuts/opcache-gui - version <?php echo OpCacheService::VERSION; ?></a>
+<footer class="main-footer">
+    <a class="github-link" href="https://github.com/amnuts/opcache-gui" target="_blank" title="opcache-gui (currently version <?php echo OpCacheService::VERSION; ?>) on GitHub">https://github.com/amnuts/opcache-gui - version <?php echo OpCacheService::VERSION; ?></a>
 </footer>
 
 <script type="text/javascript">
@@ -634,7 +632,7 @@ $opcache = OpCacheService::init($options);
         },
         render: function () {
             if (this.props.chart == true) {
-                return React.createElement("canvas", { id: this.props.gaugeId, width: "250", height: "250", "data-value": this.props.value });
+                return React.createElement("canvas", { id: this.props.gaugeId, className: "graph-widget", width: "250", height: "250", "data-value": this.props.value });
             }
             return React.createElement(
                 "p",
@@ -657,15 +655,15 @@ $opcache = OpCacheService::init($options);
         render: function () {
             return React.createElement(
                 "div",
-                { className: "moreinfo" },
+                { className: "widget-panel" },
                 React.createElement(
                     "h3",
-                    null,
+                    { className: "widget-header" },
                     "memory usage"
                 ),
                 React.createElement(
                     "div",
-                    null,
+                    { className: "widget-value widget-info" },
                     React.createElement(
                         "p",
                         null,
@@ -722,15 +720,15 @@ $opcache = OpCacheService::init($options);
         render: function () {
             return React.createElement(
                 "div",
-                { className: "moreinfo" },
+                { className: "widget-panel" },
                 React.createElement(
                     "h3",
-                    null,
+                    { className: "widget-header" },
                     "opcache statistics"
                 ),
                 React.createElement(
                     "div",
-                    null,
+                    { className: "widget-value widget-info" },
                     React.createElement(
                         "p",
                         null,
@@ -806,15 +804,15 @@ $opcache = OpCacheService::init($options);
         render: function () {
             return React.createElement(
                 "div",
-                { className: "moreinfo" },
+                { className: "widget-panel" },
                 React.createElement(
                     "h3",
-                    null,
+                    { className: "widget-header" },
                     "interned strings usage"
                 ),
                 React.createElement(
                     "div",
-                    null,
+                    { className: "widget-value widget-info" },
                     React.createElement(
                         "p",
                         null,
@@ -876,7 +874,7 @@ $opcache = OpCacheService::init($options);
             if (this.state.data == false) {
                 return React.createElement(
                     "p",
-                    { id: "fileCacheOnly" },
+                    { "class": "file-cache-only" },
                     "You have ",
                     React.createElement(
                         "i",
@@ -901,45 +899,45 @@ $opcache = OpCacheService::init($options);
 
             var memoryHighlight = this.state.highlight.memory ? React.createElement(
                 "div",
-                null,
+                { className: "widget-panel" },
                 React.createElement(
                     "h3",
-                    null,
+                    { className: "widget-header" },
                     "memory"
                 ),
                 React.createElement(
                     "p",
-                    null,
+                    { className: "widget-value" },
                     React.createElement(UsageGraph, { chart: this.state.chart, value: this.state.data.used_memory_percentage, gaugeId: "memoryUsageCanvas" })
                 )
             ) : null;
 
             var hitsHighlight = this.state.highlight.hits ? React.createElement(
                 "div",
-                null,
+                { className: "widget-panel" },
                 React.createElement(
                     "h3",
-                    null,
+                    { className: "widget-header" },
                     "hit rate"
                 ),
                 React.createElement(
                     "p",
-                    null,
+                    { className: "widget-value" },
                     React.createElement(UsageGraph, { chart: this.state.chart, value: this.state.data.hit_rate_percentage, gaugeId: "hitRateCanvas" })
                 )
             ) : null;
 
             var keysHighlight = this.state.highlight.keys ? React.createElement(
                 "div",
-                null,
+                { className: "widget-panel" },
                 React.createElement(
                     "h3",
-                    null,
+                    { className: "widget-header" },
                     "keys"
                 ),
                 React.createElement(
                     "p",
-                    null,
+                    { className: "widget-value" },
                     React.createElement(UsageGraph, { chart: this.state.chart, value: this.state.data.used_key_percentage, gaugeId: "keyUsageCanvas" })
                 )
             ) : null;
@@ -1009,7 +1007,7 @@ $opcache = OpCacheService::init($options);
             ) : '';
             return React.createElement(
                 "table",
-                null,
+                { className: "tables general-info-table" },
                 React.createElement(
                     "thead",
                     null,
@@ -1139,7 +1137,7 @@ $opcache = OpCacheService::init($options);
             });
             return React.createElement(
                 "table",
-                null,
+                { className: "tables directives-table" },
                 React.createElement(
                     "thead",
                     null,
@@ -1202,7 +1200,7 @@ $opcache = OpCacheService::init($options);
                             ",\xA0",
                             React.createElement(
                                 "a",
-                                { className: "metainfo", href: '?invalidate=' + file.full_path, "data-file": file.full_path, onClick: this.handleInvalidate },
+                                { className: "file-metainfo", href: '?invalidate=' + file.full_path, "data-file": file.full_path, onClick: this.handleInvalidate },
                                 "force file invalidation"
                             )
                         );
@@ -1214,18 +1212,13 @@ $opcache = OpCacheService::init($options);
                             "td",
                             null,
                             React.createElement(
-                                "div",
-                                null,
-                                React.createElement(
-                                    "span",
-                                    { className: "pathname" },
-                                    file.full_path
-                                ),
-                                React.createElement("br", null),
-                                React.createElement(FilesMeta, { data: [file.readable.hits, file.readable.memory_consumption, file.last_used] }),
-                                invalidate,
-                                invalidated
-                            )
+                                "span",
+                                { className: "file-pathname" },
+                                file.full_path
+                            ),
+                            React.createElement(FilesMeta, { data: [file.readable.hits, file.readable.memory_consumption, file.last_used] }),
+                            invalidate,
+                            invalidated
                         )
                     );
                 }.bind(this));
@@ -1235,7 +1228,7 @@ $opcache = OpCacheService::init($options);
                     React.createElement(FilesListed, { showing: this.state.showing }),
                     React.createElement(
                         "table",
-                        null,
+                        { className: "tables file-list-table" },
                         React.createElement(
                             "thead",
                             null,
@@ -1266,7 +1259,7 @@ $opcache = OpCacheService::init($options);
         render: function () {
             return React.createElement(
                 "span",
-                { className: "metainfo" },
+                { className: "file-metainfo" },
                 React.createElement(
                     "b",
                     null,
