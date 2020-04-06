@@ -8,7 +8,7 @@ namespace OpcacheGui;
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 2.5.2
+ * @version 2.5.3
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, http://acollington.mit-license.org/
  */
@@ -54,7 +54,7 @@ header('Pragma: no-cache');
 
 class OpCacheService
 {
-    const VERSION = '2.5.2';
+    const VERSION = '2.5.3';
 
     protected $data;
     protected $options;
