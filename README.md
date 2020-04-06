@@ -108,7 +108,11 @@ The composer.json file is provided to allow you to deploy the opcache gui a litt
 
 ## Releases
 
+**Version 2.5.2**\
+CSS class names have been added and style rules updated to use them.
+
 **Version 2.5.1**\
+A couple bug fixes and improvement on the optimisation level details.
 * optimisation_level now shows the levels of optimisations that will be performed rather than an abstract number
 * Fixed issue #43
 * Fixed issue #44
