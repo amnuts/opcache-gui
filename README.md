@@ -108,6 +108,9 @@ The composer.json file is provided to allow you to deploy the opcache gui a litt
 
 ## Releases
 
+**Version 2.5.4**\
+Refined placement of initial css namespace to play nicely within Moodle plugin and possibly other systems.  Also tweaked some CSS.
+
 **Version 2.5.3**\
 CSS class names have been added and style rules updated to use them.
 

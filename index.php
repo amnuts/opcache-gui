@@ -8,7 +8,7 @@ namespace OpcacheGui;
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 2.5.3
+ * @version 2.5.4
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, http://acollington.mit-license.org/
  */
@@ -54,7 +54,7 @@ header('Pragma: no-cache');
 
 class OpCacheService
 {
-    const VERSION = '2.5.3';
+    const VERSION = '2.5.4';
 
     protected $data;
     protected $options;
@@ -311,7 +311,7 @@ $opcache = OpCacheService::init($options);
     <script src="//cdn.jsdelivr.net/react/15.4.2/react-dom.min.js"></script>
     <script src="//cdn.jsdelivr.net/jquery/3.1.1/jquery.min.js"></script>
     <style type="text/css">
-        .opcache-gui { font-family:sans-serif; font-size:90%; padding: 0; margin: 0 }
+        .opcache-gui { font-family:sans-serif; font-size:90%; padding: 0; margin: 0; }
         .opcache-gui .hide { display: none; }
         .opcache-gui .main-nav { padding-top: 20px; }
         .opcache-gui .nav-tab-list { list-style-type: none; padding-left: 8px; margin: 0; border-bottom: 1px solid #ccc; }
@@ -336,7 +336,7 @@ $opcache = OpCacheService::init($options);
         .opcache-gui .tab-content-overview-info { margin-right: 280px; }
         .opcache-gui .graph-widget { display: block; max-width: 100%; height: auto; margin: 0 auto; }
         .opcache-gui .widget-panel { background-color: #ededed; margin-bottom: 10px; }
-        .opcache-gui .widget-header { background-color: #cdcdcd; padding: 4px 6px; margin: 0; text-align: center; }
+        .opcache-gui .widget-header { background-color: #cdcdcd; padding: 4px 6px; margin: 0; text-align: center; font-size: 1rem; font-weight: bold; }
         .opcache-gui .widget-value { margin: 0; text-align: center; }
         .opcache-gui .widget-value span.large + span { font-size: 20pt; margin: 0; color: #6ca6ef; }
         .opcache-gui .widget-value span.large { color: #6ca6ef; font-size: 80pt; margin: 0; padding: 0; text-align: center; }
@@ -390,62 +390,66 @@ $opcache = OpCacheService::init($options);
     </style>
 </head>
 
-<body class="opcache-gui">
+<body style="padding: 0; margin: 0;">
 
-<header>
-    <nav class="main-nav">
-        <ul class="nav-tab-list">
-            <li class="nav-tab"><a data-for="overview" href="#overview" class="active nav-tab-link">Overview</a></li>
-            <?php if ($opcache->getOption('allow_filelist')): ?>
-            <li class="nav-tab"><a data-for="files" href="#files" class="nav-tab-link">File usage</a></li>
-            <?php endif; ?>
-            <?php if ($opcache->getOption('allow_reset')): ?>
-            <li class="nav-tab"><a href="?reset=1" id="resetCache" onclick="return confirm('Are you sure you want to reset the cache?');" class="nav-tab-link nav-tab-link-reset">Reset cache</a></li>
-            <?php endif; ?>
-            <?php if ($opcache->getOption('allow_realtime')): ?>
-            <li class="nav-tab"><a href="#" id="toggleRealtime" class="nav-tab-link nav-tab-link-realtime">Enable real-time update</a></li>
-            <?php endif; ?>
-        </ul>
-    </nav>
-</header>
+<div class="opcache-gui">
 
-<div id="tabs" class="tab-content-container">
-    <div id="overview" class="tab-content tab-content-overview">
-        <div>
-            <div id="counts" class="tab-content-overview-counts"></div>
-            <div id="info" class="tab-content-overview-info">
-                <div id="generalInfo"></div>
-                <div id="directives"></div>
-                <div id="functions">
-                    <table class="tables">
-                        <thead>
-                            <tr><th>Available functions</th></tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($opcache->getData('functions') as $func): ?>
-                            <tr><td><a href="http://php.net/<?php echo $func; ?>" title="View manual page" target="_blank"><?php echo $func; ?></a></td></tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+    <header>
+        <nav class="main-nav">
+            <ul class="nav-tab-list">
+                <li class="nav-tab"><a data-for="overview" href="#overview" class="active nav-tab-link">Overview</a></li>
+                <?php if ($opcache->getOption('allow_filelist')): ?>
+                <li class="nav-tab"><a data-for="files" href="#files" class="nav-tab-link">File usage</a></li>
+                <?php endif; ?>
+                <?php if ($opcache->getOption('allow_reset')): ?>
+                <li class="nav-tab"><a href="?reset=1" id="resetCache" onclick="return confirm('Are you sure you want to reset the cache?');" class="nav-tab-link nav-tab-link-reset">Reset cache</a></li>
+                <?php endif; ?>
+                <?php if ($opcache->getOption('allow_realtime')): ?>
+                <li class="nav-tab"><a href="#" id="toggleRealtime" class="nav-tab-link nav-tab-link-realtime">Enable real-time update</a></li>
+                <?php endif; ?>
+            </ul>
+        </nav>
+    </header>
+
+    <div id="tabs" class="tab-content-container">
+        <div id="overview" class="tab-content tab-content-overview">
+            <div>
+                <div id="counts" class="tab-content-overview-counts"></div>
+                <div id="info" class="tab-content-overview-info">
+                    <div id="generalInfo"></div>
+                    <div id="directives"></div>
+                    <div id="functions">
+                        <table class="tables">
+                            <thead>
+                                <tr><th>Available functions</th></tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($opcache->getData('functions') as $func): ?>
+                                <tr><td><a href="http://php.net/<?php echo $func; ?>" title="View manual page" target="_blank"><?php echo $func; ?></a></td></tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <br style="clear:both;" />
                 </div>
-                <br style="clear:both;" />
             </div>
         </div>
+        <div id="files" class="tab-content tab-content-files">
+            <?php if ($opcache->getOption('allow_filelist')): ?>
+            <form action="#">
+                <label for="frmFilter">Start typing to filter on script path</label><br>
+                <input type="text" name="filter" id="frmFilter" class="file-filter">
+            </form>
+            <?php endif; ?>
+            <div id="filelist"></div>
+        </div>
     </div>
-    <div id="files" class="tab-content tab-content-files">
-        <?php if ($opcache->getOption('allow_filelist')): ?>
-        <form action="#">
-            <label for="frmFilter">Start typing to filter on script path</label><br>
-            <input type="text" name="filter" id="frmFilter" class="file-filter">
-        </form>
-        <?php endif; ?>
-        <div id="filelist"></div>
-    </div>
-</div>
 
-<footer class="main-footer">
-    <a class="github-link" href="https://github.com/amnuts/opcache-gui" target="_blank" title="opcache-gui (currently version <?php echo OpCacheService::VERSION; ?>) on GitHub">https://github.com/amnuts/opcache-gui - version <?php echo OpCacheService::VERSION; ?></a>
-</footer>
+    <footer class="main-footer">
+        <a class="github-link" href="https://github.com/amnuts/opcache-gui" target="_blank" title="opcache-gui (currently version <?php echo OpCacheService::VERSION; ?>) on GitHub">https://github.com/amnuts/opcache-gui - version <?php echo OpCacheService::VERSION; ?></a>
+    </footer>
+
+</div>
 
 <script type="text/javascript">
     var realtime = false;
