@@ -2,3 +2,5 @@
 /src/status.js
 /.idea
 /.module-cache
+/node_modules
+/package-lock.json
