@@ -102,7 +102,7 @@ The interface can poll every so often to get a fresh look at the opcache.  You c
 
 ## Project files
 
-The status.jsx file is provided solely for you to be able to edit the jsx code should you wish.  For production purposes it's best to have the jsx code pre-compiled which is what's used in index.php.  You do not need to use status.jsx at all in order to use the opcache gui.  However, should you wish to compile the jsx code then you'll need to use [babel](https://babeljs.io/) or the [react-tools](https://www.npmjs.com/package/react-tools) (no longer supported with newer versions of React).
+The status.jsx file is provided solely for you to be able to edit the jsx code should you wish.  For production purposes it's best to have the jsx code pre-compiled which is what's used in index.php.  You do not need to use status.jsx at all in order to use the opcache gui.  However, should you wish to compile the jsx code then you'll need to use [babel](https://babeljs.io/) or the [react-tools](https://www.npmjs.com/package/react-tools) (no longer supported with newer versions of React). For that, run `npm install` in the main directory. After that, run `node_modules/.bin/babel --presets @babel/preset-react src/status.jsx` to compile the file and paste it into the correct spot in `index.php`. MacOS users can pipe the output directly to `pbcopy` to copy the file to the clipboard. The same goes for linux users with `xclip`.
 
 The composer.json file is provided to allow you to deploy the opcache gui a little easier by using composer.
 
