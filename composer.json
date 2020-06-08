@@ -22,12 +22,14 @@
   },
   "require": {
     "ext-Zend-OPcache": "*",
-    "php": ">=7.1.*"
+    "php": ">=7.1.0"
   },
   "autoload": {
     "psr-4" : {
       "Amnuts\\" : "src/"
     }
+  },
+  "scripts": {
+    "build": "php build/build.php"
   }
 }
-

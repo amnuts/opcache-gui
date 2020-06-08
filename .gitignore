@@ -4,4 +4,6 @@
 /.module-cache
 /node_modules
 /package-lock.json
-/build
+/build/*
+!/build/template.php
+!/build/build.php
