@@ -1,6 +1,6 @@
 <?php
 
-use Amnuts\Opcache\Service;
+namespace Amnuts\Opcache;
 
 /**
  * OPcache GUI
@@ -52,6 +52,7 @@ if (empty($ocEnabled)) {
 header('Cache-Control: no-cache, must-revalidate');
 header('Pragma: no-cache');
 
+{{PHP_OUTPUT}}
 
 $opcache = (new Service($options))->handle();
 

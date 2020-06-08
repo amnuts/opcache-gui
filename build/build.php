@@ -1,15 +1,27 @@
 <?php
 
-chdir(dirname(__DIR__));
+$parentPath = dirname(__DIR__);
 
+if (!file_exists($parentPath . '/node_modules')) {
+    echo "🐢 Installing node modules\n";
+    exec('npm install');
+}
+
+echo "🏗️ Building js and css\n";
+chdir($parentPath);
 exec('npm run compile-jsx');
 exec('npm run compile-scss');
 
-$template = trim(file_get_contents(__DIR__ . '/template.php'));
+echo "🚀 Creating single build file\n";
+$template = trim(file_get_contents(__DIR__ . '/template.phps'));
 $jsOutput = trim(file_get_contents(__DIR__ . '/interface.js'));
 $cssOutput = trim(file_get_contents(__DIR__ . '/interface.css'));
+$phpOutput = trim(join('', array_slice(file($parentPath . '/src/Opcache/Service.php'), 3)));
+$output = str_replace(
+    ['{{JS_OUTPUT}}', '{{CSS_OUTPUT}}', '{{PHP_OUTPUT}}'],
+    [$jsOutput, $cssOutput, $phpOutput],
+    $template
+);
+file_put_contents($parentPath . '/index.php', $output);
 
-$output = str_replace(['{{JS_OUTPUT}}', '{{CSS_OUTPUT}}'], [$jsOutput, $cssOutput], $template);
-file_put_contents(dirname(__DIR__) . '/index.php', $output);
-
-echo 'Compiled';
+echo "💯 Done!\n";
