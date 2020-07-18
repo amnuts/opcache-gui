@@ -11,8 +11,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "compile-jsx": "node_modules/.bin/babel --presets @babel/preset-react src/_frontend/interface.jsx -o build/interface.js",
-    "compile-scss": "node_modules/.bin/node-sass -xi src/_frontend/interface.scss -o build/ --output-style=compressed"
+    "compile-jsx": "node_modules/.bin/babel --presets @babel/preset-react build/_frontend/interface.jsx -o build/interface.js",
+    "compile-scss": "node_modules/.bin/node-sass -xi build/_frontend/interface.scss -o build/ --output-style=compressed"
   },
   "repository": {
     "type": "git",
