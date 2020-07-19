@@ -5,7 +5,7 @@ A clean and responsive interface for Zend OPcache information, showing statistic
 [![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=acollington&url=https://github.com/amnuts/opcache-gui&title=opcache-gui&language=&tags=github&category=software)
 If you like this software or find it helpful then maybe you'll consider supporting my efforts in some way by [signing up to Flattr and leaving a micro-donation](https://flattr.com/@acollington).
 
-### Getting started
+### Using the opcache-gui
 
 There are two ways to getting started using this gui:
 
@@ -19,10 +19,12 @@ You can include the files with [Composer](https://getcomposer.org/) by running t
 
 Once in your `vendor` directory, there are numerous ways in which you can use the interface.  For example if you're using a framework such as Symfony or Laravel, you could load opcache-gui into a `Controller`.  Your requirements of setting it up within a framework will vary, and wouldn't be possible to detail how to do that within this readme.
 
-The namespace used for the class is `OpcacheGui`, so once the dependency is in your `autoload.php` you can use the `\OpcacheGui\OpCacheService` class.  For example, you could do something like:
+The namespace used for the class is `Amnuts\Opcache`, so once the dependency is in your `autoload.php` you can use the `\Amnuts\Opcache\Service` class.  For example, you could do something like:
 
 ```php
 <?php
+
+use Amnuts\Opcache\Service;
 
 // assuming location of: /var/www/html/opcache.php
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -31,10 +33,10 @@ require_once __DIR__ . '/../vendor/autoload.php';
 $options = [/* ... */];
 
 // setup the class
-\OpcacheGui\OpCacheService::init($options);
+$opcache = (new Service($options))->handle();
 ```
 
-And then you can create whatever view you want to show the details.
+Then you can create whatever view you want to show the details.
 
 Alternatively include `vendor/amnuts/opcache-gui/index.php` directly to use the default `$options`:
 
@@ -46,15 +48,17 @@ Alternatively include `vendor/amnuts/opcache-gui/index.php` directly to use the 
 require_once __DIR__ . '/../vendor/amnuts/opcache-gui/index.php';
 ```
 
-Or you could simple copy or create a symlink to the `index.php` in the vendor directory:
+Or you could simply copy or create a symlink to the `index.php` in the vendor directory:
 
 ```shell script
 ln -s /var/www/vendor/amnuts/opcache-gui/index.php /var/www/html/opcache.php
 ```
 
+Basically, there are numerous ways to get the interface up and running - pick whichever suits your needs.
+
 ### Configuration
 
-If you want to set the configuration options just alter the array at the top of the `index.php` script:
+If you want to set the configuration options just alter the array at the top of the `index.php` script (or pass in the array differently to the `Service` class):
 ```php
 $options = [
     'allow_filelist'   => true,          // show/hide the files tab
@@ -74,6 +78,19 @@ $options = [
         'keys'   => true
     ]
 ];
+```
+
+### Changing the look
+
+If you want to update the CSS for the interface then you should edit the `build/_frontend/interface.scss` file.  If you want to change the interface itself, update the `build/_frontend/interface.jsx` file.
+
+If you update those files, you will want to build the interface again and have the new jsx/css put into use.  To do that, run the command `php build/build.php` (you will need `npm` to be available).  Once running, you should see the output:
+
+```
+🐢 Installing node modules
+🏗️ Building js and css
+🚀 Creating single build file
+💯 Done!
 ```
 
 ### Overview
@@ -107,6 +124,11 @@ The status.jsx file is provided solely for you to be able to edit the jsx code s
 The composer.json file is provided to allow you to deploy the opcache gui a little easier by using composer.
 
 ## Releases
+
+**Version 3.0.0**\
+The css, js, and php have all been split up into different files, with the css moving to scss.  This was done so that the core PHP could be included via composer and integrated into your own app without any dependency of the html output (so you can use your own html).  A build script is in place to assemble the single script, which will also allow people to use just the `index.php` as normal, so you only need the one file for the interface.
+
+Along with this, the namespace has changed.  
 
 **Version 2.5.4**\
 Refined placement of initial css namespace to play nicely within Moodle plugin and possibly other systems.  Also tweaked some CSS.
