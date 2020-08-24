@@ -21,13 +21,7 @@
 
   .nav-tab {
     display: inline-block;
-    padding: 0;
     margin: 0 0 -1px 0;
-  }
-
-  .nav-tab-link {
-    display: block;
-    margin: 0 10px;
     padding: 15px 30px;
     border: 1px solid transparent;
     border-bottom-color: #ccc;
@@ -38,15 +32,16 @@
       text-decoration: underline;
     }
 
-    &.active:hover {
-      background-color: initial;
-    }
-
-    &[data-for].active {
+    &.active {
       border: 1px solid #ccc;
       border-bottom-color: #ffffff;
       border-top: 3px solid #6ca6ef;
     }
+
+    &.active:hover {
+      background-color: initial;
+    }
+
   }
 
   .nav-tab-link-reset {
@@ -73,16 +68,8 @@
     }
   }
 
-  .tab-content-container {
-    padding: 2em;
-  }
-
   .tab-content {
-    display: none;
-  }
-
-  .tab-content-overview {
-    display: block;
+    padding: 2em;
   }
 
   .tab-content-overview-counts {

@@ -265,7 +265,8 @@ class Service
                             : $_SERVER['SERVER_NAME']
                         )
                     )
-                )
+                ),
+                'gui' => self::VERSION
             ]
         );
 

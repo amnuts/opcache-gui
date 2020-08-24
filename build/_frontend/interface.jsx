@@ -1,30 +1,36 @@
-var UsageGraph = React.createClass({
-    getInitialState: function() {
-        return {
-            gauge : null
-        };
-    },
-    componentDidMount: function() {
-        if (this.props.chart) {
-            this.state.gauge = new Gauge('#' + this.props.gaugeId);
-            this.state.gauge.setValue(this.props.value);
-        }
-    },
-    componentDidUpdate: function() {
-        if (this.state.gauge != null) {
-            this.state.gauge.setValue(this.props.value);
-        }
-    },
-    render: function() {
-        if (this.props.chart == true) {
-            return(<canvas id={this.props.gaugeId} className="graph-widget" width="250" height="250" data-value={this.props.value} />);
-        }
-        return(<p><span className="large">{this.props.value}</span><span>%</span></p>);
+class UsageGraph extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {gauge: null};
     }
-});
 
-var MemoryUsagePanel = React.createClass({
-    render: function() {
+    componentDidMount() {
+        if (this.props.chart) {
+            this.state.gauge = {}; //@todo new Gauge('#' + this.props.gaugeId);
+            this.state.gauge = this.props.value;
+        }
+    }
+
+    componentDidUpdate() {
+        if (this.state.gauge != null) {
+            this.state.gauge = this.props.value;
+        }
+    }
+
+    render() {
+        if (this.props.chart == true) {
+            return (
+                <canvas id={this.props.gaugeId} className="graph-widget" width="250" height="250" data-value={this.props.value} />
+            );
+        }
+        return (
+            <p><span className="large">{this.props.value}</span><span>%</span></p>
+        );
+    }
+};
+
+class MemoryUsagePanel extends React.Component {
+    render() {
         return (
             <div className="widget-panel">
                 <h3 className="widget-header">memory usage</h3>
@@ -37,10 +43,10 @@ var MemoryUsagePanel = React.createClass({
             </div>
         );
     }
-});
+};
 
-var StatisticsPanel = React.createClass({
-    render: function() {
+class StatisticsPanel extends React.Component {
+    render() {
         return (
             <div className="widget-panel">
                 <h3 className="widget-header">opcache statistics</h3>
@@ -55,142 +61,143 @@ var StatisticsPanel = React.createClass({
             </div>
         );
     }
-});
+};
 
-var InternedStringsPanel = React.createClass({
-    render: function() {
-        return (
-            <div className="widget-panel">
-                <h3 className="widget-header">interned strings usage</h3>
-                <div className="widget-value widget-info">
-                    <p><b>buffer size:</b> {this.props.buffer_size}</p>
-                    <p><b>used memory:</b> {this.props.strings_used_memory}</p>
-                    <p><b>free memory:</b> {this.props.strings_free_memory}</p>
-                    <p><b>number of strings:</b> {this.props.number_of_strings}</p>
-                </div>
+function InternedStringsPanel(props) {
+    return (
+        <div className="widget-panel">
+            <h3 className="widget-header">interned strings usage</h3>
+            <div className="widget-value widget-info">
+                <p><b>buffer size:</b> {props.buffer_size}</p>
+                <p><b>used memory:</b> {props.strings_used_memory}</p>
+                <p><b>free memory:</b> {props.strings_free_memory}</p>
+                <p><b>number of strings:</b> {props.number_of_strings}</p>
             </div>
-        );
-    }
-});
+        </div>
+    );
+};
 
-var OverviewCounts = React.createClass({
-    getInitialState: function() {
-        return {
-            data  : opstate.overview,
-            chart : useCharts,
-            highlight: highlight
-        };
-    },
-    render: function() {
-        if (this.state.data == false) {
+class OverviewCounts extends React.Component {
+    constructor(props) {
+        super(props);
+        this.overview = props.opstate.overview;
+        this.readable = props.opstate.overview.readable;
+    }
+
+    renderInternedStrings() {
+        if (this.readable.interned == null) {
+            return <></>;
+        }
+        return <InternedStringsPanel
+            buffer_size={this.readable.interned.buffer_size}
+            strings_used_memory={this.readable.interned.strings_used_memory}
+            strings_free_memory={this.readable.interned.strings_free_memory}
+            number_of_strings={this.readable.interned.number_of_strings}
+        />;
+    }
+
+    renderGraphs(useCharts, graphList) {
+        return graphList.map((graph) => {
+            if (graph.show == null) {
+                return <></>;
+            }
+            return (
+                <div className="widget-panel" key={graph.id}>
+                    <h3 className="widget-header">{graph.title}</h3>
+                    <p className="widget-value"><UsageGraph chart={useCharts} value={graph.value} gaugeId={graph.id} /></p>
+                </div>
+            );
+        });
+    }
+
+    render() {
+        if (this.overview === false) {
             return (
                 <p class="file-cache-only">
                     You have <i>opcache.file_cache_only</i> turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by <i>opcache_get_statistics()</i>.
                 </p>
             );
         }
-        var interned = (this.state.data.readable.interned != null 
-            ? <InternedStringsPanel
-                    buffer_size={this.state.data.readable.interned.buffer_size}
-                    strings_used_memory={this.state.data.readable.interned.strings_used_memory}
-                    strings_free_memory={this.state.data.readable.interned.strings_free_memory}
-                    number_of_strings={this.state.data.readable.interned.number_of_strings}
-              /> 
-            : ''
-        );
-
-        var memoryHighlight = this.state.highlight.memory ? (
-                <div className="widget-panel">
-                    <h3 className="widget-header">memory</h3>
-                    <p className="widget-value"><UsageGraph chart={this.state.chart} value={this.state.data.used_memory_percentage} gaugeId="memoryUsageCanvas"/></p>
-                </div>
-            ) : null;
-
-        var hitsHighlight = this.state.highlight.hits ? (
-                <div className="widget-panel">
-                    <h3 className="widget-header">hit rate</h3>
-                    <p className="widget-value"><UsageGraph chart={this.state.chart} value={this.state.data.hit_rate_percentage} gaugeId="hitRateCanvas"/></p>
-                </div>
-            ) : null;
-
-        var keysHighlight = this.state.highlight.keys ? (
-                <div className="widget-panel">
-                    <h3 className="widget-header">keys</h3>
-                    <p className="widget-value"><UsageGraph chart={this.state.chart} value={this.state.data.used_key_percentage} gaugeId="keyUsageCanvas"/></p>
-                </div>
-            ) : null;
-
-
         return (
-            <div>
-                {memoryHighlight}
-                {hitsHighlight}
-                {keysHighlight}
+            <div id="counts" className="tab-content-overview-counts">
+                {this.renderGraphs(this.props.useCharts, [
+                    {id: 'memoryUsageCanvas', title: 'memory', show: this.props.highlight.memory, value: this.props.opstate.overview.used_memory_percentage},
+                    {id: 'hitRateCanvas', title: 'hit rate', show: this.props.highlight.hits, value: this.props.opstate.overview.hit_rate_percentage},
+                    {id: 'keyUsageCanvas', title: 'keys', show: this.props.highlight.keys, value: this.props.opstate.overview.used_key_percentage}
+                ])}
                 <MemoryUsagePanel
-                    total={this.state.data.readable.total_memory}
-                    used={this.state.data.readable.used_memory}
-                    free={this.state.data.readable.free_memory}
-                    wasted={this.state.data.readable.wasted_memory}
-                    wastedPercent={this.state.data.wasted_percentage}
+                    total={this.readable.total_memory}
+                    used={this.readable.used_memory}
+                    free={this.readable.free_memory}
+                    wasted={this.readable.wasted_memory}
+                    wastedPercent={this.overview.wasted_percentage}
                 />
                 <StatisticsPanel
-                    num_cached_scripts={this.state.data.readable.num_cached_scripts}
-                    hits={this.state.data.readable.hits}
-                    misses={this.state.data.readable.misses}
-                    blacklist_miss={this.state.data.readable.blacklist_miss}
-                    num_cached_keys={this.state.data.readable.num_cached_keys}
-                    max_cached_keys={this.state.data.readable.max_cached_keys}
+                    num_cached_scripts={this.readable.num_cached_scripts}
+                    hits={this.readable.hits}
+                    misses={this.readable.misses}
+                    blacklist_miss={this.readable.blacklist_miss}
+                    num_cached_keys={this.readable.num_cached_keys}
+                    max_cached_keys={this.readable.max_cached_keys}
                 />
-                {interned}
+                {this.renderInternedStrings()}
             </div>
         );
     }
-});
+};
 
-var GeneralInfo = React.createClass({
-    getInitialState: function() {
-        return {
-            version : opstate.version,
-            start : opstate.overview ? opstate.overview.readable.start_time : null,
-            reset : opstate.overview ? opstate.overview.readable.last_restart_time : null
-        };
-    },
-    render: function() {
-        var startTime = this.state.start
-            ? <tr><td>Start time</td><td>{this.state.start}</td></tr>
-            : '';
-        var lastReset = this.state.reset
-            ? <tr><td>Last reset</td><td>{this.state.reset}</td></tr>
-            : '';
+class GeneralInfo extends React.Component {
+    constructor(props) {
+        super(props);
+        this.start = props.opstate.overview ? props.opstate.overview.readable.start_time : null;
+        this.reset = props.opstate.overview ? props.opstate.overview.readable.last_restart_time : null;
+    }
+
+    renderStart() {
+        if (this.start === null) {
+            return <></>;
+        }
+        return <tr><td>Start time</td><td>{this.start}</td></tr>;
+    }
+
+    renderReset() {
+        if (this.reset === null) {
+            return <></>;
+        }
+        return <tr><td>Last reset</td><td>{this.reset}</td></tr>;
+    }
+
+    render() {
         return (
             <table className="tables general-info-table">
                 <thead>
                     <tr><th colSpan="2">General info</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td>Zend OPcache</td><td>{this.state.version.version}</td></tr>
-                    <tr><td>PHP</td><td>{this.state.version.php}</td></tr>
-                    <tr><td>Host</td><td>{this.state.version.host}</td></tr>
-                    <tr><td>Server Software</td><td>{this.state.version.server}</td></tr>
-                    { startTime }
-                    { lastReset }
+                    <tr><td>Zend OPcache</td><td>{this.props.version.version}</td></tr>
+                    <tr><td>PHP</td><td>{this.props.version.php}</td></tr>
+                    <tr><td>Host</td><td>{this.props.version.host}</td></tr>
+                    <tr><td>Server Software</td><td>{this.props.version.server}</td></tr>
+                    { this.renderStart() }
+                    { this.renderReset() }
                 </tbody>
             </table>
         );
     }
-});
+};
 
-var Directives = React.createClass({
-    getInitialState: function() {
-        return { data : opstate.directives };
-    },
-    render: function() {
-        var directiveNodes = this.state.data.map(function(directive) {
-            var map = { 'opcache.':'', '_':' ' };
-            var dShow = directive.k.replace(/opcache\.|_/gi, function(matched){
+class Directives extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        let directiveNodes = this.props.opstate.directives.map(function(directive) {
+            let map = { 'opcache.':'', '_':' ' };
+            let dShow = directive.k.replace(/opcache\.|_/gi, function(matched){
                 return map[matched];
             });
-            var vShow;
+            let vShow;
             if (directive.v === true || directive.v === false) {
                 vShow = React.createElement('i', {}, directive.v.toString());
             } else if (directive.v === '') {
@@ -221,17 +228,18 @@ var Directives = React.createClass({
             </table>
         );
     }
-});
+};
 
-var Files = React.createClass({
-    getInitialState: function() {
+class Files extends React.Component {
+    getInitialState() {
         return {
             data : opstate.files,
             showing: null,
             allowFiles: allowFiles
         };
-    },
-    handleInvalidate: function(e) {
+    }
+
+    handleInvalidate(e) {
         e.preventDefault();
         if (realtime) {
             $.get('#', { invalidate: e.currentTarget.getAttribute('data-file') }, function(data) {
@@ -240,8 +248,9 @@ var Files = React.createClass({
         } else {
             window.location.href = e.currentTarget.href;
         }
-    },
-    render: function() {
+    }
+
+    render() {
         if (this.state.allowFiles) {
             var fileNodes = this.state.data.map(function(file, i) {
                 var invalidate, invalidated;
@@ -265,7 +274,13 @@ var Files = React.createClass({
             }.bind(this));
             return (
                 <div>
+                    <form action="#">
+                        <label htmlFor="frmFilter">Start typing to filter on script path</label><br />
+                        <input type="text" name="filter" id="frmFilter" className="file-filter" />
+                    </form>
+
                     <FilesListed showing={this.state.showing}/>
+
                     <table className="tables file-list-table">
                         <thead>
                         <tr>
@@ -280,37 +295,204 @@ var Files = React.createClass({
             return <span></span>;
         }
     }
-});
+};
 
-var FilesMeta = React.createClass({
-    render: function() {
-        return (
-            <span className="file-metainfo">
-                <b>hits: </b><span>{this.props.data[0]}, </span>
-                <b>memory: </b><span>{this.props.data[1]}, </span>
-                <b>last used: </b><span>{this.props.data[2]}</span>
-            </span>
-        );
+function FilesMeta(props) {
+    return (
+        <span className="file-metainfo">
+            <b>hits: </b><span>{props.data[0]}, </span>
+            <b>memory: </b><span>{props.data[1]}, </span>
+            <b>last used: </b><span>{props.data[2]}</span>
+        </span>
+    );
+};
+
+class FilesListed extends React.Component {
+    constructor(props) {
+        super(props);
+        this.formatted = props.opstate.overview.readable.num_cached_scripts || 0;
+        this.total = props.opstate.overview.readable.num_cached_scripts || 0;
     }
-});
 
-var FilesListed = React.createClass({
-    getInitialState: function() {
-        return {
-            formatted : opstate.overview ? opstate.overview.readable.num_cached_scripts : 0,
-            total     : opstate.overview ? opstate.overview.num_cached_scripts : 0
-        };
-    },
-    render: function() {
-        var display = this.state.formatted + ' file' + (this.state.total == 1 ? '' : 's') + ' cached';
-        if (this.props.showing !== null && this.props.showing != this.state.total) {
+    render() {
+        let display = this.formatted + ' file' + (this.total == 1 ? '' : 's') + ' cached';
+        if (this.props.showing !== null && this.props.showing != this.total) {
             display += ', ' + this.props.showing + ' showing due to filter';
         }
-        return (<h3>{display}</h3>);
+        return (
+            <h3>{display}</h3>
+        );
     }
-});
+};
 
-var overviewCountsObj = ReactDOM.render(<OverviewCounts/>, document.getElementById('counts'));
-var generalInfoObj = ReactDOM.render(<GeneralInfo/>, document.getElementById('generalInfo'));
-var filesObj = ReactDOM.render(<Files/>, document.getElementById('filelist'));
-ReactDOM.render(<Directives/>, document.getElementById('directives'));
+function Footer(props) {
+    return (
+        <footer className="main-footer">
+            <a className="github-link" href="https://github.com/amnuts/opcache-gui"
+               target="_blank"
+               title="opcache-gui (currently version {props.version.gui}) on GitHub"
+            >https://github.com/amnuts/opcache-gui - version {props.version.gui}</a>
+        </footer>
+    );
+}
+
+class Tabs extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            activeTab: this.props.children[0].props.label,
+        };
+    }
+
+    onClickTabItem = (tab) => {
+        this.setState({ activeTab: tab });
+    }
+
+    render() {
+        const {
+            onClickTabItem,
+            props: { children },
+            state: { activeTab }
+        } = this;
+
+        return (
+            <>
+                <ul className="nav-tab-list">
+                    {children.map((child) => {
+                        const { label } = child.props;
+                        return (
+                            <Tab
+                                activeTab={activeTab}
+                                key={label}
+                                label={label}
+                                onClick={onClickTabItem}
+                            />
+                        );
+                    })}
+                </ul>
+                <div className="tab-content">
+                    {children.map((child) => {
+                        if (child.props.label !== activeTab) return undefined;
+                        return child.props.children;
+                    })}
+                </div>
+            </>
+        );
+    }
+}
+
+class Tab extends React.Component {
+    onClick = () => {
+        const { label, onClick } = this.props;
+        onClick(label);
+    }
+
+    render() {
+        const {
+            onClick,
+            props: {activeTab, label },
+        } = this;
+
+        let className = 'nav-tab';
+        if (activeTab === label) {
+            className += ' active';
+        }
+
+        return (
+            <li className={className} onClick={onClick}>{label}</li>
+        );
+    }
+}
+
+class MainNavigation extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    renderOverview() {
+        return (
+            <div label="Overview" tabId="overview">
+                <>
+                    <OverviewCounts {...this.props} />
+                    <div id="info" className="tab-content-overview-info">
+                        <GeneralInfo {...this.props} />
+                        <Directives {...this.props} />
+                        <div id="functions">
+                            <table className="tables">
+                                <thead>
+                                <tr>
+                                    <th>Available functions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr><td>tbody stuff</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <br style={{ clear: 'both' }} />
+                    </div>
+                </>
+            </div>
+        );
+    }
+
+    renderFileList() {
+        if (this.props.allow.filelist) {
+            return (
+                <div label="Files" tabId="files">
+                    <Files {...this.props} />
+                </div>
+            );
+        }
+        return <></>;
+    }
+
+    renderReset() {
+        if (this.props.allow.reset) {
+            return (
+                <div label="Reset cache" tabId="resetCache" link="?reset=1"></div>
+            );
+        }
+        return <></>;
+    }
+
+    renderRealtime() {
+        if (this.props.allow.realtime) {
+            return (
+                <div label="Enable real-time update" tabId="toggleRealtime"></div>
+            );
+        }
+        return <></>;
+    }
+
+    render() {
+        return (
+            <nav className="main-nav">
+                <Tabs>
+                    {this.renderOverview()}
+                    {this.renderFileList()}
+                    {this.renderReset()}
+                    {this.renderRealtime()}
+                </Tabs>
+            </nav>
+        );
+    }
+}
+
+
+function Interface(props) {
+    return (
+        <>
+            <header>
+                <MainNavigation {...props} />
+            </header>
+            <Footer version={props.version} />
+        </>
+    );
+}
+
+
+
+// var filesObj = ReactDOM.render(<Files/>, document.getElementById('filelist'));
+// ReactDOM.render(<Directives/>, document.getElementById('directives'));
+
