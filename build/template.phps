@@ -80,8 +80,6 @@ $opcache = (new Service($options))->handle();
     {{JS_OUTPUT}}
 
     ReactDOM.render(React.createElement(Interface, {
-        version: <?php echo json_encode($opcache->getData('version')); ?>,
-        functions: <?php echo json_encode($opcache->getData('functions')); ?>,
         allow: {
             filelist: <?php echo $opcache->getOption('allow_filelist') ? 'true' : 'false'; ?>,
             invalidate: <?php echo $opcache->getOption('allow_invalidate') ? 'true' : 'false'; ?>,

@@ -154,17 +154,17 @@ class GeneralInfo extends React.Component {
     }
 
     renderStart() {
-        if (this.start === null) {
-            return <></>;
-        }
-        return <tr><td>Start time</td><td>{this.start}</td></tr>;
+        return (this.start === null
+            ? <></>
+            : <tr><td>Start time</td><td>{this.start}</td></tr>
+        );
     }
 
     renderReset() {
-        if (this.reset === null) {
-            return <></>;
-        }
-        return <tr><td>Last reset</td><td>{this.reset}</td></tr>;
+        return (this.reset === null
+            ? <></>
+            : <tr><td>Last reset</td><td>{this.reset}</td></tr>
+        );
     }
 
     render() {
@@ -174,10 +174,10 @@ class GeneralInfo extends React.Component {
                     <tr><th colSpan="2">General info</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td>Zend OPcache</td><td>{this.props.version.version}</td></tr>
-                    <tr><td>PHP</td><td>{this.props.version.php}</td></tr>
-                    <tr><td>Host</td><td>{this.props.version.host}</td></tr>
-                    <tr><td>Server Software</td><td>{this.props.version.server}</td></tr>
+                    <tr><td>Zend OPcache</td><td>{this.props.opstate.version.version}</td></tr>
+                    <tr><td>PHP</td><td>{this.props.opstate.version.php}</td></tr>
+                    <tr><td>Host</td><td>{this.props.opstate.version.host}</td></tr>
+                    <tr><td>Server Software</td><td>{this.props.opstate.version.server}</td></tr>
                     { this.renderStart() }
                     { this.renderReset() }
                 </tbody>
@@ -229,6 +229,23 @@ class Directives extends React.Component {
         );
     }
 };
+
+function Functions(props) {
+    return (
+        <div id="functions">
+            <table className="tables">
+                <thead>
+                    <tr><th>Available functions</th></tr>
+                </thead>
+                <tbody>
+                {props.opstate.functions.map(f =>
+                    <tr><td><a href={"http://php.net/"+f} title="View manual page" target="_blank">{f}</a></td></tr>
+                )}
+                </tbody>
+            </table>
+        </div>
+    );
+}
 
 class Files extends React.Component {
     getInitialState() {
@@ -330,8 +347,8 @@ function Footer(props) {
         <footer className="main-footer">
             <a className="github-link" href="https://github.com/amnuts/opcache-gui"
                target="_blank"
-               title="opcache-gui (currently version {props.version.gui}) on GitHub"
-            >https://github.com/amnuts/opcache-gui - version {props.version.gui}</a>
+               title="opcache-gui (currently version {props.opstate.version.gui}) on GitHub"
+            >https://github.com/amnuts/opcache-gui - version {props.opstate.version.gui}</a>
         </footer>
     );
 }
@@ -417,18 +434,7 @@ class MainNavigation extends React.Component {
                     <div id="info" className="tab-content-overview-info">
                         <GeneralInfo {...this.props} />
                         <Directives {...this.props} />
-                        <div id="functions">
-                            <table className="tables">
-                                <thead>
-                                <tr>
-                                    <th>Available functions</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr><td>tbody stuff</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        <Functions {...this.props} />
                         <br style={{ clear: 'both' }} />
                     </div>
                 </>
@@ -483,10 +489,8 @@ class MainNavigation extends React.Component {
 function Interface(props) {
     return (
         <>
-            <header>
-                <MainNavigation {...props} />
-            </header>
-            <Footer version={props.version} />
+            <header><MainNavigation {...props} /></header>
+            <Footer {...props} />
         </>
     );
 }
