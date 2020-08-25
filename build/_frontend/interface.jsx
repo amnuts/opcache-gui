@@ -461,11 +461,14 @@ function InternedStringsPanel(props) {
 
 
 class Files extends React.Component {
-    getInitialState() {
-        return {
-            data : opstate.files,
-            showing: null,
-            allowFiles: allowFiles
+    constructor(props) {
+        super(props);
+        this.renderFileList = this.renderFileList.bind(this);
+        this.renderInvalidateStatus = this.renderInvalidateStatus.bind(this);
+        this.renderInvalidateLink = this.renderInvalidateLink.bind(this);
+        this.state = {
+            data : this.props.opstate.files,
+            showing: null
         };
     }
 
@@ -480,44 +483,51 @@ class Files extends React.Component {
         }
     }
 
+    renderInvalidateStatus(file) {
+        return (file.timestamp == 0
+            ? <span className="invalid file-metainfo"> - has been invalidated</span>
+            : null
+        );
+    }
+
+    renderInvalidateLink(file, canInvalidate) {
+        return (canInvalidate
+            ? <span>,&nbsp;<a className="file-metainfo" href={'?invalidate=' + file.full_path} data-file={file.full_path} onClick={this.handleInvalidate}>force file invalidation</a></span>
+            : null
+        );
+    }
+
+    renderFileList() {
+        return this.state.data.map(function(file, i) {
+            return (
+                <tr key={file.full_path} data-path={file.full_path.toLowerCase()} className={i%2?'alternate':''}>
+                    <td>
+                        <span className="file-pathname">{file.full_path}</span>
+                        <FilesMeta data={[file.readable.hits, file.readable.memory_consumption, file.last_used]} />
+                        { this.renderInvalidateStatus(file) }
+                        { this.renderInvalidateLink(file, this.props.allow.invalidate) }
+                    </td>
+                </tr>
+            );
+        }.bind(this));
+    }
+
     render() {
-        if (this.state.allowFiles) {
-            var fileNodes = this.state.data.map(function(file, i) {
-                var invalidate, invalidated;
-                if (file.timestamp == 0) {
-                    invalidated = <span><i className="invalid metainfo"> - has been invalidated</i></span>;
-                }
-                if (canInvalidate) {
-                    invalidate = <span>,&nbsp;<a className="file-metainfo" href={'?invalidate='
-                        + file.full_path} data-file={file.full_path} onClick={this.handleInvalidate}>force file invalidation</a></span>;
-                }
-                return (
-                    <tr key={file.full_path} data-path={file.full_path.toLowerCase()} className={i%2?'alternate':''}>
-                        <td>
-                            <span className="file-pathname">{file.full_path}</span>
-                            <FilesMeta data={[file.readable.hits, file.readable.memory_consumption, file.last_used]} />
-                            {invalidate}
-                            {invalidated}
-                        </td>
-                    </tr>
-                );
-            }.bind(this));
+        if (this.props.allow.filelist) {
             return (
                 <div>
                     <form action="#">
                         <label htmlFor="frmFilter">Start typing to filter on script path</label><br />
                         <input type="text" name="filter" id="frmFilter" className="file-filter" />
                     </form>
-
-                    <FilesListed showing={this.state.showing}/>
-
+                    <FilesListed
+                        showing={this.state.showing}
+                        cachedTotal={this.props.opstate.overview.num_cached_scripts}
+                        cachedReadable={this.props.opstate.overview.readable.num_cached_scripts}
+                    />
                     <table className="tables file-list-table">
-                        <thead>
-                        <tr>
-                            <th>Script</th>
-                        </tr>
-                        </thead>
-                        <tbody>{fileNodes}</tbody>
+                        <thead><tr><th>Script</th></tr></thead>
+                        <tbody>{ this.renderFileList() }</tbody>
                     </table>
                 </div>
             );
@@ -542,8 +552,8 @@ function FilesMeta(props) {
 class FilesListed extends React.Component {
     constructor(props) {
         super(props);
-        this.formatted = props.opstate.overview.readable.num_cached_scripts || 0;
-        this.total = props.opstate.overview.readable.num_cached_scripts || 0;
+        this.formatted = props.cachedReadable || 0;
+        this.total = props.cachedTotal || 0;
     }
 
     render() {

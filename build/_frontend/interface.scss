@@ -185,6 +185,10 @@
 
   .file-metainfo {
     font-size: 80%;
+
+    &.invalid {
+      font-style: italic;
+    }
   }
 
   .file-pathname {

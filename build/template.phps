@@ -63,8 +63,8 @@ $opcache = (new Service($options))->handle();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>OPcache statistics on <?php echo $opcache->getData('version', 'host'); ?></title>
-    <script src="//unpkg.com/react@16/umd/react.development.js" crossorigin></script>
-    <script src="//unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
     <style type="text/css">
         {{CSS_OUTPUT}}
     </style>
@@ -83,7 +83,7 @@ $opcache = (new Service($options))->handle();
             filelist: <?php echo $opcache->getOption('allow_filelist') ? 'true' : 'false'; ?>,
             invalidate: <?php echo $opcache->getOption('allow_invalidate') ? 'true' : 'false'; ?>,
             reset: <?php echo $opcache->getOption('allow_reset') ? 'true' : 'false'; ?>,
-            realtime: <?php echo $opcache->getOption('allow_realtime') ? 'true' : 'false'; ?>,
+            realtime: <?php echo $opcache->getOption('allow_realtime') ? 'true' : 'false'; ?>
         },
         opstate: <?php echo json_encode($opcache->getData()); ?>,
         useCharts: <?php echo json_encode($opcache->getOption('charts')); ?>,
