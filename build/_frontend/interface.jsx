@@ -1,81 +1,147 @@
-class UsageGraph extends React.Component {
+function Interface(props) {
+    return (
+        <>
+            <header><MainNavigation {...props} /></header>
+            <Footer {...props} />
+        </>
+    );
+}
+
+
+class MainNavigation extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {gauge: null};
     }
 
-    componentDidMount() {
-        if (this.props.chart) {
-            this.state.gauge = {}; //@todo new Gauge('#' + this.props.gaugeId);
-            this.state.gauge = this.props.value;
-        }
+    renderOverview() {
+        return (
+            <div label="Overview" tabId="overview">
+                <>
+                    <OverviewCounts {...this.props} />
+                    <div id="info" className="tab-content-overview-info">
+                        <GeneralInfo {...this.props} />
+                        <Directives {...this.props} />
+                        <Functions {...this.props} />
+                        <br style={{ clear: 'both' }} />
+                    </div>
+                </>
+            </div>
+        );
     }
 
-    componentDidUpdate() {
-        if (this.state.gauge != null) {
-            this.state.gauge = this.props.value;
-        }
-    }
-
-    render() {
-        if (this.props.chart == true) {
+    renderFileList() {
+        if (this.props.allow.filelist) {
             return (
-                <canvas id={this.props.gaugeId} className="graph-widget" width="250" height="250" data-value={this.props.value} />
+                <div label="Files" tabId="files">
+                    <Files {...this.props} />
+                </div>
             );
         }
-        return (
-            <p><span className="large">{this.props.value}</span><span>%</span></p>
-        );
+        return null;
     }
-};
 
-class MemoryUsagePanel extends React.Component {
+    renderReset() {
+        if (this.props.allow.reset) {
+            return (
+                <div label="Reset cache" tabId="resetCache" link="?reset=1"></div>
+            );
+        }
+        return null;
+    }
+
+    renderRealtime() {
+        if (this.props.allow.realtime) {
+            return (
+                <div label="Enable real-time update" tabId="toggleRealtime"></div>
+            );
+        }
+        return null;
+    }
+
     render() {
         return (
-            <div className="widget-panel">
-                <h3 className="widget-header">memory usage</h3>
-                <div className="widget-value widget-info">
-                    <p><b>total memory:</b> {this.props.total}</p>
-                    <p><b>used memory:</b> {this.props.used}</p>
-                    <p><b>free memory:</b> {this.props.free}</p>
-                    <p><b>wasted memory:</b> {this.props.wasted} ({this.props.wastedPercent}%)</p>
-                </div>
-            </div>
+            <nav className="main-nav">
+                <Tabs>
+                    {this.renderOverview()}
+                    {this.renderFileList()}
+                    {this.renderReset()}
+                    {this.renderRealtime()}
+                </Tabs>
+            </nav>
         );
     }
-};
+}
 
-class StatisticsPanel extends React.Component {
+
+class Tabs extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            activeTab: this.props.children[0].props.label,
+        };
+    }
+
+    onClickTabItem = (tab) => {
+        this.setState({ activeTab: tab });
+    }
+
     render() {
+        const {
+            onClickTabItem,
+            props: { children },
+            state: { activeTab }
+        } = this;
+
         return (
-            <div className="widget-panel">
-                <h3 className="widget-header">opcache statistics</h3>
-                <div className="widget-value widget-info">
-                    <p><b>number of cached files:</b> {this.props.num_cached_scripts}</p>
-                    <p><b>number of hits:</b> {this.props.hits}</p>
-                    <p><b>number of misses:</b> {this.props.misses}</p>
-                    <p><b>blacklist misses:</b> {this.props.blacklist_miss}</p>
-                    <p><b>number of cached keys:</b> {this.props.num_cached_keys}</p>
-                    <p><b>max cached keys:</b> {this.props.max_cached_keys}</p>
+            <>
+                <ul className="nav-tab-list">
+                    {children.map((child) => {
+                        const { label } = child.props;
+                        return (
+                            <Tab
+                                activeTab={activeTab}
+                                key={label}
+                                label={label}
+                                onClick={onClickTabItem}
+                            />
+                        );
+                    })}
+                </ul>
+                <div className="tab-content">
+                    {children.map((child) => {
+                        if (child.props.label !== activeTab) return undefined;
+                        return child.props.children;
+                    })}
                 </div>
-            </div>
+            </>
         );
     }
-};
+}
 
-function InternedStringsPanel(props) {
-    return (
-        <div className="widget-panel">
-            <h3 className="widget-header">interned strings usage</h3>
-            <div className="widget-value widget-info">
-                <p><b>buffer size:</b> {props.buffer_size}</p>
-                <p><b>used memory:</b> {props.strings_used_memory}</p>
-                <p><b>free memory:</b> {props.strings_free_memory}</p>
-                <p><b>number of strings:</b> {props.number_of_strings}</p>
-            </div>
-        </div>
-    );
-};
+
+class Tab extends React.Component {
+    onClick = () => {
+        const { label, onClick } = this.props;
+        onClick(label);
+    }
+
+    render() {
+        const {
+            onClick,
+            props: {activeTab, label },
+        } = this;
+
+        let className = 'nav-tab';
+        if (activeTab === label) {
+            className += ' active';
+        }
+
+        return (
+            <li className={className} onClick={onClick}>{label}</li>
+        );
+    }
+}
+
 
 class OverviewCounts extends React.Component {
     constructor(props) {
@@ -85,8 +151,8 @@ class OverviewCounts extends React.Component {
     }
 
     renderInternedStrings() {
-        if (this.readable.interned == null) {
-            return <></>;
+        if (!this.readable.interned) {
+            return null;
         }
         return <InternedStringsPanel
             buffer_size={this.readable.interned.buffer_size}
@@ -98,13 +164,13 @@ class OverviewCounts extends React.Component {
 
     renderGraphs(useCharts, graphList) {
         return graphList.map((graph) => {
-            if (graph.show == null) {
-                return <></>;
+            if (!graph.show) {
+                return null;
             }
             return (
                 <div className="widget-panel" key={graph.id}>
                     <h3 className="widget-header">{graph.title}</h3>
-                    <p className="widget-value"><UsageGraph chart={useCharts} value={graph.value} gaugeId={graph.id} /></p>
+                    <p className="widget-value"><UsageGraph charts={useCharts} value={graph.value} gaugeId={graph.id} /></p>
                 </div>
             );
         });
@@ -144,7 +210,8 @@ class OverviewCounts extends React.Component {
             </div>
         );
     }
-};
+}
+
 
 class GeneralInfo extends React.Component {
     constructor(props) {
@@ -155,14 +222,14 @@ class GeneralInfo extends React.Component {
 
     renderStart() {
         return (this.start === null
-            ? <></>
+            ? null
             : <tr><td>Start time</td><td>{this.start}</td></tr>
         );
     }
 
     renderReset() {
         return (this.reset === null
-            ? <></>
+            ? null
             : <tr><td>Last reset</td><td>{this.reset}</td></tr>
         );
     }
@@ -184,7 +251,8 @@ class GeneralInfo extends React.Component {
             </table>
         );
     }
-};
+}
+
 
 class Directives extends React.Component {
     constructor(props) {
@@ -214,38 +282,183 @@ class Directives extends React.Component {
             return (
                 <tr key={directive.k}>
                     <td title={'View ' + directive.k + ' manual entry'}><a href={'http://php.net/manual/en/opcache.configuration.php#ini.'
-                        + (directive.k).replace(/_/g,'-')} target="_blank">{dShow}</a></td>
+                    + (directive.k).replace(/_/g,'-')} target="_blank">{dShow}</a></td>
                     <td>{vShow}</td>
                 </tr>
             );
         });
         return (
             <table className="tables directives-table">
-                <thead>
-                    <tr><th colSpan="2">Directives</th></tr>
-                </thead>
+                <thead><tr><th colSpan="2">Directives</th></tr></thead>
                 <tbody>{directiveNodes}</tbody>
             </table>
         );
     }
-};
+}
 
 function Functions(props) {
     return (
         <div id="functions">
             <table className="tables">
                 <thead>
-                    <tr><th>Available functions</th></tr>
+                <tr><th>Available functions</th></tr>
                 </thead>
                 <tbody>
                 {props.opstate.functions.map(f =>
-                    <tr><td><a href={"http://php.net/"+f} title="View manual page" target="_blank">{f}</a></td></tr>
+                    <tr key={f}><td><a href={"http://php.net/"+f} title="View manual page" target="_blank">{f}</a></td></tr>
                 )}
                 </tbody>
             </table>
         </div>
     );
 }
+
+
+function UsageGraph(props) {
+    return (props.charts
+        ? <Canvas value={props.value} gaugeId={props.gaugeId} />
+        : <><span className="large">{props.value}</span><span>%</span></>
+    );
+}
+
+
+class Canvas extends React.Component {
+    constructor(props) {
+        super(props);
+        this.saveContext = this.saveContext.bind(this);
+        this.animate = this.animate.bind(this);
+        this.draw = this.draw.bind(this);
+        this.loop = null;
+        this.state = {
+            degrees: 0,
+            newdegs: 0
+        }
+    }
+
+    saveContext(ctx) {
+        this.ctx = ctx;
+        this.width = this.ctx.canvas.width;
+        this.height = this.ctx.canvas.height;
+        this.gaugeColour = this.props.colour || '#6ca6ef';
+        this.gaugeBackgroundColour = this.props.bgcolour || '#e2e2e2';
+        this.loop = null;
+
+    }
+
+    animate() {
+        const { degrees, newdegs } = this.state;
+        if (degrees == newdegs) {
+            clearInterval(this.loop);
+        }
+        this.setState({
+            degrees: degrees + (degrees < newdegs ? 1 : -1)
+        });
+    }
+
+    draw() {
+        if (typeof this.loop != 'undefined') {
+            clearInterval(this.loop);
+        }
+        this.loop = setInterval(this.animate, 1000/(this.state.newdegs - this.state.degrees));
+    }
+
+    componentDidUpdate() {
+        const { degrees } = this.state;
+        const text = Math.round((degrees/360)*100) + '%';
+        this.ctx.clearRect(0, 0, this.width, this.height);
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = this.gaugeBackgroundColour;
+        this.ctx.lineWidth = 30;
+        this.ctx.arc(this.width/2, this.height/2, 100, 0, Math.PI*2, false);
+        this.ctx.stroke();
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = this.gaugeColour;
+        this.ctx.lineWidth = 30;
+        this.ctx.arc(this.width/2, this.height/2, 100, 0 - (90 * Math.PI / 180), (degrees * Math.PI / 180) - (90 * Math.PI / 180), false);
+        this.ctx.stroke();
+        this.ctx.fillStyle = this.gaugeColour;
+        this.ctx.font = '60px sans-serif';
+        this.ctx.fillText(text, (this.width/2) - (this.ctx.measureText(text).width/2), (this.height/2) + 20);
+    }
+
+    componentDidMount() {
+        this.setState({ newdegs: Math.round(3.6 * this.props.value) });
+        this.draw();
+    }
+
+    render() {
+        return <PureCanvas key={this.props.gaugeId} contextRef={this.saveContext} {...this.props} />;
+    }
+}
+
+
+class PureCanvas extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    shouldComponentUpdate() {
+        return false;
+    }
+
+    render() {
+        return (
+            <canvas id={this.props.gaugeId} className="graph-widget" width="250" height="250" data-value={this.props.value}
+                    ref={node =>
+                        node ? this.props.contextRef(node.getContext('2d')) : null
+                    }
+            />
+        );
+    }
+}
+
+
+function MemoryUsagePanel(props) {
+    return (
+        <div className="widget-panel">
+            <h3 className="widget-header">memory usage</h3>
+            <div className="widget-value widget-info">
+                <p><b>total memory:</b> {props.total}</p>
+                <p><b>used memory:</b> {props.used}</p>
+                <p><b>free memory:</b> {props.free}</p>
+                <p><b>wasted memory:</b> {props.wasted} ({props.wastedPercent}%)</p>
+            </div>
+        </div>
+    );
+}
+
+
+function StatisticsPanel(props) {
+    return (
+        <div className="widget-panel">
+            <h3 className="widget-header">opcache statistics</h3>
+            <div className="widget-value widget-info">
+                <p><b>number of cached files:</b> {props.num_cached_scripts}</p>
+                <p><b>number of hits:</b> {props.hits}</p>
+                <p><b>number of misses:</b> {props.misses}</p>
+                <p><b>blacklist misses:</b> {props.blacklist_miss}</p>
+                <p><b>number of cached keys:</b> {props.num_cached_keys}</p>
+                <p><b>max cached keys:</b> {props.max_cached_keys}</p>
+            </div>
+        </div>
+    );
+}
+
+
+function InternedStringsPanel(props) {
+    return (
+        <div className="widget-panel">
+            <h3 className="widget-header">interned strings usage</h3>
+            <div className="widget-value widget-info">
+                <p><b>buffer size:</b> {props.buffer_size}</p>
+                <p><b>used memory:</b> {props.strings_used_memory}</p>
+                <p><b>free memory:</b> {props.strings_free_memory}</p>
+                <p><b>number of strings:</b> {props.number_of_strings}</p>
+            </div>
+        </div>
+    );
+}
+
 
 class Files extends React.Component {
     getInitialState() {
@@ -312,7 +525,8 @@ class Files extends React.Component {
             return <span></span>;
         }
     }
-};
+}
+
 
 function FilesMeta(props) {
     return (
@@ -322,7 +536,8 @@ function FilesMeta(props) {
             <b>last used: </b><span>{props.data[2]}</span>
         </span>
     );
-};
+}
+
 
 class FilesListed extends React.Component {
     constructor(props) {
@@ -340,7 +555,8 @@ class FilesListed extends React.Component {
             <h3>{display}</h3>
         );
     }
-};
+}
+
 
 function Footer(props) {
     return (
@@ -352,151 +568,3 @@ function Footer(props) {
         </footer>
     );
 }
-
-class Tabs extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            activeTab: this.props.children[0].props.label,
-        };
-    }
-
-    onClickTabItem = (tab) => {
-        this.setState({ activeTab: tab });
-    }
-
-    render() {
-        const {
-            onClickTabItem,
-            props: { children },
-            state: { activeTab }
-        } = this;
-
-        return (
-            <>
-                <ul className="nav-tab-list">
-                    {children.map((child) => {
-                        const { label } = child.props;
-                        return (
-                            <Tab
-                                activeTab={activeTab}
-                                key={label}
-                                label={label}
-                                onClick={onClickTabItem}
-                            />
-                        );
-                    })}
-                </ul>
-                <div className="tab-content">
-                    {children.map((child) => {
-                        if (child.props.label !== activeTab) return undefined;
-                        return child.props.children;
-                    })}
-                </div>
-            </>
-        );
-    }
-}
-
-class Tab extends React.Component {
-    onClick = () => {
-        const { label, onClick } = this.props;
-        onClick(label);
-    }
-
-    render() {
-        const {
-            onClick,
-            props: {activeTab, label },
-        } = this;
-
-        let className = 'nav-tab';
-        if (activeTab === label) {
-            className += ' active';
-        }
-
-        return (
-            <li className={className} onClick={onClick}>{label}</li>
-        );
-    }
-}
-
-class MainNavigation extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    renderOverview() {
-        return (
-            <div label="Overview" tabId="overview">
-                <>
-                    <OverviewCounts {...this.props} />
-                    <div id="info" className="tab-content-overview-info">
-                        <GeneralInfo {...this.props} />
-                        <Directives {...this.props} />
-                        <Functions {...this.props} />
-                        <br style={{ clear: 'both' }} />
-                    </div>
-                </>
-            </div>
-        );
-    }
-
-    renderFileList() {
-        if (this.props.allow.filelist) {
-            return (
-                <div label="Files" tabId="files">
-                    <Files {...this.props} />
-                </div>
-            );
-        }
-        return <></>;
-    }
-
-    renderReset() {
-        if (this.props.allow.reset) {
-            return (
-                <div label="Reset cache" tabId="resetCache" link="?reset=1"></div>
-            );
-        }
-        return <></>;
-    }
-
-    renderRealtime() {
-        if (this.props.allow.realtime) {
-            return (
-                <div label="Enable real-time update" tabId="toggleRealtime"></div>
-            );
-        }
-        return <></>;
-    }
-
-    render() {
-        return (
-            <nav className="main-nav">
-                <Tabs>
-                    {this.renderOverview()}
-                    {this.renderFileList()}
-                    {this.renderReset()}
-                    {this.renderRealtime()}
-                </Tabs>
-            </nav>
-        );
-    }
-}
-
-
-function Interface(props) {
-    return (
-        <>
-            <header><MainNavigation {...props} /></header>
-            <Footer {...props} />
-        </>
-    );
-}
-
-
-
-// var filesObj = ReactDOM.render(<Files/>, document.getElementById('filelist'));
-// ReactDOM.render(<Directives/>, document.getElementById('directives'));
-

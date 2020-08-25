@@ -65,7 +65,6 @@ $opcache = (new Service($options))->handle();
     <title>OPcache statistics on <?php echo $opcache->getData('version', 'host'); ?></title>
     <script src="//unpkg.com/react@16/umd/react.development.js" crossorigin></script>
     <script src="//unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
-    <script src="//cdn.jsdelivr.net/npm/jquery@3.5.0/dist/jquery.min.js"></script>
     <style type="text/css">
         {{CSS_OUTPUT}}
     </style>

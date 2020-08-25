@@ -107,17 +107,16 @@
     text-align: center;
 
     span.large {
+      color: #6ca6ef;
+      font-size: 80pt;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+
       + span {
         font-size: 20pt;
         margin: 0;
         color: #6ca6ef;
-      }
-      span.large {
-        color: #6ca6ef;
-        font-size: 80pt;
-        margin: 0;
-        padding: 0;
-        text-align: center;
       }
     }
   }
