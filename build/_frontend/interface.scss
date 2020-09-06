@@ -280,6 +280,10 @@ $footer-border-color: #CCC;
         text-decoration: none;
         height: 100%;
 
+        &.arrow {
+          font-size: 1.1rem;
+        }
+
         &:active {
           transform: translateY(2px);
         }
