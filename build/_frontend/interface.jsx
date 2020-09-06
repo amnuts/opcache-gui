@@ -463,13 +463,80 @@ function InternedStringsPanel(props) {
 class Files extends React.Component {
     constructor(props) {
         super(props);
-        this.renderFileList = this.renderFileList.bind(this);
-        this.renderInvalidateStatus = this.renderInvalidateStatus.bind(this);
-        this.renderInvalidateLink = this.renderInvalidateLink.bind(this);
         this.state = {
-            data : this.props.opstate.files,
-            showing: null
-        };
+            allFiles: this.props.opstate.files,
+            currentFiles: [],
+            currentPage: null,
+            totalPages: null
+        }
+    }
+
+    onPageChanged = data => {
+        const { allFiles } = this.state;
+        const { currentPage, totalPages, pageLimit } = data;
+        const offset = (currentPage - 1) * pageLimit;
+        const currentFiles = allFiles.slice(offset, offset + pageLimit);
+        this.setState({ currentPage, currentFiles, totalPages });
+    };
+
+    renderPageHeader(currentPage, totalPages) {
+        return (currentPage
+            ? <h3>Page { currentPage } / {totalPages }</h3>
+            : null
+        );
+    }
+
+    render() {
+        if (!this.props.allow.filelist) {
+            return null;
+        }
+
+        const {allFiles, currentFiles, currentPage, totalPages} = this.state;
+        const totalFiles = allFiles.length;
+
+        if (allFiles === 0) {
+            return <p>No files have been cached</p>;
+        }
+
+        return (
+            <div>
+                <form action="#">
+                    <label htmlFor="frmFilter">Start typing to filter on script path</label><br/>
+                    <input type="text" name="filter" id="frmFilter" className="file-filter"/>
+                </form>
+
+                {this.renderPageHeader(currentPage, totalPages)}
+
+                <Pagination
+                    totalRecords={totalFiles}
+                    pageLimit={500}
+                    pageNeighbours={1}
+                    onPageChanged={this.onPageChanged}
+                />
+
+                <table className="tables file-list-table">
+                    <thead>
+                    <tr>
+                        <th>Script</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {currentFiles.map((file, index) => {
+                        return <File key={file.full_path} canInvalidate={this.props.allow.invalidate} {...file} colourRow={index} />
+                    })}
+                    </tbody>
+                </table>
+            </div>
+        );
+    }
+}
+
+
+class File extends React.Component {
+    constructor(props) {
+        super(props);
+        this.renderInvalidateLink = this.renderInvalidateLink.bind(this);
+        this.renderInvalidateStatus = this.renderInvalidateStatus.bind(this);
     }
 
     handleInvalidate(e) {
@@ -483,86 +550,202 @@ class Files extends React.Component {
         }
     }
 
-    renderInvalidateStatus(file) {
-        return (file.timestamp == 0
+    renderInvalidateStatus() {
+        return (!this.props.timestamp
             ? <span className="invalid file-metainfo"> - has been invalidated</span>
             : null
         );
     }
 
-    renderInvalidateLink(file, canInvalidate) {
-        return (canInvalidate
-            ? <span>,&nbsp;<a className="file-metainfo" href={'?invalidate=' + file.full_path} data-file={file.full_path} onClick={this.handleInvalidate}>force file invalidation</a></span>
+    renderInvalidateLink() {
+        return (this.props.canInvalidate
+            ? <span>,&nbsp;<a className="file-metainfo" href={'?invalidate=' + this.props.full_path} data-file={this.props.full_path} onClick={this.handleInvalidate}>force file invalidation</a></span>
             : null
         );
     }
 
-    renderFileList() {
-        return this.state.data.map(function(file, i) {
-            return (
-                <tr key={file.full_path} data-path={file.full_path.toLowerCase()} className={i%2?'alternate':''}>
-                    <td>
-                        <span className="file-pathname">{file.full_path}</span>
-                        <FilesMeta data={[file.readable.hits, file.readable.memory_consumption, file.last_used]} />
-                        { this.renderInvalidateStatus(file) }
-                        { this.renderInvalidateLink(file, this.props.allow.invalidate) }
-                    </td>
-                </tr>
-            );
-        }.bind(this));
-    }
-
     render() {
-        if (this.props.allow.filelist) {
-            return (
-                <div>
-                    <form action="#">
-                        <label htmlFor="frmFilter">Start typing to filter on script path</label><br />
-                        <input type="text" name="filter" id="frmFilter" className="file-filter" />
-                    </form>
-                    <FilesListed
-                        showing={this.state.showing}
-                        cachedTotal={this.props.opstate.overview.num_cached_scripts}
-                        cachedReadable={this.props.opstate.overview.readable.num_cached_scripts}
-                    />
-                    <table className="tables file-list-table">
-                        <thead><tr><th>Script</th></tr></thead>
-                        <tbody>{ this.renderFileList() }</tbody>
-                    </table>
-                </div>
-            );
-        } else {
-            return <span></span>;
-        }
+        return (
+            <tr data-path={this.props.full_path.toLowerCase()} className={this.props.colourRow % 2 ? 'alternate' : ''}>
+                <td>
+                    <span className="file-pathname">{this.props.full_path}</span>
+                    <span className="file-metainfo">
+                        <b>hits: </b><span>{this.props.readable.hits}, </span>
+                        <b>memory: </b><span>{this.props.readable.memory_consumption}, </span>
+                        <b>last used: </b><span>{this.props.last_used}</span>
+                    </span>
+                    { this.renderInvalidateStatus() }
+                    { this.renderInvalidateLink() }
+                </td>
+            </tr>
+        );
     }
 }
 
 
-function FilesMeta(props) {
-    return (
-        <span className="file-metainfo">
-            <b>hits: </b><span>{props.data[0]}, </span>
-            <b>memory: </b><span>{props.data[1]}, </span>
-            <b>last used: </b><span>{props.data[2]}</span>
-        </span>
-    );
-}
-
-
-class FilesListed extends React.Component {
+class Pagination extends React.Component {
     constructor(props) {
         super(props);
-        this.formatted = props.cachedReadable || 0;
-        this.total = props.cachedTotal || 0;
+        const { totalRecords = null, pageLimit = 30, pageNeighbours = 0 } = props;
+        this.pageLimit = typeof pageLimit === "number" ? pageLimit : 30;
+        this.totalRecords = typeof totalRecords === "number" ? totalRecords : 0;
+        this.pageNeighbours =
+            typeof pageNeighbours === "number"
+                ? Math.max(0, Math.min(pageNeighbours, 2))
+                : 0;
+        this.totalPages = Math.ceil(this.totalRecords / this.pageLimit);
+        this.state = { currentPage: 1 };
     }
 
-    render() {
-        let display = this.formatted + ' file' + (this.total == 1 ? '' : 's') + ' cached';
-        if (this.props.showing !== null && this.props.showing != this.total) {
-            display += ', ' + this.props.showing + ' showing due to filter';
+    componentDidMount() {
+        this.gotoPage(1);
+    }
+
+    gotoPage = page => {
+        const { onPageChanged = f => f } = this.props;
+        const currentPage = Math.max(0, Math.min(page, this.totalPages));
+        const paginationData = {
+            currentPage,
+            totalPages: this.totalPages,
+            pageLimit: this.pageLimit,
+            totalRecords: this.totalRecords
+        };
+        this.setState({ currentPage }, () => onPageChanged(paginationData));
+    };
+
+    handleClick = (page, evt) => {
+        evt.preventDefault();
+        this.gotoPage(page);
+    };
+
+    handleJumpLeft = evt => {
+        evt.preventDefault();
+        this.gotoPage(this.state.currentPage - this.pageNeighbours * 2 - 1);
+    };
+
+    handleJumpRight = evt => {
+        evt.preventDefault();
+        this.gotoPage(this.state.currentPage + this.pageNeighbours * 2 + 1);
+    };
+
+    handleMoveLeft = evt => {
+        evt.preventDefault();
+        this.gotoPage(this.state.currentPage - 1);
+    };
+
+    handleMoveRight = evt => {
+        evt.preventDefault();
+        this.gotoPage(this.state.currentPage + 1);
+    };
+
+    range = (from, to, step = 1) => {
+        let i = from;
+        const range = [];
+        while (i <= to) {
+            range.push(i);
+            i += step;
         }
+        return range;
+    }
+
+    fetchPageNumbers = () => {
+        const totalPages = this.totalPages;
+        const currentPage = this.state.currentPage;
+        const pageNeighbours = this.pageNeighbours;
+        const totalNumbers = this.pageNeighbours * 2 + 3;
+        const totalBlocks = totalNumbers + 2;
+
+        if (totalPages > totalBlocks) {
+            let pages = [];
+            const leftBound = currentPage - pageNeighbours;
+            const rightBound = currentPage + pageNeighbours;
+            const beforeLastPage = totalPages - 1;
+            const startPage = leftBound > 2 ? leftBound : 2;
+            const endPage = rightBound < beforeLastPage ? rightBound : beforeLastPage;
+
+            pages = this.range(startPage, endPage);
+
+            const pagesCount = pages.length;
+            const singleSpillOffset = totalNumbers - pagesCount - 1;
+            const leftSpill = startPage > 2;
+            const rightSpill = endPage < beforeLastPage;
+            const leftSpillPage = "LEFT";
+            const rightSpillPage = "RIGHT";
+
+            if (leftSpill && !rightSpill) {
+                const extraPages = this.range(startPage - singleSpillOffset, startPage - 1);
+                pages = [leftSpillPage, ...extraPages, ...pages];
+            } else if (!leftSpill && rightSpill) {
+                const extraPages = this.range(endPage + 1, endPage + singleSpillOffset);
+                pages = [...pages, ...extraPages, rightSpillPage];
+            } else if (leftSpill && rightSpill) {
+                pages = [leftSpillPage, ...pages, rightSpillPage];
+            }
+
+            return [1, ...pages, totalPages];
+        }
+
+        return this.range(1, totalPages);
+    };
+
+    render() {
+        if (!this.totalRecords || this.totalPages === 1) {
+            return null
+        }
+
+        const { currentPage } = this.state;
+        const pages = this.fetchPageNumbers();
+
         return (
-            <h3>{display}</h3>
+            <nav aria-label="File list pagination">
+                <ul className="pagination">
+                    {pages.map((page, index) => {
+                        if (page === "LEFT") {
+                            return (
+                                <>
+                                    <li key={`jl$index`} className="page-item">
+                                        <a className="page-link" href="#" aria-label="Previous" onClick={this.handleJumpLeft}>
+                                            <span aria-hidden="true">&laquo;</span>
+                                            <span className="sr-only">Jump back</span>
+                                        </a>
+                                    </li>
+                                    <li key={`ml$index`} className="page-item">
+                                        <a className="page-link" href="#" aria-label="Previous" onClick={this.handleMoveLeft}>
+                                            <span aria-hidden="true">&lt;</span>
+                                            <span className="sr-only">Previous page</span>
+                                        </a>
+                                    </li>
+                                </>
+                            );
+                        }
+                        if (page === "RIGHT") {
+                            return (
+                                <>
+                                    <li key={`jr$index`} className="page-item">
+                                        <a className="page-link" href="#" aria-label="Next" onClick={this.handleMoveRight}>
+                                            <span aria-hidden="true">&gt;</span>
+                                            <span className="sr-only">Next page</span>
+                                        </a>
+                                    </li>
+                                    <li key={`mr$index`} className="page-item">
+                                        <a className="page-link" href="#" aria-label="Next" onClick={this.handleJumpRight}>
+                                            <span aria-hidden="true">&raquo;</span>
+                                            <span className="sr-only">Jump forward</span>
+                                        </a>
+                                    </li>
+                                </>
+                            );
+                        }
+                        return (
+                            <li key={index} className="page-item">
+                                <a className={`page-link${currentPage === page ? " active" : ""}`} href="#" onClick={e => this.handleClick(page, e)}>
+                                    {page}
+                                </a>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </nav>
         );
     }
 }

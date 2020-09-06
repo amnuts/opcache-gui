@@ -226,6 +226,79 @@
     margin-top: 0;
   }
 
+  .pagination {
+    margin: 10px 0;
+    padding: 0;
+
+    li {
+      display: inline-block;
+
+      a {
+        display: inline-block; // flex fallback
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+        line-height: 1;
+        padding: 0.75rem 1rem;
+        border-radius: 2px;
+        text-decoration: none;
+        height: 100%;
+        transition: .2s;
+
+        &:active {
+          transform: translateY(2px);
+        }
+
+        &.active {
+          background-color: #4d75af;
+          color: #fefefe;
+        }
+
+        &:hover:not(.active) {
+          background-color: #99D0DF;
+        }
+      }
+    }
+  }
+
+
+
+/*  .pagination {
+    margin-top: 0;
+    margin-bottom: 0;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    list-style-type: none;
+
+    li {
+      display: inline-block;
+      margin: 0 0 -1px 0;
+      padding: 15px 30px;
+
+      .page-link {
+        padding: 0.75rem 1rem;
+        min-width: 3.5rem;
+        text-align: center;
+        box-shadow: none !important;
+        border-color: #ededed !important;
+        color: saturate(darken(#ededed, 30%), 10%);
+        font-weight: 900;
+        font-size: 1rem;
+
+        &:hover {
+          background-color: #ededed;
+        }
+      }
+
+      .active {
+        .page-link {
+          color: saturate(darken(#ededed, 50%), 5%) !important;
+          background-color: saturate(lighten(#ededed, 7.5%), 2.5%) !important;
+          border-color: #ededed !important;
+        }
+      }
+    }
+  }
+*/
   @media screen and (max-width: 750px) {
     .nav-tab-list {
       border-bottom: 0;
@@ -261,6 +334,20 @@
     .file-filter {
       width: 100%;
     }
+  }
+
+  .sr-only {
+    border: 0 !important;
+    clip: rect(1px, 1px, 1px, 1px) !important;
+    -webkit-clip-path: inset(50%) !important;
+    clip-path: inset(50%) !important;
+    height: 1px !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    position: absolute !important;
+    width: 1px !important;
+    white-space: nowrap !important;
   }
 }
 
