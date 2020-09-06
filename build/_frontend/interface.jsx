@@ -705,13 +705,13 @@ class Pagination extends React.Component {
                                 <>
                                     <li key={`jl$index`} className="page-item">
                                         <a className="page-link" href="#" aria-label="Previous" onClick={this.handleJumpLeft}>
-                                            <span aria-hidden="true">&laquo;</span>
+                                            <span aria-hidden="true">&#12298;</span>
                                             <span className="sr-only">Jump back</span>
                                         </a>
                                     </li>
                                     <li key={`ml$index`} className="page-item">
                                         <a className="page-link" href="#" aria-label="Previous" onClick={this.handleMoveLeft}>
-                                            <span aria-hidden="true">&lt;</span>
+                                            <span aria-hidden="true">&#12296;</span>
                                             <span className="sr-only">Previous page</span>
                                         </a>
                                     </li>
@@ -723,13 +723,13 @@ class Pagination extends React.Component {
                                 <>
                                     <li key={`jr$index`} className="page-item">
                                         <a className="page-link" href="#" aria-label="Next" onClick={this.handleMoveRight}>
-                                            <span aria-hidden="true">&gt;</span>
+                                            <span aria-hidden="true">&#12297;</span>
                                             <span className="sr-only">Next page</span>
                                         </a>
                                     </li>
                                     <li key={`mr$index`} className="page-item">
                                         <a className="page-link" href="#" aria-label="Next" onClick={this.handleJumpRight}>
-                                            <span aria-hidden="true">&raquo;</span>
+                                            <span aria-hidden="true">&#12299;</span>
                                             <span className="sr-only">Jump forward</span>
                                         </a>
                                     </li>
