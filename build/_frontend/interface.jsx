@@ -463,27 +463,51 @@ function InternedStringsPanel(props) {
 class Files extends React.Component {
     constructor(props) {
         super(props);
+        this.doPagination = (typeof this.props.perPageLimit === "number"
+            && this.props.perPageLimit > 0
+        );
+        this.totalFiles = props.opstate.files.length;
         this.state = {
-            allFiles: this.props.opstate.files,
-            currentFiles: [],
+            availableFiles: props.opstate.files,
+            currentFiles: (this.doPagination ? [] : props.opstate.files),
             currentPage: null,
-            totalPages: null
+            totalPages: null,
+            searchTerm: props.searchTerm,
+            refreshPagination: 0
         }
     }
 
+    setSearchTerm = debounce(searchTerm => {
+        const availableFiles = this.props.opstate.files.filter(file => {
+            return !(file.full_path.indexOf(searchTerm) == -1);
+        });
+        const currentFiles = (this.doPagination
+            ? this.state.currentFiles
+            : availableFiles
+        );
+        this.setState({
+            searchTerm,
+            availableFiles,
+            currentFiles,
+            refreshPagination: !(this.state.refreshPagination)
+        });
+    }, this.props.debounceRate);
+
     onPageChanged = data => {
-        const { allFiles } = this.state;
+        const { availableFiles } = this.state;
         const { currentPage, totalPages, pageLimit } = data;
         const offset = (currentPage - 1) * pageLimit;
-        const currentFiles = allFiles.slice(offset, offset + pageLimit);
+        const currentFiles = availableFiles.slice(offset, offset + pageLimit);
         this.setState({ currentPage, currentFiles, totalPages });
-    };
+    }
 
-    renderPageHeader(currentPage, totalPages) {
-        return (currentPage
-            ? <h3>Page { currentPage } / {totalPages }</h3>
+    renderPageHeader() {
+        const showingTotal = this.state.availableFiles.length;
+        const showing = (showingTotal != this.totalFiles
+            ? `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`
             : null
         );
+        return <h3>{this.totalFiles} files cached{showing}</h3>;
     }
 
     render() {
@@ -491,10 +515,7 @@ class Files extends React.Component {
             return null;
         }
 
-        const {allFiles, currentFiles, currentPage, totalPages} = this.state;
-        const totalFiles = allFiles.length;
-
-        if (allFiles === 0) {
+        if (this.props.opstate.files.length === 0) {
             return <p>No files have been cached</p>;
         }
 
@@ -502,17 +523,18 @@ class Files extends React.Component {
             <div>
                 <form action="#">
                     <label htmlFor="frmFilter">Start typing to filter on script path</label><br/>
-                    <input type="text" name="filter" id="frmFilter" className="file-filter"/>
+                    <input type="text" name="filter" id="frmFilter" className="file-filter" onChange={e => {this.setSearchTerm(e.target.value)}} />
                 </form>
 
-                {this.renderPageHeader(currentPage, totalPages)}
+                {this.renderPageHeader()}
 
-                <Pagination
-                    totalRecords={totalFiles}
-                    pageLimit={500}
-                    pageNeighbours={1}
+                {this.doPagination && <Pagination
+                    totalRecords={this.state.availableFiles.length}
+                    pageLimit={this.props.perPageLimit}
+                    pageNeighbours={2}
                     onPageChanged={this.onPageChanged}
-                />
+                    refresh={this.state.refreshPagination}
+                />}
 
                 <table className="tables file-list-table">
                     <thead>
@@ -521,7 +543,7 @@ class Files extends React.Component {
                     </tr>
                     </thead>
                     <tbody>
-                    {currentFiles.map((file, index) => {
+                    {this.state.currentFiles.map((file, index) => {
                         return <File key={file.full_path} canInvalidate={this.props.allow.invalidate} {...file} colourRow={index} />
                     })}
                     </tbody>
@@ -586,32 +608,39 @@ class File extends React.Component {
 class Pagination extends React.Component {
     constructor(props) {
         super(props);
-        const { totalRecords = null, pageLimit = 30, pageNeighbours = 0 } = props;
-        this.pageLimit = typeof pageLimit === "number" ? pageLimit : 30;
-        this.totalRecords = typeof totalRecords === "number" ? totalRecords : 0;
-        this.pageNeighbours =
-            typeof pageNeighbours === "number"
-                ? Math.max(0, Math.min(pageNeighbours, 2))
-                : 0;
-        this.totalPages = Math.ceil(this.totalRecords / this.pageLimit);
         this.state = { currentPage: 1 };
+        this.pageNeighbours =
+            typeof props.pageNeighbours === "number"
+                ? Math.max(0, Math.min(props.pageNeighbours, 2))
+                : 0;
     }
 
     componentDidMount() {
         this.gotoPage(1);
     }
 
+    componentDidUpdate(props) {
+        const { refresh } = this.props;
+        if (props.refresh !== refresh) {
+            this.gotoPage(1);
+        }
+    }
+
     gotoPage = page => {
         const { onPageChanged = f => f } = this.props;
-        const currentPage = Math.max(0, Math.min(page, this.totalPages));
+        const currentPage = Math.max(0, Math.min(page, this.totalPages()));
         const paginationData = {
             currentPage,
-            totalPages: this.totalPages,
-            pageLimit: this.pageLimit,
-            totalRecords: this.totalRecords
+            totalPages: this.totalPages(),
+            pageLimit: this.props.pageLimit,
+            totalRecords: this.props.totalRecords
         };
         this.setState({ currentPage }, () => onPageChanged(paginationData));
     };
+
+    totalPages = () => {
+        return Math.ceil(this.props.totalRecords / this.props.pageLimit);
+    }
 
     handleClick = (page, evt) => {
         evt.preventDefault();
@@ -649,16 +678,15 @@ class Pagination extends React.Component {
     }
 
     fetchPageNumbers = () => {
-        const totalPages = this.totalPages;
-        const currentPage = this.state.currentPage;
+        const totalPages = this.totalPages();
         const pageNeighbours = this.pageNeighbours;
         const totalNumbers = this.pageNeighbours * 2 + 3;
         const totalBlocks = totalNumbers + 2;
 
         if (totalPages > totalBlocks) {
             let pages = [];
-            const leftBound = currentPage - pageNeighbours;
-            const rightBound = currentPage + pageNeighbours;
+            const leftBound = this.state.currentPage - pageNeighbours;
+            const rightBound = this.state.currentPage + pageNeighbours;
             const beforeLastPage = totalPages - 1;
             const startPage = leftBound > 2 ? leftBound : 2;
             const endPage = rightBound < beforeLastPage ? rightBound : beforeLastPage;
@@ -689,7 +717,7 @@ class Pagination extends React.Component {
     };
 
     render() {
-        if (!this.totalRecords || this.totalPages === 1) {
+        if (!this.props.totalRecords || this.totalPages() === 1) {
             return null
         }
 
@@ -702,38 +730,38 @@ class Pagination extends React.Component {
                     {pages.map((page, index) => {
                         if (page === "LEFT") {
                             return (
-                                <>
-                                    <li key={`jl$index`} className="page-item arrow">
+                                <React.Fragment key={index}>
+                                    <li className="page-item arrow">
                                         <a className="page-link" href="#" aria-label="Previous" onClick={this.handleJumpLeft}>
                                             <span aria-hidden="true">↞</span>
                                             <span className="sr-only">Jump back</span>
                                         </a>
                                     </li>
-                                    <li key={`ml$index`} className="page-item arrow">
+                                    <li className="page-item arrow">
                                         <a className="page-link" href="#" aria-label="Previous" onClick={this.handleMoveLeft}>
                                             <span aria-hidden="true">⇠</span>
                                             <span className="sr-only">Previous page</span>
                                         </a>
                                     </li>
-                                </>
+                                </React.Fragment>
                             );
                         }
                         if (page === "RIGHT") {
                             return (
-                                <>
-                                    <li key={`jr$index`} className="page-item arrow">
+                                <React.Fragment key={index}>
+                                    <li className="page-item arrow">
                                         <a className="page-link" href="#" aria-label="Next" onClick={this.handleMoveRight}>
                                             <span aria-hidden="true">⇢</span>
                                             <span className="sr-only">Next page</span>
                                         </a>
                                     </li>
-                                    <li key={`mr$index`} className="page-item arrow">
+                                    <li className="page-item arrow">
                                         <a className="page-link" href="#" aria-label="Next" onClick={this.handleJumpRight}>
                                             <span aria-hidden="true">↠</span>
                                             <span className="sr-only">Jump forward</span>
                                         </a>
                                     </li>
-                                </>
+                                </React.Fragment>
                             );
                         }
                         return (
@@ -761,3 +789,25 @@ function Footer(props) {
         </footer>
     );
 }
+
+
+function debounce(func, wait, immediate) {
+    let timeout;
+    wait = wait || 250;
+    return function() {
+        let context = this, args = arguments;
+        let later = function() {
+            timeout = null;
+            if (!immediate) {
+                func.apply(context, args);
+            }
+        };
+        let callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) {
+            func.apply(context, args);
+        }
+    };
+}
+

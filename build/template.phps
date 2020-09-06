@@ -27,12 +27,13 @@ $options = [
     'size_space'       => false,         // have '1MB' or '1 MB' when showing sizes
     'charts'           => true,          // show gauge chart or just big numbers
     'debounce_rate'    => 250,           // milliseconds after key press to send keyup event when filtering
+    'per_page'         => 200,           // How many results per page to show in the file list, false for no pagination
     'cookie_name'      => 'opcachegui',  // name of cookie
     'cookie_ttl'       => 365,           // days to store cookie
-    'highlight'        => [              // highlight charts/big numbers
-        'memory' => true,
-        'hits'   => true,
-        'keys'   => true
+    'highlight'        => [
+        'memory' => true,                // show the memory chart/big number
+        'hits'   => true,                // show the hit rate chart/big number
+        'keys'   => true                 // show the keys used chart/big number
     ]
 ];
 
@@ -62,7 +63,7 @@ $opcache = (new Service($options))->handle();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>OPcache statistics on <?php echo $opcache->getData('version', 'host'); ?></title>
+    <title>OPcache statistics on <?= $opcache->getData('version', 'host'); ?></title>
     <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
     <style type="text/css">
@@ -80,14 +81,16 @@ $opcache = (new Service($options))->handle();
 
     ReactDOM.render(React.createElement(Interface, {
         allow: {
-            filelist: <?php echo $opcache->getOption('allow_filelist') ? 'true' : 'false'; ?>,
-            invalidate: <?php echo $opcache->getOption('allow_invalidate') ? 'true' : 'false'; ?>,
-            reset: <?php echo $opcache->getOption('allow_reset') ? 'true' : 'false'; ?>,
-            realtime: <?php echo $opcache->getOption('allow_realtime') ? 'true' : 'false'; ?>
+            filelist: <?= $opcache->getOption('allow_filelist') ? 'true' : 'false'; ?>,
+            invalidate: <?= $opcache->getOption('allow_invalidate') ? 'true' : 'false'; ?>,
+            reset: <?= $opcache->getOption('allow_reset') ? 'true' : 'false'; ?>,
+            realtime: <?= $opcache->getOption('allow_realtime') ? 'true' : 'false'; ?>
         },
-        opstate: <?php echo json_encode($opcache->getData()); ?>,
-        useCharts: <?php echo json_encode($opcache->getOption('charts')); ?>,
-        highlight: <?php echo json_encode($opcache->getOption('highlight')); ?>,
+        opstate: <?= json_encode($opcache->getData()); ?>,
+        useCharts: <?= json_encode($opcache->getOption('charts')); ?>,
+        highlight: <?= json_encode($opcache->getOption('highlight')); ?>,
+        debounceRate: <?= $opcache->getOption('debounce_rate'); ?>,
+        perPageLimit: <?= json_encode($opcache->getOption('per_page')); ?>
     }), document.getElementById('interface'));
 
     </script>
