@@ -108,10 +108,11 @@ class Tabs extends React.Component {
                     })}
                 </ul>
                 <div className="tab-content">
-                    {children.map((child) => {
-                        if (child.props.label !== activeTab) return undefined;
-                        return child.props.children;
-                    })}
+                    {children.map((child) => (
+                        <div key={child.props.label} style={{ display: child.props.label === activeTab ? 'block' : 'none' }}>
+                            {child.props.children}
+                        </div>
+                    ))}
                 </div>
             </>
         );
