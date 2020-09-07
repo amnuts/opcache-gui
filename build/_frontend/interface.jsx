@@ -22,7 +22,6 @@ class MainNavigation extends React.Component {
                         <GeneralInfo {...this.props} />
                         <Directives {...this.props} />
                         <Functions {...this.props} />
-                        <br style={{ clear: 'both' }} />
                     </div>
                 </>
             </div>
@@ -43,7 +42,9 @@ class MainNavigation extends React.Component {
     renderReset() {
         if (this.props.allow.reset) {
             return (
-                <div label="Reset cache" tabId="resetCache" link="?reset=1" className="nav-tab-link-reset"></div>
+                <div label="Reset cache" tabId="resetCache" className="nav-tab-link-reset" handler={() => {
+                    window.location.href = '?reset=1';
+                }}></div>
             );
         }
         return null;
@@ -96,13 +97,13 @@ class Tabs extends React.Component {
             <>
                 <ul className="nav-tab-list">
                     {children.map((child) => {
-                        const { tabId, label, className } = child.props;
+                        const { tabId, label, className, handler } = child.props;
                         return (
                             <Tab
                                 activeTab={activeTab}
                                 key={tabId}
                                 label={label}
-                                onClick={onClickTabItem}
+                                onClick={handler || onClickTabItem}
                                 className={className}
                             />
                         );
