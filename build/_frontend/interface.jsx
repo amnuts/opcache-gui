@@ -43,7 +43,7 @@ class MainNavigation extends React.Component {
     renderReset() {
         if (this.props.allow.reset) {
             return (
-                <div label="Reset cache" tabId="resetCache" link="?reset=1"></div>
+                <div label="Reset cache" tabId="resetCache" link="?reset=1" className="nav-tab-link-reset"></div>
             );
         }
         return null;
@@ -52,7 +52,7 @@ class MainNavigation extends React.Component {
     renderRealtime() {
         if (this.props.allow.realtime) {
             return (
-                <div label="Enable real-time update" tabId="toggleRealtime"></div>
+                <div label="Enable real-time update" tabId="toggleRealtime" className="nav-tab-link-realtime"></div>
             );
         }
         return null;
@@ -96,13 +96,14 @@ class Tabs extends React.Component {
             <>
                 <ul className="nav-tab-list">
                     {children.map((child) => {
-                        const { label } = child.props;
+                        const { tabId, label, className } = child.props;
                         return (
                             <Tab
                                 activeTab={activeTab}
-                                key={label}
+                                key={tabId}
                                 label={label}
                                 onClick={onClickTabItem}
+                                className={className}
                             />
                         );
                     })}
@@ -129,10 +130,13 @@ class Tab extends React.Component {
     render() {
         const {
             onClick,
-            props: {activeTab, label },
+            props: { activeTab, label },
         } = this;
 
         let className = 'nav-tab';
+        if (this.props.className) {
+            className += ` ${this.props.className}`;
+        }
         if (activeTab === label) {
             className += ' active';
         }
