@@ -66,6 +66,7 @@ $opcache = (new Service($options))->handle();
     <title>OPcache statistics on <?= $opcache->getData('version', 'host'); ?></title>
     <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js" crossorigin></script>
     <style type="text/css">
         {{CSS_OUTPUT}}
     </style>
@@ -90,7 +91,8 @@ $opcache = (new Service($options))->handle();
         useCharts: <?= json_encode($opcache->getOption('charts')); ?>,
         highlight: <?= json_encode($opcache->getOption('highlight')); ?>,
         debounceRate: <?= $opcache->getOption('debounce_rate'); ?>,
-        perPageLimit: <?= json_encode($opcache->getOption('per_page')); ?>
+        perPageLimit: <?= json_encode($opcache->getOption('per_page')); ?>,
+        realtimeRefresh: <?= json_encode($opcache->getOption('refresh_time')); ?>
     }), document.getElementById('interface'));
 
     </script>

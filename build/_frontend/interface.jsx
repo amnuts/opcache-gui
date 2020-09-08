@@ -1,10 +1,49 @@
-function Interface(props) {
-    return (
-        <>
-            <header><MainNavigation {...props} /></header>
-            <Footer {...props} />
-        </>
-    );
+class Interface extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            realtime: false,
+            fetching: false,
+            opstate: props.opstate
+        }
+        this.polling = false;
+    }
+
+    realtimeHandler = () => {
+        const realtime = !this.state.realtime;
+        this.setState({realtime});
+        if (!realtime) {
+            clearInterval(this.polling);
+            this.polling = false
+            this.setState({ fetching: false });
+        } else {
+            this.polling = setInterval((() => {
+                this.setState({fetching: true});
+                axios.get('#', {time: Date.now()})
+                    .then((response) => {
+                        console.log(response.data);
+                        this.setState({opstate: response.data});
+                    });
+            })(), this.props.realtimeRefresh * 1000);
+        }
+    }
+
+    render() {
+        const { opstate, realtimeRefresh, ...otherProps } = this.props;
+        return (
+            <>
+                <header>
+                    <MainNavigation {...otherProps}
+                        opstate={this.state.opstate}
+                        realtime={this.state.realtime}
+                        realtimeHandler={this.realtimeHandler}
+                        fetching={this.state.fetching}
+                    />
+                </header>
+                <Footer {...this.props} />
+            </>
+        );
+    }
 }
 
 
@@ -53,7 +92,10 @@ class MainNavigation extends React.Component {
     renderRealtime() {
         if (this.props.allow.realtime) {
             return (
-                <div label="Enable real-time update" tabId="toggleRealtime" className="nav-tab-link-realtime"></div>
+                <div label="Enable real-time update" tabId="toggleRealtime"
+                     className={`nav-tab-link-realtime${this.props.realtime ? ' live-update' : ''}${this.props.fetching ? ' pulse' : ''}`}
+                     handler={this.props.realtimeHandler}
+                ></div>
             );
         }
         return null;
