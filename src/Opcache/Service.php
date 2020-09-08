@@ -63,14 +63,14 @@ class Service
      */
     public function handle(): Service
     {
-        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
-            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
+        if (!empty($_SERVER['HTTP_ACCEPT'])
+            && stripos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false
         ) {
             if (isset($_GET['reset']) && $this->getOption('allow_reset')) {
                 echo '{ "success": "' . ($this->resetCache() ? 'yes' : 'no') . '" }';
             } else if (isset($_GET['invalidate']) && $this->getOption('allow_invalidate')) {
                 echo '{ "success": "' . ($this->resetCache($_GET['invalidate']) ? 'yes' : 'no') . '" }';
-            } else {
+            } else if ($this->getOption('allow_realtime')) {
                 echo json_encode($this->getData((empty($_GET['section']) ? null : $_GET['section'])));
             }
             exit;
