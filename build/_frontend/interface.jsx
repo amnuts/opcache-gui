@@ -61,7 +61,11 @@ class MainNavigation extends React.Component {
         return (
             <div label="Overview" tabId="overview">
                 <>
-                    <OverviewCounts {...this.props} />
+                    <OverviewCounts
+                        overview={this.props.opstate.overview}
+                        highlight={this.props.highlight}
+                        useCharts={this.props.useCharts}
+                    />
                     <div id="info" className="tab-content-overview-info">
                         <GeneralInfo
                             start={this.props.opstate.overview.readable.start_time || null}
@@ -204,73 +208,60 @@ class Tab extends React.Component {
 }
 
 
-class OverviewCounts extends React.Component {
-    constructor(props) {
-        super(props);
-        this.overview = props.opstate.overview;
-        this.readable = props.opstate.overview.readable;
-    }
-
-    renderInternedStrings() {
-        if (!this.readable.interned) {
-            return null;
-        }
-        return <InternedStringsPanel
-            buffer_size={this.readable.interned.buffer_size}
-            strings_used_memory={this.readable.interned.strings_used_memory}
-            strings_free_memory={this.readable.interned.strings_free_memory}
-            number_of_strings={this.readable.interned.number_of_strings}
-        />;
-    }
-
-    renderGraphs(useCharts, graphList) {
-        return graphList.map((graph) => {
-            if (!graph.show) {
-                return null;
-            }
-            return (
-                <div className="widget-panel" key={graph.id}>
-                    <h3 className="widget-header">{graph.title}</h3>
-                    <p className="widget-value"><UsageGraph charts={useCharts} value={graph.value} gaugeId={graph.id} /></p>
-                </div>
-            );
-        });
-    }
-
-    render() {
-        if (this.overview === false) {
-            return (
-                <p class="file-cache-only">
-                    You have <i>opcache.file_cache_only</i> turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by <i>opcache_get_statistics()</i>.
-                </p>
-            );
-        }
+function OverviewCounts(props) {
+    if (props.overview === false) {
         return (
-            <div id="counts" className="tab-content-overview-counts">
-                {this.renderGraphs(this.props.useCharts, [
-                    {id: 'memoryUsageCanvas', title: 'memory', show: this.props.highlight.memory, value: this.props.opstate.overview.used_memory_percentage},
-                    {id: 'hitRateCanvas', title: 'hit rate', show: this.props.highlight.hits, value: this.props.opstate.overview.hit_rate_percentage},
-                    {id: 'keyUsageCanvas', title: 'keys', show: this.props.highlight.keys, value: this.props.opstate.overview.used_key_percentage}
-                ])}
-                <MemoryUsagePanel
-                    total={this.readable.total_memory}
-                    used={this.readable.used_memory}
-                    free={this.readable.free_memory}
-                    wasted={this.readable.wasted_memory}
-                    wastedPercent={this.overview.wasted_percentage}
-                />
-                <StatisticsPanel
-                    num_cached_scripts={this.readable.num_cached_scripts}
-                    hits={this.readable.hits}
-                    misses={this.readable.misses}
-                    blacklist_miss={this.readable.blacklist_miss}
-                    num_cached_keys={this.readable.num_cached_keys}
-                    max_cached_keys={this.readable.max_cached_keys}
-                />
-                {this.renderInternedStrings()}
-            </div>
+            <p class="file-cache-only">
+                You have <i>opcache.file_cache_only</i> turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by <i>opcache_get_statistics()</i>.
+            </p>
         );
     }
+
+    const graphList = [
+        {id: 'memoryUsageCanvas', title: 'memory', show: props.highlight.memory, value: props.overview.used_memory_percentage},
+        {id: 'hitRateCanvas', title: 'hit rate', show: props.highlight.hits, value: props.overview.hit_rate_percentage},
+        {id: 'keyUsageCanvas', title: 'keys', show: props.highlight.keys, value: props.overview.used_key_percentage}
+    ];
+
+    return (
+        <div id="counts" className="tab-content-overview-counts">
+            {graphList.map((graph) => {
+                if (!graph.show) {
+                    return null;
+                }
+                return (
+                    <div className="widget-panel" key={graph.id}>
+                        <h3 className="widget-header">{graph.title}</h3>
+                        <p className="widget-value"><UsageGraph charts={props.useCharts} value={graph.value} gaugeId={graph.id} /></p>
+                    </div>
+                );
+            })}
+            <MemoryUsagePanel
+                total={props.overview.readable.total_memory}
+                used={props.overview.readable.used_memory}
+                free={props.overview.readable.free_memory}
+                wasted={props.overview.readable.wasted_memory}
+                wastedPercent={props.overview.wasted_percentage}
+            />
+            <StatisticsPanel
+                num_cached_scripts={props.overview.readable.num_cached_scripts}
+                hits={props.overview.readable.hits}
+                misses={props.overview.readable.misses}
+                blacklist_miss={props.overview.readable.blacklist_miss}
+                num_cached_keys={props.overview.readable.num_cached_keys}
+                max_cached_keys={props.overview.readable.max_cached_keys}
+            />
+            {!props.overview.readable.interned
+                ? null
+                : <InternedStringsPanel
+                    buffer_size={props.overview.readable.interned.buffer_size}
+                    strings_used_memory={props.overview.readable.interned.strings_used_memory}
+                    strings_free_memory={props.overview.readable.interned.strings_free_memory}
+                    number_of_strings={props.overview.readable.interned.number_of_strings}
+                />
+            }
+        </div>
+    );
 }
 
 
