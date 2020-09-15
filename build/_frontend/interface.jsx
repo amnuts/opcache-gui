@@ -63,7 +63,11 @@ class MainNavigation extends React.Component {
                 <>
                     <OverviewCounts {...this.props} />
                     <div id="info" className="tab-content-overview-info">
-                        <GeneralInfo {...this.props} />
+                        <GeneralInfo
+                            start={this.props.opstate.overview.readable.start_time || null}
+                            reset={this.props.opstate.overview.readable.last_restart_time || null}
+                            version={this.props.opstate.version}
+                        />
                         <Directives {...this.props} />
                         <Functions {...this.props} />
                     </div>
@@ -266,44 +270,22 @@ class OverviewCounts extends React.Component {
 }
 
 
-class GeneralInfo extends React.Component {
-    constructor(props) {
-        super(props);
-        this.start = props.opstate.overview ? props.opstate.overview.readable.start_time : null;
-        this.reset = props.opstate.overview ? props.opstate.overview.readable.last_restart_time : null;
-    }
-
-    renderStart() {
-        return (this.start === null
-            ? null
-            : <tr><td>Start time</td><td>{this.start}</td></tr>
-        );
-    }
-
-    renderReset() {
-        return (this.reset === null
-            ? null
-            : <tr><td>Last reset</td><td>{this.reset}</td></tr>
-        );
-    }
-
-    render() {
-        return (
-            <table className="tables general-info-table">
-                <thead>
-                    <tr><th colSpan="2">General info</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Zend OPcache</td><td>{this.props.opstate.version.version}</td></tr>
-                    <tr><td>PHP</td><td>{this.props.opstate.version.php}</td></tr>
-                    <tr><td>Host</td><td>{this.props.opstate.version.host}</td></tr>
-                    <tr><td>Server Software</td><td>{this.props.opstate.version.server}</td></tr>
-                    { this.renderStart() }
-                    { this.renderReset() }
-                </tbody>
-            </table>
-        );
-    }
+function GeneralInfo(props) {
+    return (
+        <table className="tables general-info-table">
+            <thead>
+                <tr><th colSpan="2">General info</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Zend OPcache</td><td>{props.version.version}</td></tr>
+                <tr><td>PHP</td><td>{props.version.php}</td></tr>
+                <tr><td>Host</td><td>{props.version.host}</td></tr>
+                <tr><td>Server Software</td><td>{props.version.server}</td></tr>
+                { props.start ? <tr><td>Start time</td><td>{props.start}</td></tr> : null }
+                { props.reset ? <tr><td>Last reset</td><td>{props.reset}</td></tr> : null }
+            </tbody>
+        </table>
+    );
 }
 
 

@@ -439,7 +439,11 @@ class MainNavigation extends React.Component {
     }, /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(OverviewCounts, this.props), /*#__PURE__*/React.createElement("div", {
       id: "info",
       className: "tab-content-overview-info"
-    }, /*#__PURE__*/React.createElement(GeneralInfo, this.props), /*#__PURE__*/React.createElement(Directives, this.props), /*#__PURE__*/React.createElement(Functions, this.props))));
+    }, /*#__PURE__*/React.createElement(GeneralInfo, {
+      start: this.props.opstate.overview.readable.start_time || null,
+      reset: this.props.opstate.overview.readable.last_restart_time || null,
+      version: this.props.opstate.version
+    }), /*#__PURE__*/React.createElement(Directives, this.props), /*#__PURE__*/React.createElement(Functions, this.props))));
   }
 
   renderFileList() {
@@ -665,29 +669,12 @@ class OverviewCounts extends React.Component {
 
 }
 
-class GeneralInfo extends React.Component {
-  constructor(props) {
-    super(props);
-    this.start = props.opstate.overview ? props.opstate.overview.readable.start_time : null;
-    this.reset = props.opstate.overview ? props.opstate.overview.readable.last_restart_time : null;
-  }
-
-  renderStart() {
-    return this.start === null ? null : /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Start time"), /*#__PURE__*/React.createElement("td", null, this.start));
-  }
-
-  renderReset() {
-    return this.reset === null ? null : /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Last reset"), /*#__PURE__*/React.createElement("td", null, this.reset));
-  }
-
-  render() {
-    return /*#__PURE__*/React.createElement("table", {
-      className: "tables general-info-table"
-    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
-      colSpan: "2"
-    }, "General info"))), /*#__PURE__*/React.createElement("tbody", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Zend OPcache"), /*#__PURE__*/React.createElement("td", null, this.props.opstate.version.version)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "PHP"), /*#__PURE__*/React.createElement("td", null, this.props.opstate.version.php)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Host"), /*#__PURE__*/React.createElement("td", null, this.props.opstate.version.host)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Server Software"), /*#__PURE__*/React.createElement("td", null, this.props.opstate.version.server)), this.renderStart(), this.renderReset()));
-  }
-
+function GeneralInfo(props) {
+  return /*#__PURE__*/React.createElement("table", {
+    className: "tables general-info-table"
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+    colSpan: "2"
+  }, "General info"))), /*#__PURE__*/React.createElement("tbody", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Zend OPcache"), /*#__PURE__*/React.createElement("td", null, props.version.version)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "PHP"), /*#__PURE__*/React.createElement("td", null, props.version.php)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Host"), /*#__PURE__*/React.createElement("td", null, props.version.host)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Server Software"), /*#__PURE__*/React.createElement("td", null, props.version.server)), props.start ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Start time"), /*#__PURE__*/React.createElement("td", null, props.start)) : null, props.reset ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Last reset"), /*#__PURE__*/React.createElement("td", null, props.reset)) : null));
 }
 
 class Directives extends React.Component {
