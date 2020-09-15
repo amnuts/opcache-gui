@@ -445,7 +445,9 @@ class MainNavigation extends React.Component {
       version: this.props.opstate.version
     }), /*#__PURE__*/React.createElement(Directives, {
       directives: this.props.opstate.directives
-    }), /*#__PURE__*/React.createElement(Functions, this.props))));
+    }), /*#__PURE__*/React.createElement(Functions, {
+      functions: this.props.opstate.functions
+    }))));
   }
 
   renderFileList() {
@@ -727,7 +729,7 @@ function Functions(props) {
     id: "functions"
   }, /*#__PURE__*/React.createElement("table", {
     className: "tables"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Available functions"))), /*#__PURE__*/React.createElement("tbody", null, props.opstate.functions.map(f => /*#__PURE__*/React.createElement("tr", {
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Available functions"))), /*#__PURE__*/React.createElement("tbody", null, props.functions.map(f => /*#__PURE__*/React.createElement("tr", {
     key: f
   }, /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("a", {
     href: "http://php.net/" + f,

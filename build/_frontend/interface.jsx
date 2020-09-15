@@ -71,7 +71,9 @@ class MainNavigation extends React.Component {
                         <Directives
                             directives={this.props.opstate.directives}
                         />
-                        <Functions {...this.props} />
+                        <Functions
+                            functions={this.props.opstate.functions}
+                        />
                     </div>
                 </>
             </div>
@@ -332,11 +334,9 @@ function Functions(props) {
     return (
         <div id="functions">
             <table className="tables">
-                <thead>
-                <tr><th>Available functions</th></tr>
-                </thead>
+                <thead><tr><th>Available functions</th></tr></thead>
                 <tbody>
-                {props.opstate.functions.map(f =>
+                {props.functions.map(f =>
                     <tr key={f}><td><a href={"http://php.net/"+f} title="View manual page" target="_blank">{f}</a></td></tr>
                 )}
                 </tbody>
