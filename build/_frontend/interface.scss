@@ -108,7 +108,7 @@ $footer-border-color: #CCC;
       background-color: transparent;
       border: 2px solid $realtime-pulse-color;
       border-radius: 100%;
-      animation: pulse 1s linear 3;
+      animation: pulse 2s linear infinite;
     }
   }
 
@@ -354,11 +354,7 @@ $footer-border-color: #CCC;
     transform: scale(1);
     opacity: 1;
   }
-  50% {
-    transform: scale(1.5);
-    opacity: 0.4;
-  }
-  100% {
+  50%,100% {
     transform: scale(2);
     opacity: 0;
   }

@@ -3,28 +3,34 @@ class Interface extends React.Component {
         super(props);
         this.state = {
             realtime: false,
-            fetching: false,
             opstate: props.opstate
         }
         this.polling = false;
     }
 
+    startTimer = () => {
+        this.setState({realtime: true})
+        this.polling = setInterval(() => {
+            this.setState({fetching: true});
+            axios.get('#', {time: Date.now()})
+                .then((response) => {
+                    console.log(response.data);
+                    this.setState({opstate: response.data});
+                });
+        }, this.props.realtimeRefresh * 1000);
+    }
+
+    stopTimer = () => {
+        this.setState({realtime: false})
+        clearInterval(this.polling)
+    }
+
     realtimeHandler = () => {
         const realtime = !this.state.realtime;
-        this.setState({realtime});
         if (!realtime) {
-            clearInterval(this.polling);
-            this.polling = false
-            this.setState({ fetching: false });
+            this.stopTimer();
         } else {
-            this.polling = setInterval((() => {
-                this.setState({fetching: true});
-                axios.get('#', {time: Date.now()})
-                    .then((response) => {
-                        console.log(response.data);
-                        this.setState({opstate: response.data});
-                    });
-            })(), this.props.realtimeRefresh * 1000);
+            this.startTimer();
         }
     }
 
@@ -37,7 +43,6 @@ class Interface extends React.Component {
                         opstate={this.state.opstate}
                         realtime={this.state.realtime}
                         realtimeHandler={this.realtimeHandler}
-                        fetching={this.state.fetching}
                     />
                 </header>
                 <Footer {...this.props} />
@@ -93,7 +98,7 @@ class MainNavigation extends React.Component {
         if (this.props.allow.realtime) {
             return (
                 <div label="Enable real-time update" tabId="toggleRealtime"
-                     className={`nav-tab-link-realtime${this.props.realtime ? ' live-update' : ''}${this.props.fetching ? ' pulse' : ''}`}
+                     className={`nav-tab-link-realtime${this.props.realtime ? ' live-update pulse' : ''}`}
                      handler={this.props.realtimeHandler}
                 ></div>
             );
