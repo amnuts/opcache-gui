@@ -52,84 +52,54 @@ class Interface extends React.Component {
 }
 
 
-class MainNavigation extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    renderOverview() {
-        return (
-            <div label="Overview" tabId="overview">
-                <>
+function MainNavigation(props) {
+    return (
+        <nav className="main-nav">
+            <Tabs>
+                <div label="Overview" tabId="overview">
                     <OverviewCounts
-                        overview={this.props.opstate.overview}
-                        highlight={this.props.highlight}
-                        useCharts={this.props.useCharts}
+                        overview={props.opstate.overview}
+                        highlight={props.highlight}
+                        useCharts={props.useCharts}
                     />
                     <div id="info" className="tab-content-overview-info">
                         <GeneralInfo
-                            start={this.props.opstate.overview.readable.start_time || null}
-                            reset={this.props.opstate.overview.readable.last_restart_time || null}
-                            version={this.props.opstate.version}
+                            start={props.opstate.overview.readable.start_time || null}
+                            reset={props.opstate.overview.readable.last_restart_time || null}
+                            version={props.opstate.version}
                         />
                         <Directives
-                            directives={this.props.opstate.directives}
+                            directives={props.opstate.directives}
                         />
                         <Functions
-                            functions={this.props.opstate.functions}
+                            functions={props.opstate.functions}
                         />
                     </div>
-                </>
-            </div>
-        );
-    }
-
-    renderFileList() {
-        if (this.props.allow.filelist) {
-            return (
-                <div label="Files" tabId="files">
-                    <Files {...this.props} />
                 </div>
-            );
-        }
-        return null;
-    }
-
-    renderReset() {
-        if (this.props.allow.reset) {
-            return (
-                <div label="Reset cache" tabId="resetCache" className="nav-tab-link-reset" handler={() => {
-                    window.location.href = '?reset=1';
-                }}></div>
-            );
-        }
-        return null;
-    }
-
-    renderRealtime() {
-        if (this.props.allow.realtime) {
-            return (
-                <div label="Enable real-time update" tabId="toggleRealtime"
-                     className={`nav-tab-link-realtime${this.props.realtime ? ' live-update pulse' : ''}`}
-                     handler={this.props.realtimeHandler}
-                ></div>
-            );
-        }
-        return null;
-    }
-
-    render() {
-        return (
-            <nav className="main-nav">
-                <Tabs>
-                    {this.renderOverview()}
-                    {this.renderFileList()}
-                    {this.renderReset()}
-                    {this.renderRealtime()}
-                </Tabs>
-            </nav>
-        );
-    }
+                {
+                    props.allow.filelist
+                        ? <div label="Files" tabId="files"><Files {...props} /></div>
+                        : null
+                }
+                {
+                    props.allow.reset
+                        ? <div label="Reset cache" tabId="resetCache"
+                               className="nav-tab-link-reset"
+                               handler={() => { window.location.href = '?reset=1'; }}
+                          ></div>
+                        : null
+                }
+                {
+                    props.allow.realtime
+                        ? <div label="Enable real-time update" tabId="toggleRealtime"
+                               className={`nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`}
+                               handler={props.realtimeHandler}
+                        ></div>
+                        : null
+                }
+            </Tabs>
+        </nav>
+    );
 }
 
 

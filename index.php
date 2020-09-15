@@ -427,78 +427,43 @@ class Interface extends React.Component {
 
 }
 
-class MainNavigation extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  renderOverview() {
-    return /*#__PURE__*/React.createElement("div", {
-      label: "Overview",
-      tabId: "overview"
-    }, /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(OverviewCounts, {
-      overview: this.props.opstate.overview,
-      highlight: this.props.highlight,
-      useCharts: this.props.useCharts
-    }), /*#__PURE__*/React.createElement("div", {
-      id: "info",
-      className: "tab-content-overview-info"
-    }, /*#__PURE__*/React.createElement(GeneralInfo, {
-      start: this.props.opstate.overview.readable.start_time || null,
-      reset: this.props.opstate.overview.readable.last_restart_time || null,
-      version: this.props.opstate.version
-    }), /*#__PURE__*/React.createElement(Directives, {
-      directives: this.props.opstate.directives
-    }), /*#__PURE__*/React.createElement(Functions, {
-      functions: this.props.opstate.functions
-    }))));
-  }
-
-  renderFileList() {
-    if (this.props.allow.filelist) {
-      return /*#__PURE__*/React.createElement("div", {
-        label: "Files",
-        tabId: "files"
-      }, /*#__PURE__*/React.createElement(Files, this.props));
+function MainNavigation(props) {
+  return /*#__PURE__*/React.createElement("nav", {
+    className: "main-nav"
+  }, /*#__PURE__*/React.createElement(Tabs, null, /*#__PURE__*/React.createElement("div", {
+    label: "Overview",
+    tabId: "overview"
+  }, /*#__PURE__*/React.createElement(OverviewCounts, {
+    overview: props.opstate.overview,
+    highlight: props.highlight,
+    useCharts: props.useCharts
+  }), /*#__PURE__*/React.createElement("div", {
+    id: "info",
+    className: "tab-content-overview-info"
+  }, /*#__PURE__*/React.createElement(GeneralInfo, {
+    start: props.opstate.overview.readable.start_time || null,
+    reset: props.opstate.overview.readable.last_restart_time || null,
+    version: props.opstate.version
+  }), /*#__PURE__*/React.createElement(Directives, {
+    directives: props.opstate.directives
+  }), /*#__PURE__*/React.createElement(Functions, {
+    functions: props.opstate.functions
+  }))), props.allow.filelist ? /*#__PURE__*/React.createElement("div", {
+    label: "Files",
+    tabId: "files"
+  }, /*#__PURE__*/React.createElement(Files, props)) : null, props.allow.reset ? /*#__PURE__*/React.createElement("div", {
+    label: "Reset cache",
+    tabId: "resetCache",
+    className: "nav-tab-link-reset",
+    handler: () => {
+      window.location.href = '?reset=1';
     }
-
-    return null;
-  }
-
-  renderReset() {
-    if (this.props.allow.reset) {
-      return /*#__PURE__*/React.createElement("div", {
-        label: "Reset cache",
-        tabId: "resetCache",
-        className: "nav-tab-link-reset",
-        handler: () => {
-          window.location.href = '?reset=1';
-        }
-      });
-    }
-
-    return null;
-  }
-
-  renderRealtime() {
-    if (this.props.allow.realtime) {
-      return /*#__PURE__*/React.createElement("div", {
-        label: "Enable real-time update",
-        tabId: "toggleRealtime",
-        className: `nav-tab-link-realtime${this.props.realtime ? ' live-update pulse' : ''}`,
-        handler: this.props.realtimeHandler
-      });
-    }
-
-    return null;
-  }
-
-  render() {
-    return /*#__PURE__*/React.createElement("nav", {
-      className: "main-nav"
-    }, /*#__PURE__*/React.createElement(Tabs, null, this.renderOverview(), this.renderFileList(), this.renderReset(), this.renderRealtime()));
-  }
-
+  }) : null, props.allow.realtime ? /*#__PURE__*/React.createElement("div", {
+    label: "Enable real-time update",
+    tabId: "toggleRealtime",
+    className: `nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`,
+    handler: props.realtimeHandler
+  }) : null));
 }
 
 class Tabs extends React.Component {
