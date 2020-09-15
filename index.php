@@ -443,7 +443,9 @@ class MainNavigation extends React.Component {
       start: this.props.opstate.overview.readable.start_time || null,
       reset: this.props.opstate.overview.readable.last_restart_time || null,
       version: this.props.opstate.version
-    }), /*#__PURE__*/React.createElement(Directives, this.props), /*#__PURE__*/React.createElement(Functions, this.props))));
+    }), /*#__PURE__*/React.createElement(Directives, {
+      directives: this.props.opstate.directives
+    }), /*#__PURE__*/React.createElement(Functions, this.props))));
   }
 
   renderFileList() {
@@ -677,54 +679,47 @@ function GeneralInfo(props) {
   }, "General info"))), /*#__PURE__*/React.createElement("tbody", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Zend OPcache"), /*#__PURE__*/React.createElement("td", null, props.version.version)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "PHP"), /*#__PURE__*/React.createElement("td", null, props.version.php)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Host"), /*#__PURE__*/React.createElement("td", null, props.version.host)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Server Software"), /*#__PURE__*/React.createElement("td", null, props.version.server)), props.start ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Start time"), /*#__PURE__*/React.createElement("td", null, props.start)) : null, props.reset ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Last reset"), /*#__PURE__*/React.createElement("td", null, props.reset)) : null));
 }
 
-class Directives extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    let directiveNodes = this.props.opstate.directives.map(function (directive) {
-      let map = {
-        'opcache.': '',
-        '_': ' '
-      };
-      let dShow = directive.k.replace(/opcache\.|_/gi, function (matched) {
-        return map[matched];
-      });
-      let vShow;
-
-      if (directive.v === true || directive.v === false) {
-        vShow = React.createElement('i', {}, directive.v.toString());
-      } else if (directive.v === '') {
-        vShow = React.createElement('i', {}, 'no value');
-      } else {
-        if (Array.isArray(directive.v)) {
-          vShow = directive.v.map((item, key) => {
-            return /*#__PURE__*/React.createElement("span", {
-              key: key
-            }, item, /*#__PURE__*/React.createElement("br", null));
-          });
-        } else {
-          vShow = directive.v;
-        }
-      }
-
-      return /*#__PURE__*/React.createElement("tr", {
-        key: directive.k
-      }, /*#__PURE__*/React.createElement("td", {
-        title: 'View ' + directive.k + ' manual entry'
-      }, /*#__PURE__*/React.createElement("a", {
-        href: 'http://php.net/manual/en/opcache.configuration.php#ini.' + directive.k.replace(/_/g, '-'),
-        target: "_blank"
-      }, dShow)), /*#__PURE__*/React.createElement("td", null, vShow));
+function Directives(props) {
+  let directiveNodes = props.directives.map(function (directive) {
+    let map = {
+      'opcache.': '',
+      '_': ' '
+    };
+    let dShow = directive.k.replace(/opcache\.|_/gi, function (matched) {
+      return map[matched];
     });
-    return /*#__PURE__*/React.createElement("table", {
-      className: "tables directives-table"
-    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
-      colSpan: "2"
-    }, "Directives"))), /*#__PURE__*/React.createElement("tbody", null, directiveNodes));
-  }
+    let vShow;
 
+    if (directive.v === true || directive.v === false) {
+      vShow = React.createElement('i', {}, directive.v.toString());
+    } else if (directive.v === '') {
+      vShow = React.createElement('i', {}, 'no value');
+    } else {
+      if (Array.isArray(directive.v)) {
+        vShow = directive.v.map((item, key) => {
+          return /*#__PURE__*/React.createElement("span", {
+            key: key
+          }, item, /*#__PURE__*/React.createElement("br", null));
+        });
+      } else {
+        vShow = directive.v;
+      }
+    }
+
+    return /*#__PURE__*/React.createElement("tr", {
+      key: directive.k
+    }, /*#__PURE__*/React.createElement("td", {
+      title: 'View ' + directive.k + ' manual entry'
+    }, /*#__PURE__*/React.createElement("a", {
+      href: 'http://php.net/manual/en/opcache.configuration.php#ini.' + directive.k.replace(/_/g, '-'),
+      target: "_blank"
+    }, dShow)), /*#__PURE__*/React.createElement("td", null, vShow));
+  });
+  return /*#__PURE__*/React.createElement("table", {
+    className: "tables directives-table"
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+    colSpan: "2"
+  }, "Directives"))), /*#__PURE__*/React.createElement("tbody", null, directiveNodes));
 }
 
 function Functions(props) {

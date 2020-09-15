@@ -68,7 +68,9 @@ class MainNavigation extends React.Component {
                             reset={this.props.opstate.overview.readable.last_restart_time || null}
                             version={this.props.opstate.version}
                         />
-                        <Directives {...this.props} />
+                        <Directives
+                            directives={this.props.opstate.directives}
+                        />
                         <Functions {...this.props} />
                     </div>
                 </>
@@ -289,46 +291,41 @@ function GeneralInfo(props) {
 }
 
 
-class Directives extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        let directiveNodes = this.props.opstate.directives.map(function(directive) {
-            let map = { 'opcache.':'', '_':' ' };
-            let dShow = directive.k.replace(/opcache\.|_/gi, function(matched){
-                return map[matched];
-            });
-            let vShow;
-            if (directive.v === true || directive.v === false) {
-                vShow = React.createElement('i', {}, directive.v.toString());
-            } else if (directive.v === '') {
-                vShow = React.createElement('i', {}, 'no value');
-            } else {
-                if (Array.isArray(directive.v)) {
-                    vShow = directive.v.map((item, key) => {
-                        return <span key={key}>{item}<br/></span>
-                    });
-                } else {
-                    vShow = directive.v;
-                }
-            }
-            return (
-                <tr key={directive.k}>
-                    <td title={'View ' + directive.k + ' manual entry'}><a href={'http://php.net/manual/en/opcache.configuration.php#ini.'
-                    + (directive.k).replace(/_/g,'-')} target="_blank">{dShow}</a></td>
-                    <td>{vShow}</td>
-                </tr>
-            );
+function Directives(props) {
+    let directiveNodes = props.directives.map(function(directive) {
+        let map = { 'opcache.':'', '_':' ' };
+        let dShow = directive.k.replace(/opcache\.|_/gi, function(matched){
+            return map[matched];
         });
+        let vShow;
+        if (directive.v === true || directive.v === false) {
+            vShow = React.createElement('i', {}, directive.v.toString());
+        } else if (directive.v === '') {
+            vShow = React.createElement('i', {}, 'no value');
+        } else {
+            if (Array.isArray(directive.v)) {
+                vShow = directive.v.map((item, key) => {
+                    return <span key={key}>{item}<br/></span>
+                });
+            } else {
+                vShow = directive.v;
+            }
+        }
         return (
-            <table className="tables directives-table">
-                <thead><tr><th colSpan="2">Directives</th></tr></thead>
-                <tbody>{directiveNodes}</tbody>
-            </table>
+            <tr key={directive.k}>
+                <td title={'View ' + directive.k + ' manual entry'}><a href={'http://php.net/manual/en/opcache.configuration.php#ini.'
+                + (directive.k).replace(/_/g,'-')} target="_blank">{dShow}</a></td>
+                <td>{vShow}</td>
+            </tr>
         );
-    }
+    });
+
+    return (
+        <table className="tables directives-table">
+            <thead><tr><th colSpan="2">Directives</th></tr></thead>
+            <tbody>{directiveNodes}</tbody>
+        </table>
+    );
 }
 
 function Functions(props) {
