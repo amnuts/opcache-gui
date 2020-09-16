@@ -202,7 +202,7 @@ function OverviewCounts(props) {
                 return (
                     <div className="widget-panel" key={graph.id}>
                         <h3 className="widget-header">{graph.title}</h3>
-                        <p className="widget-value"><UsageGraph charts={props.useCharts} value={graph.value} gaugeId={graph.id} /></p>
+                        <UsageGraph charts={props.useCharts} value={graph.value} gaugeId={graph.id} />
                     </div>
                 );
             })}
@@ -308,11 +308,221 @@ function Functions(props) {
 
 
 function UsageGraph(props) {
+    const percentage = Math.round(((3.6 * props.value)/360)*100);
     return (props.charts
-        ? <Canvas value={props.value} gaugeId={props.gaugeId} />
-        : <><span className="large">{props.value}</span><span>%</span></>
+        ? <ReactCustomizableProgressbar
+            progress={percentage}
+            radius={100}
+            strokeWidth={30}
+            trackStrokeWidth={30}
+            strokeColor="#5d9cec"
+            gaugeId={props.gaugeId}
+        />
+        : <p className="widget-value"><span className="large">{percentage}</span><span>%</span></p>
     );
 }
+
+/**
+ * This component is from <https://github.com/martyan/react-customizable-progressbar/>
+ * MIT License (MIT), Copyright (c) 2019 Martin Juzl
+ */
+class ReactCustomizableProgressbar extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            animationInited: false
+        };
+    }
+
+    componentDidMount() {
+        const { initialAnimation, initialAnimationDelay } = this.props
+        if (initialAnimation)
+            setTimeout(this.initAnimation, initialAnimationDelay)
+    }
+
+    initAnimation = () => {
+        this.setState({ animationInited: true })
+    }
+
+    getProgress = () => {
+        const { initialAnimation, progress } = this.props
+        const { animationInited } = this.state
+
+        return initialAnimation && !animationInited ? 0 : progress
+    }
+
+    getStrokeDashoffset = strokeLength => {
+        const { counterClockwise, inverse, steps } = this.props
+        const progress = this.getProgress()
+        const progressLength = (strokeLength / steps) * (steps - progress)
+
+        if (inverse) return counterClockwise ? 0 : progressLength - strokeLength
+
+        return counterClockwise ? -1 * progressLength : progressLength
+    }
+
+    getStrokeDashArray = (strokeLength, circumference) => {
+        const { counterClockwise, inverse, steps } = this.props
+        const progress = this.getProgress()
+        const progressLength = (strokeLength / steps) * (steps - progress)
+
+        if (inverse) return `${progressLength}, ${circumference}`
+
+        return counterClockwise
+            ? `${strokeLength * (progress / 100)}, ${circumference}`
+            : `${strokeLength}, ${circumference}`
+    }
+
+    getTrackStrokeDashArray = (strokeLength, circumference) => {
+        const { initialAnimation } = this.props
+        const { animationInited } = this.state
+        if (initialAnimation && !animationInited) return `0, ${circumference}`
+        return `${strokeLength}, ${circumference}`
+    }
+
+    getExtendedWidth = () => {
+        const {
+            strokeWidth,
+            pointerRadius,
+            pointerStrokeWidth,
+            trackStrokeWidth
+        } = this.props
+        const pointerWidth = pointerRadius + pointerStrokeWidth
+        if (pointerWidth > strokeWidth && pointerWidth > trackStrokeWidth) return pointerWidth * 2
+        else if (strokeWidth > trackStrokeWidth) return strokeWidth * 2
+        else return trackStrokeWidth * 2
+    }
+
+    getPointerAngle = () => {
+        const { cut, counterClockwise, steps } = this.props
+        const progress = this.getProgress()
+        return counterClockwise
+            ? ((360 - cut) / steps) * (steps - progress)
+            : ((360 - cut) / steps) * progress
+    }
+
+    render() {
+        const {
+            radius,
+            pointerRadius,
+            pointerStrokeWidth,
+            pointerFillColor,
+            pointerStrokeColor,
+            fillColor,
+            trackStrokeWidth,
+            trackStrokeColor,
+            trackStrokeLinecap,
+            strokeColor,
+            strokeWidth,
+            strokeLinecap,
+            rotate,
+            cut,
+            trackTransition,
+            transition,
+            progress
+        } = this.props
+
+        const d = 2 * radius
+        const width = d + this.getExtendedWidth()
+
+        const circumference = 2 * Math.PI * radius
+        const strokeLength = (circumference / 360) * (360 - cut)
+
+        return (
+            <figure
+                className={`graph-widget`}
+                style={{width: `${width || 250}px`}}
+                data-value={progress}
+                id={this.props.guageId}
+            >
+                <svg width={width} height={width}
+                    viewBox={`0 0 ${width} ${width}`}
+                    style={{ transform: `rotate(${rotate}deg)` }}
+                >
+                    {trackStrokeWidth > 0 && (
+                        <circle
+                            cx={width / 2}
+                            cy={width / 2}
+                            r={radius}
+                            fill="none"
+                            stroke={trackStrokeColor}
+                            strokeWidth={trackStrokeWidth}
+                            strokeDasharray={this.getTrackStrokeDashArray(
+                                strokeLength,
+                                circumference
+                            )}
+                            strokeLinecap={trackStrokeLinecap}
+                            style={{ transition: trackTransition }}
+                        />
+                    )}
+                    {strokeWidth > 0 && (
+                        <circle
+                            cx={width / 2}
+                            cy={width / 2}
+                            r={radius}
+                            fill={fillColor}
+                            stroke={strokeColor}
+                            strokeWidth={strokeWidth}
+                            strokeDasharray={this.getStrokeDashArray(
+                                strokeLength,
+                                circumference
+                            )}
+                            strokeDashoffset={this.getStrokeDashoffset(
+                                strokeLength
+                            )}
+                            strokeLinecap={strokeLinecap}
+                            style={{ transition }}
+                        />
+                    )}
+                    {pointerRadius > 0 && (
+                        <circle
+                            cx={d}
+                            cy="50%"
+                            r={pointerRadius}
+                            fill={pointerFillColor}
+                            stroke={pointerStrokeColor}
+                            strokeWidth={pointerStrokeWidth}
+                            style={{
+                                transformOrigin: '50% 50%',
+                                transform: `rotate(${this.getPointerAngle()}deg) translate(${this.getExtendedWidth() /
+                                2}px)`,
+                                transition
+                            }}
+                        />
+                    )}
+                </svg>
+                <figcaption className={`widget-value`}>
+                    {progress}%
+                </figcaption>
+            </figure>
+        )
+    }
+}
+
+ReactCustomizableProgressbar.defaultProps = {
+    radius: 100,
+    progress: 0,
+    steps: 100,
+    cut: 0,
+    rotate: -90,
+    strokeWidth: 20,
+    strokeColor: 'indianred',
+    fillColor: 'none',
+    strokeLinecap: 'round',
+    transition: '.3s ease',
+    pointerRadius: 0,
+    pointerStrokeWidth: 20,
+    pointerStrokeColor: 'indianred',
+    pointerFillColor: 'white',
+    trackStrokeColor: '#e6e6e6',
+    trackStrokeWidth: 20,
+    trackStrokeLinecap: 'round',
+    trackTransition: '.3s ease',
+    counterClockwise: false,
+    inverse: false,
+    initialAnimation: false,
+    initialAnimationDelay: 0
+};
 
 
 class Canvas extends React.Component {
@@ -324,7 +534,8 @@ class Canvas extends React.Component {
         this.loop = null;
         this.state = {
             degrees: 0,
-            newdegs: 0
+            newdegs: 0,
+            value: props.value
         }
     }
 
@@ -380,7 +591,7 @@ class Canvas extends React.Component {
     }
 
     render() {
-        return <PureCanvas key={this.props.gaugeId} contextRef={this.saveContext} {...this.props} />;
+        return <PureCanvas key={this.props.gaugeId} contextRef={this.saveContext} value={this.props.value} />;
     }
 }
 

@@ -130,10 +130,27 @@ $footer-border-color: #CCC;
   }
 
   .graph-widget {
-    display: block;
     max-width: 100%;
     height: auto;
     margin: 0 auto;
+    display: flex;
+    position: relative;
+
+    .widget-value {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: absolute;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0 auto;
+      font-size: 3.2em;
+      font-weight: 100;
+      color: $table-header-color;
+      user-select: none;
+    }
   }
 
   .widget-panel {
