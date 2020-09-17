@@ -445,7 +445,9 @@ class Interface extends React.Component {
       resetting: this.state.resetting,
       realtimeHandler: this.realtimeHandler,
       resetHandler: this.resetHandler
-    }))), /*#__PURE__*/React.createElement(Footer, this.props));
+    }))), /*#__PURE__*/React.createElement(Footer, {
+      version: this.props.opstate.version.gui
+    }));
   }
 
 }
@@ -464,14 +466,14 @@ function MainNavigation(props) {
     id: "info",
     className: "tab-content-overview-info"
   }, /*#__PURE__*/React.createElement(GeneralInfo, {
-    start: props.opstate.overview.readable.start_time || null,
-    reset: props.opstate.overview.readable.last_restart_time || null,
+    start: props.opstate.overview && props.opstate.overview.readable.start_time || null,
+    reset: props.opstate.overview && props.opstate.overview.readable.last_restart_time || null,
     version: props.opstate.version
   }), /*#__PURE__*/React.createElement(Directives, {
     directives: props.opstate.directives
   }), /*#__PURE__*/React.createElement(Functions, {
     functions: props.opstate.functions
-  }))), props.allow.filelist ? /*#__PURE__*/React.createElement("div", {
+  }))), props.allow.filelist && /*#__PURE__*/React.createElement("div", {
     label: "Files",
     tabId: "files"
   }, /*#__PURE__*/React.createElement(Files, {
@@ -484,17 +486,17 @@ function MainNavigation(props) {
       invalidate: props.allow.invalidate
     },
     realtime: props.realtime
-  })) : null, props.allow.reset ? /*#__PURE__*/React.createElement("div", {
+  })), props.allow.reset && /*#__PURE__*/React.createElement("div", {
     label: "Reset cache",
     tabId: "resetCache",
     className: `nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`,
     handler: props.resetHandler
-  }) : null, props.allow.realtime ? /*#__PURE__*/React.createElement("div", {
+  }), props.allow.realtime && /*#__PURE__*/React.createElement("div", {
     label: "Enable real-time update",
     tabId: "toggleRealtime",
     className: `nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`,
     handler: props.realtimeHandler
-  }) : null));
+  })));
 }
 
 class Tabs extends React.Component {
@@ -996,7 +998,7 @@ class Files extends React.Component {
     }
 
     if (this.props.allFiles.length === 0) {
-      return /*#__PURE__*/React.createElement("p", null, "No files have been cached");
+      return /*#__PURE__*/React.createElement("p", null, "No files have been cached or you have ", /*#__PURE__*/React.createElement("i", null, "opcache.file_cache_only"), " turned on");
     }
 
     const {
@@ -1289,8 +1291,8 @@ function Footer(props) {
     className: "github-link",
     href: "https://github.com/amnuts/opcache-gui",
     target: "_blank",
-    title: "opcache-gui (currently version {props.opstate.version.gui}) on GitHub"
-  }, "https://github.com/amnuts/opcache-gui - version ", props.opstate.version.gui));
+    title: "opcache-gui (currently version {props.version}) on GitHub"
+  }, "https://github.com/amnuts/opcache-gui - version ", props.version));
 }
 
 function debounce(func, wait, immediate) {

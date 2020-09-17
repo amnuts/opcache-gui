@@ -59,7 +59,7 @@ class Interface extends React.Component {
                         resetHandler={this.resetHandler}
                     />
                 </header>
-                <Footer {...this.props} />
+                <Footer version={this.props.opstate.version.gui} />
             </>
         );
     }
@@ -78,8 +78,8 @@ function MainNavigation(props) {
                     />
                     <div id="info" className="tab-content-overview-info">
                         <GeneralInfo
-                            start={props.opstate.overview.readable.start_time || null}
-                            reset={props.opstate.overview.readable.last_restart_time || null}
+                            start={props.opstate.overview && props.opstate.overview.readable.start_time || null}
+                            reset={props.opstate.overview && props.opstate.overview.readable.last_restart_time || null}
                             version={props.opstate.version}
                         />
                         <Directives
@@ -91,8 +91,8 @@ function MainNavigation(props) {
                     </div>
                 </div>
                 {
-                    props.allow.filelist
-                        ? <div label="Files" tabId="files">
+                    props.allow.filelist &&
+                        <div label="Files" tabId="files">
                             <Files
                                 perPageLimit={props.perPageLimit}
                                 allFiles={props.opstate.files}
@@ -101,24 +101,21 @@ function MainNavigation(props) {
                                 allow={{fileList: props.allow.filelist, invalidate: props.allow.invalidate}}
                                 realtime={props.realtime}
                             />
-                          </div>
-                        : null
+                        </div>
                 }
                 {
-                    props.allow.reset
-                        ? <div label="Reset cache" tabId="resetCache"
-                               className={`nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`}
-                               handler={props.resetHandler}
-                          ></div>
-                        : null
-                }
-                {
-                    props.allow.realtime
-                        ? <div label="Enable real-time update" tabId="toggleRealtime"
-                               className={`nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`}
-                               handler={props.realtimeHandler}
+                    props.allow.reset &&
+                        <div label="Reset cache" tabId="resetCache"
+                           className={`nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`}
+                           handler={props.resetHandler}
                         ></div>
-                        : null
+                }
+                {
+                    props.allow.realtime &&
+                        <div label="Enable real-time update" tabId="toggleRealtime"
+                            className={`nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`}
+                            handler={props.realtimeHandler}
+                        ></div>
                 }
             </Tabs>
         </nav>
@@ -244,9 +241,8 @@ function OverviewCounts(props) {
                 num_cached_keys={props.overview.readable.num_cached_keys}
                 max_cached_keys={props.overview.readable.max_cached_keys}
             />
-            {!props.overview.readable.interned
-                ? null
-                : <InternedStringsPanel
+            {props.overview.readable.interned &&
+                <InternedStringsPanel
                     buffer_size={props.overview.readable.interned.buffer_size}
                     strings_used_memory={props.overview.readable.interned.strings_used_memory}
                     strings_free_memory={props.overview.readable.interned.strings_free_memory}
@@ -626,7 +622,7 @@ class Files extends React.Component {
         }
 
         if (this.props.allFiles.length === 0) {
-            return <p>No files have been cached</p>;
+            return <p>No files have been cached or you have <i>opcache.file_cache_only</i> turned on</p>;
         }
 
         const { searchTerm, currentPage } = this.state;
@@ -893,8 +889,8 @@ function Footer(props) {
         <footer className="main-footer">
             <a className="github-link" href="https://github.com/amnuts/opcache-gui"
                target="_blank"
-               title="opcache-gui (currently version {props.opstate.version.gui}) on GitHub"
-            >https://github.com/amnuts/opcache-gui - version {props.opstate.version.gui}</a>
+               title="opcache-gui (currently version {props.version}) on GitHub"
+            >https://github.com/amnuts/opcache-gui - version {props.version}</a>
         </footer>
     );
 }
