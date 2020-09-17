@@ -14,7 +14,6 @@ class Interface extends React.Component {
             this.setState({fetching: true});
             axios.get('#', {time: Date.now()})
                 .then((response) => {
-                    console.log(response.data);
                     this.setState({opstate: response.data});
                 });
         }, this.props.realtimeRefresh * 1000);
@@ -78,7 +77,15 @@ function MainNavigation(props) {
                 </div>
                 {
                     props.allow.filelist
-                        ? <div label="Files" tabId="files"><Files {...props} /></div>
+                        ? <div label="Files" tabId="files">
+                            <Files
+                                perPageLimit={props.perPageLimit}
+                                files={props.opstate.files}
+                                searchTerm={props.searchTerm}
+                                debounceRate={props.debounceRate}
+                                allow={{fileList: props.allow.filelist, invalidate: props.allow.invalidate}}
+                            />
+                          </div>
                         : null
                 }
                 {
@@ -315,7 +322,8 @@ function UsageGraph(props) {
             radius={100}
             strokeWidth={30}
             trackStrokeWidth={30}
-            strokeColor="#5d9cec"
+            strokeColor={getComputedStyle(document.documentElement).getPropertyValue('--opcache-gui-graph-track-fill-color') || "#6CA6EF"}
+            trackStrokeColor={getComputedStyle(document.documentElement).getPropertyValue('--opcache-gui-graph-track-background-color') || "#CCC"}
             gaugeId={props.gaugeId}
         />
         : <p className="widget-value"><span className="large">{percentage}</span><span>%</span></p>
@@ -667,13 +675,13 @@ function InternedStringsPanel(props) {
 class Files extends React.Component {
     constructor(props) {
         super(props);
-        this.doPagination = (typeof this.props.perPageLimit === "number"
-            && this.props.perPageLimit > 0
+        this.doPagination = (typeof props.perPageLimit === "number"
+            && props.perPageLimit > 0
         );
-        this.totalFiles = props.opstate.files.length;
+        this.totalFiles = props.files.length;
         this.state = {
-            availableFiles: props.opstate.files,
-            currentFiles: (this.doPagination ? [] : props.opstate.files),
+            availableFiles: props.files,
+            currentFiles: (this.doPagination ? [] : props.files),
             currentPage: null,
             totalPages: null,
             searchTerm: props.searchTerm,
@@ -682,7 +690,7 @@ class Files extends React.Component {
     }
 
     setSearchTerm = debounce(searchTerm => {
-        const availableFiles = this.props.opstate.files.filter(file => {
+        const availableFiles = this.props.files.filter(file => {
             return !(file.full_path.indexOf(searchTerm) == -1);
         });
         const currentFiles = (this.doPagination
@@ -715,11 +723,11 @@ class Files extends React.Component {
     }
 
     render() {
-        if (!this.props.allow.filelist) {
+        if (!this.props.allow.fileList) {
             return null;
         }
 
-        if (this.props.opstate.files.length === 0) {
+        if (this.props.files.length === 0) {
             return <p>No files have been cached</p>;
         }
 
@@ -791,6 +799,7 @@ class File extends React.Component {
     }
 
     render() {
+        console.log(this.props);
         return (
             <tr data-path={this.props.full_path.toLowerCase()} className={this.props.colourRow % 2 ? 'alternate' : ''}>
                 <td>

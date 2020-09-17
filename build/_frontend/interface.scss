@@ -14,6 +14,8 @@ $table-header-border-color: #FFF;
 
 $widget-header-color: #CDCDCD;
 $widget-background-color: #EDEDED;
+$widget-graph-fill-color: #6CA6EF;
+$widget-graph-background-color: #E5E7E7E7;
 
 $pagination-active-color: #4d75af;
 $pagination-active-font-color: #FFF;
@@ -24,6 +26,11 @@ $footer-border-color: #CCC;
 
 @function toRGB ($color) {
   @return "rgb(" + red($color) + ", " + green($color) + ", " + blue($color)+ ")";
+}
+
+:root {
+  --opcache-gui-graph-track-fill-color: #{$widget-graph-fill-color};
+  --opcache-gui-graph-track-background-color: #{$widget-graph-background-color};
 }
 
 .opcache-gui {
@@ -148,7 +155,7 @@ $footer-border-color: #CCC;
       margin: 0 auto;
       font-size: 3.2em;
       font-weight: 100;
-      color: $table-header-color;
+      color: $widget-graph-fill-color;
       user-select: none;
     }
   }
@@ -172,7 +179,7 @@ $footer-border-color: #CCC;
     text-align: center;
 
     span.large {
-      color: $table-header-color;
+      color: $widget-graph-fill-color;
       font-size: 80pt;
       margin: 0;
       padding: 0;
@@ -181,7 +188,7 @@ $footer-border-color: #CCC;
       + span {
         font-size: 20pt;
         margin: 0;
-        color: $table-header-color;
+        color: $widget-graph-fill-color;
       }
     }
   }
