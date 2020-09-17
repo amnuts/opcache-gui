@@ -460,7 +460,8 @@ function MainNavigation(props) {
     allow: {
       fileList: props.allow.filelist,
       invalidate: props.allow.invalidate
-    }
+    },
+    realtime: props.realtime
   })) : null, props.allow.reset ? /*#__PURE__*/React.createElement("div", {
     label: "Reset cache",
     tabId: "resetCache",
@@ -963,9 +964,7 @@ class Files extends React.Component {
 
     this.doPagination = typeof props.perPageLimit === "number" && props.perPageLimit > 0;
     this.state = {
-      filesInSearch: props.allFiles,
       currentPage: 1,
-      totalPages: null,
       searchTerm: props.searchTerm,
       refreshPagination: 0
     };
@@ -1003,7 +1002,7 @@ class Files extends React.Component {
       onChange: e => {
         this.setSearchTerm(e.target.value);
       }
-    })), /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " files cached", showingTotal != allFilesTotal && `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
+    })), /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " files cached", showingTotal !== allFilesTotal && `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
       totalRecords: filesInSearch.length,
       pageLimit: this.props.perPageLimit,
       pageNeighbours: 2,
@@ -1016,7 +1015,8 @@ class Files extends React.Component {
         key: file.full_path,
         canInvalidate: this.props.allow.invalidate
       }, file, {
-        colourRow: index
+        colourRow: index,
+        realtime: this.props.realtime
       }));
     }))));
   }
@@ -1024,39 +1024,27 @@ class Files extends React.Component {
 }
 
 class File extends React.Component {
-  constructor(props) {
-    super(props);
-    this.renderInvalidateLink = this.renderInvalidateLink.bind(this);
-    this.renderInvalidateStatus = this.renderInvalidateStatus.bind(this);
-  }
+  constructor(...args) {
+    super(...args);
 
-  handleInvalidate(e) {
-    e.preventDefault();
+    _defineProperty(this, "handleInvalidate", e => {
+      e.preventDefault();
 
-    if (realtime) {
-      $.get('#', {
-        invalidate: e.currentTarget.getAttribute('data-file')
-      }, function (data) {
-        console.log('success: ' + data.success);
-      }, 'json');
-    } else {
-      window.location.href = e.currentTarget.href;
-    }
-  }
-
-  renderInvalidateStatus() {
-    return !this.props.timestamp ? /*#__PURE__*/React.createElement("span", {
-      className: "invalid file-metainfo"
-    }, " - has been invalidated") : null;
-  }
-
-  renderInvalidateLink() {
-    return this.props.canInvalidate ? /*#__PURE__*/React.createElement("span", null, ",\xA0", /*#__PURE__*/React.createElement("a", {
-      className: "file-metainfo",
-      href: '?invalidate=' + this.props.full_path,
-      "data-file": this.props.full_path,
-      onClick: this.handleInvalidate
-    }, "force file invalidation")) : null;
+      if (this.props.realtime) {
+        console.log({
+          invalidate: e.currentTarget.getAttribute('data-file')
+        });
+        axios.get('#', {
+          params: {
+            invalidate: e.currentTarget.getAttribute('data-file')
+          }
+        }).then(response => {
+          console.log('success: ', response.data);
+        });
+      } else {
+        window.location.href = e.currentTarget.href;
+      }
+    });
   }
 
   render() {
@@ -1067,7 +1055,14 @@ class File extends React.Component {
       className: "file-pathname"
     }, this.props.full_path), /*#__PURE__*/React.createElement("span", {
       className: "file-metainfo"
-    }, /*#__PURE__*/React.createElement("b", null, "hits: "), /*#__PURE__*/React.createElement("span", null, this.props.readable.hits, ", "), /*#__PURE__*/React.createElement("b", null, "memory: "), /*#__PURE__*/React.createElement("span", null, this.props.readable.memory_consumption, ", "), /*#__PURE__*/React.createElement("b", null, "last used: "), /*#__PURE__*/React.createElement("span", null, this.props.last_used)), this.renderInvalidateStatus(), this.renderInvalidateLink()));
+    }, /*#__PURE__*/React.createElement("b", null, "hits: "), /*#__PURE__*/React.createElement("span", null, this.props.readable.hits, ", "), /*#__PURE__*/React.createElement("b", null, "memory: "), /*#__PURE__*/React.createElement("span", null, this.props.readable.memory_consumption, ", "), /*#__PURE__*/React.createElement("b", null, "last used: "), /*#__PURE__*/React.createElement("span", null, this.props.last_used)), !this.props.timestamp && /*#__PURE__*/React.createElement("span", {
+      className: "invalid file-metainfo"
+    }, " - has been invalidated"), this.props.canInvalidate && /*#__PURE__*/React.createElement("span", null, ",\xA0", /*#__PURE__*/React.createElement("a", {
+      className: "file-metainfo",
+      href: '?invalidate=' + this.props.full_path,
+      "data-file": this.props.full_path,
+      onClick: this.handleInvalidate
+    }, "force file invalidation"))));
   }
 
 }

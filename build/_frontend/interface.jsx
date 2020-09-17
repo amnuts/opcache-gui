@@ -84,6 +84,7 @@ function MainNavigation(props) {
                                 searchTerm={props.searchTerm}
                                 debounceRate={props.debounceRate}
                                 allow={{fileList: props.allow.filelist, invalidate: props.allow.invalidate}}
+                                realtime={props.realtime}
                             />
                           </div>
                         : null
@@ -653,7 +654,13 @@ class Files extends React.Component {
                     </thead>
                     <tbody>
                     {filesInPage.map((file, index) => {
-                        return <File key={file.full_path} canInvalidate={this.props.allow.invalidate} {...file} colourRow={index} />
+                        return <File
+                            key={file.full_path}
+                            canInvalidate={this.props.allow.invalidate}
+                            {...file}
+                            colourRow={index}
+                            realtime={this.props.realtime}
+                        />
                     })}
                     </tbody>
                 </table>
@@ -664,35 +671,17 @@ class Files extends React.Component {
 
 
 class File extends React.Component {
-    constructor(props) {
-        super(props);
-        this.renderInvalidateLink = this.renderInvalidateLink.bind(this);
-        this.renderInvalidateStatus = this.renderInvalidateStatus.bind(this);
-    }
-
-    handleInvalidate(e) {
+    handleInvalidate = e => {
         e.preventDefault();
-        if (realtime) {
-            $.get('#', { invalidate: e.currentTarget.getAttribute('data-file') }, function(data) {
-                console.log('success: ' + data.success);
-            }, 'json');
+        if (this.props.realtime) {
+            console.log({ invalidate: e.currentTarget.getAttribute('data-file') });
+            axios.get('#', {params: { invalidate: e.currentTarget.getAttribute('data-file') }})
+                .then((response) => {
+                    console.log('success: ' , response.data);
+                });
         } else {
             window.location.href = e.currentTarget.href;
         }
-    }
-
-    renderInvalidateStatus() {
-        return (!this.props.timestamp
-            ? <span className="invalid file-metainfo"> - has been invalidated</span>
-            : null
-        );
-    }
-
-    renderInvalidateLink() {
-        return (this.props.canInvalidate
-            ? <span>,&nbsp;<a className="file-metainfo" href={'?invalidate=' + this.props.full_path} data-file={this.props.full_path} onClick={this.handleInvalidate}>force file invalidation</a></span>
-            : null
-        );
     }
 
     render() {
@@ -705,8 +694,10 @@ class File extends React.Component {
                         <b>memory: </b><span>{this.props.readable.memory_consumption}, </span>
                         <b>last used: </b><span>{this.props.last_used}</span>
                     </span>
-                    { this.renderInvalidateStatus() }
-                    { this.renderInvalidateLink() }
+                    { !this.props.timestamp && <span className="invalid file-metainfo"> - has been invalidated</span> }
+                    { this.props.canInvalidate && <span>,&nbsp;<a className="file-metainfo"
+                          href={'?invalidate=' + this.props.full_path} data-file={this.props.full_path}
+                          onClick={this.handleInvalidate}>force file invalidation</a></span> }
                 </td>
             </tr>
         );
