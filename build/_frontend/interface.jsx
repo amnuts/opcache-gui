@@ -3,6 +3,7 @@ class Interface extends React.Component {
         super(props);
         this.state = {
             realtime: false,
+            resetting: false,
             opstate: props.opstate
         }
         this.polling = false;
@@ -11,7 +12,7 @@ class Interface extends React.Component {
     startTimer = () => {
         this.setState({realtime: true})
         this.polling = setInterval(() => {
-            this.setState({fetching: true});
+            this.setState({fetching: true, resetting: false});
             axios.get('#', {time: Date.now()})
                 .then((response) => {
                     this.setState({opstate: response.data});
@@ -20,7 +21,7 @@ class Interface extends React.Component {
     }
 
     stopTimer = () => {
-        this.setState({realtime: false})
+        this.setState({realtime: false, resetting: false})
         clearInterval(this.polling)
     }
 
@@ -33,6 +34,18 @@ class Interface extends React.Component {
         }
     }
 
+    resetHandler = () => {
+        if (this.state.realtime) {
+            this.setState({resetting: true});
+            axios.get('#', {params: {reset: 1}})
+                .then((response) => {
+                    console.log('success: ', response.data);
+                });
+        } else {
+            window.location.href = '?reset=1';
+        }
+    }
+
     render() {
         const { opstate, realtimeRefresh, ...otherProps } = this.props;
         return (
@@ -41,7 +54,9 @@ class Interface extends React.Component {
                     <MainNavigation {...otherProps}
                         opstate={this.state.opstate}
                         realtime={this.state.realtime}
+                        resetting={this.state.resetting}
                         realtimeHandler={this.realtimeHandler}
+                        resetHandler={this.resetHandler}
                     />
                 </header>
                 <Footer {...this.props} />
@@ -92,8 +107,8 @@ function MainNavigation(props) {
                 {
                     props.allow.reset
                         ? <div label="Reset cache" tabId="resetCache"
-                               className="nav-tab-link-reset"
-                               handler={() => { window.location.href = '?reset=1'; }}
+                               className={`nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`}
+                               handler={props.resetHandler}
                           ></div>
                         : null
                 }
