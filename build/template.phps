@@ -15,6 +15,8 @@ namespace Amnuts\Opcache;
 
 /*
  * User configuration
+ * These are all the default values; you only really need to supply the ones
+ * that you wish to change.
  */
 
 $options = [
