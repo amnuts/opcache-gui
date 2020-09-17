@@ -454,7 +454,7 @@ function MainNavigation(props) {
     tabId: "files"
   }, /*#__PURE__*/React.createElement(Files, {
     perPageLimit: props.perPageLimit,
-    files: props.opstate.files,
+    allFiles: props.opstate.files,
     searchTerm: props.searchTerm,
     debounceRate: props.debounceRate,
     allow: {
@@ -914,112 +914,6 @@ ReactCustomizableProgressbar.defaultProps = {
   initialAnimationDelay: 0
 };
 
-class Canvas extends React.Component {
-  constructor(props) {
-    super(props);
-    this.saveContext = this.saveContext.bind(this);
-    this.animate = this.animate.bind(this);
-    this.draw = this.draw.bind(this);
-    this.loop = null;
-    this.state = {
-      degrees: 0,
-      newdegs: 0,
-      value: props.value
-    };
-  }
-
-  saveContext(ctx) {
-    this.ctx = ctx;
-    this.width = this.ctx.canvas.width;
-    this.height = this.ctx.canvas.height;
-    this.gaugeColour = this.props.colour || '#6ca6ef';
-    this.gaugeBackgroundColour = this.props.bgcolour || '#e2e2e2';
-    this.loop = null;
-  }
-
-  animate() {
-    const {
-      degrees,
-      newdegs
-    } = this.state;
-
-    if (degrees == newdegs) {
-      clearInterval(this.loop);
-    }
-
-    this.setState({
-      degrees: degrees + (degrees < newdegs ? 1 : -1)
-    });
-  }
-
-  draw() {
-    if (typeof this.loop != 'undefined') {
-      clearInterval(this.loop);
-    }
-
-    this.loop = setInterval(this.animate, 1000 / (this.state.newdegs - this.state.degrees));
-  }
-
-  componentDidUpdate() {
-    const {
-      degrees
-    } = this.state;
-    const text = Math.round(degrees / 360 * 100) + '%';
-    this.ctx.clearRect(0, 0, this.width, this.height);
-    this.ctx.beginPath();
-    this.ctx.strokeStyle = this.gaugeBackgroundColour;
-    this.ctx.lineWidth = 30;
-    this.ctx.arc(this.width / 2, this.height / 2, 100, 0, Math.PI * 2, false);
-    this.ctx.stroke();
-    this.ctx.beginPath();
-    this.ctx.strokeStyle = this.gaugeColour;
-    this.ctx.lineWidth = 30;
-    this.ctx.arc(this.width / 2, this.height / 2, 100, 0 - 90 * Math.PI / 180, degrees * Math.PI / 180 - 90 * Math.PI / 180, false);
-    this.ctx.stroke();
-    this.ctx.fillStyle = this.gaugeColour;
-    this.ctx.font = '60px sans-serif';
-    this.ctx.fillText(text, this.width / 2 - this.ctx.measureText(text).width / 2, this.height / 2 + 20);
-  }
-
-  componentDidMount() {
-    this.setState({
-      newdegs: Math.round(3.6 * this.props.value)
-    });
-    this.draw();
-  }
-
-  render() {
-    return /*#__PURE__*/React.createElement(PureCanvas, {
-      key: this.props.gaugeId,
-      contextRef: this.saveContext,
-      value: this.props.value
-    });
-  }
-
-}
-
-class PureCanvas extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  shouldComponentUpdate() {
-    return false;
-  }
-
-  render() {
-    return /*#__PURE__*/React.createElement("canvas", {
-      id: this.props.gaugeId,
-      className: "graph-widget",
-      width: "250",
-      height: "250",
-      "data-value": this.props.value,
-      ref: node => node ? this.props.contextRef(node.getContext('2d')) : null
-    });
-  }
-
-}
-
 function MemoryUsagePanel(props) {
   return /*#__PURE__*/React.createElement("div", {
     className: "widget-panel"
@@ -1055,52 +949,26 @@ class Files extends React.Component {
     super(props);
 
     _defineProperty(this, "setSearchTerm", debounce(searchTerm => {
-      const availableFiles = this.props.files.filter(file => {
-        return !(file.full_path.indexOf(searchTerm) == -1);
-      });
-      const currentFiles = this.doPagination ? this.state.currentFiles : availableFiles;
       this.setState({
         searchTerm,
-        availableFiles,
-        currentFiles,
         refreshPagination: !this.state.refreshPagination
       });
     }, this.props.debounceRate));
 
-    _defineProperty(this, "onPageChanged", data => {
-      const {
-        availableFiles
-      } = this.state;
-      const {
-        currentPage,
-        totalPages,
-        pageLimit
-      } = data;
-      const offset = (currentPage - 1) * pageLimit;
-      const currentFiles = availableFiles.slice(offset, offset + pageLimit);
+    _defineProperty(this, "onPageChanged", currentPage => {
       this.setState({
-        currentPage,
-        currentFiles,
-        totalPages
+        currentPage
       });
     });
 
     this.doPagination = typeof props.perPageLimit === "number" && props.perPageLimit > 0;
-    this.totalFiles = props.files.length;
     this.state = {
-      availableFiles: props.files,
-      currentFiles: this.doPagination ? [] : props.files,
-      currentPage: null,
+      filesInSearch: props.allFiles,
+      currentPage: 1,
       totalPages: null,
       searchTerm: props.searchTerm,
       refreshPagination: 0
     };
-  }
-
-  renderPageHeader() {
-    const showingTotal = this.state.availableFiles.length;
-    const showing = showingTotal != this.totalFiles ? `, ${showingTotal} showing due to filter '${this.state.searchTerm}'` : null;
-    return /*#__PURE__*/React.createElement("h3", null, this.totalFiles, " files cached", showing);
   }
 
   render() {
@@ -1108,10 +976,21 @@ class Files extends React.Component {
       return null;
     }
 
-    if (this.props.files.length === 0) {
+    if (this.props.allFiles.length === 0) {
       return /*#__PURE__*/React.createElement("p", null, "No files have been cached");
     }
 
+    const {
+      searchTerm,
+      currentPage
+    } = this.state;
+    const offset = (currentPage - 1) * this.props.perPageLimit;
+    const filesInSearch = searchTerm ? this.props.allFiles.filter(file => {
+      return !(file.full_path.indexOf(searchTerm) == -1);
+    }) : this.props.allFiles;
+    const filesInPage = this.doPagination ? filesInSearch.slice(offset, offset + this.props.perPageLimit) : filesInSearch;
+    const allFilesTotal = this.props.allFiles.length;
+    const showingTotal = filesInSearch.length;
     return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("form", {
       action: "#"
     }, /*#__PURE__*/React.createElement("label", {
@@ -1124,15 +1003,15 @@ class Files extends React.Component {
       onChange: e => {
         this.setSearchTerm(e.target.value);
       }
-    })), this.renderPageHeader(), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
-      totalRecords: this.state.availableFiles.length,
+    })), /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " files cached", showingTotal != allFilesTotal && `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
+      totalRecords: filesInSearch.length,
       pageLimit: this.props.perPageLimit,
       pageNeighbours: 2,
       onPageChanged: this.onPageChanged,
       refresh: this.state.refreshPagination
     }), /*#__PURE__*/React.createElement("table", {
       className: "tables file-list-table"
-    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Script"))), /*#__PURE__*/React.createElement("tbody", null, this.state.currentFiles.map((file, index) => {
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Script"))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
       return /*#__PURE__*/React.createElement(File, _extends({
         key: file.full_path,
         canInvalidate: this.props.allow.invalidate
@@ -1181,7 +1060,6 @@ class File extends React.Component {
   }
 
   render() {
-    console.log(this.props);
     return /*#__PURE__*/React.createElement("tr", {
       "data-path": this.props.full_path.toLowerCase(),
       className: this.props.colourRow % 2 ? 'alternate' : ''
@@ -1203,15 +1081,9 @@ class Pagination extends React.Component {
         onPageChanged = f => f
       } = this.props;
       const currentPage = Math.max(0, Math.min(page, this.totalPages()));
-      const paginationData = {
-        currentPage,
-        totalPages: this.totalPages(),
-        pageLimit: this.props.pageLimit,
-        totalRecords: this.props.totalRecords
-      };
       this.setState({
         currentPage
-      }, () => onPageChanged(paginationData));
+      }, () => onPageChanged(currentPage));
     });
 
     _defineProperty(this, "totalPages", () => {

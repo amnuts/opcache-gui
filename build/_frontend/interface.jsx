@@ -80,7 +80,7 @@ function MainNavigation(props) {
                         ? <div label="Files" tabId="files">
                             <Files
                                 perPageLimit={props.perPageLimit}
-                                files={props.opstate.files}
+                                allFiles={props.opstate.files}
                                 searchTerm={props.searchTerm}
                                 debounceRate={props.debounceRate}
                                 allow={{fileList: props.allow.filelist, invalidate: props.allow.invalidate}}
@@ -586,48 +586,22 @@ class Files extends React.Component {
         this.doPagination = (typeof props.perPageLimit === "number"
             && props.perPageLimit > 0
         );
-        this.totalFiles = props.files.length;
         this.state = {
-            availableFiles: props.files,
-            currentFiles: (this.doPagination ? [] : props.files),
-            currentPage: null,
-            totalPages: null,
+            currentPage: 1,
             searchTerm: props.searchTerm,
             refreshPagination: 0
         }
     }
 
     setSearchTerm = debounce(searchTerm => {
-        const availableFiles = this.props.files.filter(file => {
-            return !(file.full_path.indexOf(searchTerm) == -1);
-        });
-        const currentFiles = (this.doPagination
-            ? this.state.currentFiles
-            : availableFiles
-        );
         this.setState({
             searchTerm,
-            availableFiles,
-            currentFiles,
             refreshPagination: !(this.state.refreshPagination)
         });
     }, this.props.debounceRate);
 
-    onPageChanged = data => {
-        const { availableFiles } = this.state;
-        const { currentPage, totalPages, pageLimit } = data;
-        const offset = (currentPage - 1) * pageLimit;
-        const currentFiles = availableFiles.slice(offset, offset + pageLimit);
-        this.setState({ currentPage, currentFiles, totalPages });
-    }
-
-    renderPageHeader() {
-        const showingTotal = this.state.availableFiles.length;
-        const showing = (showingTotal != this.totalFiles
-            ? `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`
-            : null
-        );
-        return <h3>{this.totalFiles} files cached{showing}</h3>;
+    onPageChanged = currentPage => {
+        this.setState({ currentPage });
     }
 
     render() {
@@ -635,9 +609,24 @@ class Files extends React.Component {
             return null;
         }
 
-        if (this.props.files.length === 0) {
+        if (this.props.allFiles.length === 0) {
             return <p>No files have been cached</p>;
         }
+
+        const { searchTerm, currentPage } = this.state;
+        const offset = (currentPage - 1) * this.props.perPageLimit;
+        const filesInSearch = (searchTerm
+            ? this.props.allFiles.filter(file => {
+                    return !(file.full_path.indexOf(searchTerm) == -1);
+                })
+            : this.props.allFiles
+        );
+        const filesInPage = (this.doPagination
+            ? filesInSearch.slice(offset, offset + this.props.perPageLimit)
+            : filesInSearch
+        );
+        const allFilesTotal = this.props.allFiles.length;
+        const showingTotal = filesInSearch.length;
 
         return (
             <div>
@@ -646,10 +635,10 @@ class Files extends React.Component {
                     <input type="text" name="filter" id="frmFilter" className="file-filter" onChange={e => {this.setSearchTerm(e.target.value)}} />
                 </form>
 
-                {this.renderPageHeader()}
+                <h3>{allFilesTotal} files cached{showingTotal !== allFilesTotal && `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`}</h3>
 
                 {this.doPagination && <Pagination
-                    totalRecords={this.state.availableFiles.length}
+                    totalRecords={filesInSearch.length}
                     pageLimit={this.props.perPageLimit}
                     pageNeighbours={2}
                     onPageChanged={this.onPageChanged}
@@ -663,7 +652,7 @@ class Files extends React.Component {
                     </tr>
                     </thead>
                     <tbody>
-                    {this.state.currentFiles.map((file, index) => {
+                    {filesInPage.map((file, index) => {
                         return <File key={file.full_path} canInvalidate={this.props.allow.invalidate} {...file} colourRow={index} />
                     })}
                     </tbody>
@@ -707,7 +696,6 @@ class File extends React.Component {
     }
 
     render() {
-        console.log(this.props);
         return (
             <tr data-path={this.props.full_path.toLowerCase()} className={this.props.colourRow % 2 ? 'alternate' : ''}>
                 <td>
@@ -750,13 +738,7 @@ class Pagination extends React.Component {
     gotoPage = page => {
         const { onPageChanged = f => f } = this.props;
         const currentPage = Math.max(0, Math.min(page, this.totalPages()));
-        const paginationData = {
-            currentPage,
-            totalPages: this.totalPages(),
-            pageLimit: this.props.pageLimit,
-            totalRecords: this.props.totalRecords
-        };
-        this.setState({ currentPage }, () => onPageChanged(paginationData));
+        this.setState({ currentPage }, () => onPageChanged(currentPage));
     };
 
     totalPages = () => {
