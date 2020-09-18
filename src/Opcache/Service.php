@@ -63,24 +63,25 @@ class Service
      */
     public function handle(): Service
     {
-        if (!empty($_SERVER['HTTP_ACCEPT'])
-            && stripos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false
-        ) {
-            if (isset($_GET['reset']) && $this->getOption('allow_reset')) {
-                echo '{ "success": "' . ($this->resetCache() ? 'yes' : 'no') . '" }';
-            } else if (isset($_GET['invalidate']) && $this->getOption('allow_invalidate')) {
-                echo '{ "success": "' . ($this->resetCache($_GET['invalidate']) ? 'yes' : 'no') . '" }';
-            } else if ($this->getOption('allow_realtime')) {
-                echo json_encode($this->getData((empty($_GET['section']) ? null : $_GET['section'])));
+        $response = function($success) {
+            if ($this->isJsonRequest()) {
+                echo '{ "success": "' . ($success ? 'yes' : 'no') . '" }';
+            } else {
+                header('Location: ?');
             }
             exit;
-        } else if (isset($_GET['reset']) && $this->getOption('allow_reset')) {
-            $this->resetCache();
-            header('Location: ?');
-            exit;
+        };
+
+        if (isset($_GET['reset']) && $this->getOption('allow_reset')) {
+            $response($this->resetCache());
         } else if (isset($_GET['invalidate']) && $this->getOption('allow_invalidate')) {
-            $this->resetCache($_GET['invalidate']);
-            header('Location: ?');
+            $response($this->resetCache($_GET['invalidate']));
+        } else if (isset($_GET['invalidate_searched']) && $this->getOption('allow_invalidate')) {
+            $response($this->resetSearched($_GET['invalidate_searched']));
+        } else if (isset($_GET['invalidate_searched']) && $this->getOption('allow_invalidate')) {
+            $response($this->resetSearched($_GET['invalidate_searched']));
+        } else if ($this->isJsonRequest() && $this->getOption('allow_realtime')) {
+            echo json_encode($this->getData((empty($_GET['section']) ? null : $_GET['section'])));
             exit;
         }
 
@@ -149,6 +150,26 @@ class Service
     }
 
     /**
+     * @param string $search
+     * @return bool
+     */
+    public function resetSearched(string $search): bool
+    {
+        $found = $success = 0;
+        $search = urldecode($search);
+        foreach ($this->getData('files') as $file) {
+            if (strpos($file['full_path'], $search) !== false) {
+                ++$found;
+                $success += (int)opcache_invalidate($file['full_path'], true);
+            }
+        }
+        if ($success) {
+            $this->compileState();
+        }
+        return $found === $success;
+    }
+
+    /**
      * @param mixed $size
      * @return string
      */
@@ -163,6 +184,15 @@ class Service
         return sprintf('%.' . $this->getOption('size_precision') . 'f%s%s',
             $size, ($this->getOption('size_space') ? ' ' : ''), $val[$i]
         );
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isJsonRequest(): bool
+    {
+        return !empty($_SERVER['HTTP_ACCEPT'])
+            && stripos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
     }
 
     /**

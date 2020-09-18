@@ -116,24 +116,25 @@ class Service
      */
     public function handle(): Service
     {
-        if (!empty($_SERVER['HTTP_ACCEPT'])
-            && stripos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false
-        ) {
-            if (isset($_GET['reset']) && $this->getOption('allow_reset')) {
-                echo '{ "success": "' . ($this->resetCache() ? 'yes' : 'no') . '" }';
-            } else if (isset($_GET['invalidate']) && $this->getOption('allow_invalidate')) {
-                echo '{ "success": "' . ($this->resetCache($_GET['invalidate']) ? 'yes' : 'no') . '" }';
-            } else if ($this->getOption('allow_realtime')) {
-                echo json_encode($this->getData((empty($_GET['section']) ? null : $_GET['section'])));
+        $response = function($success) {
+            if ($this->isJsonRequest()) {
+                echo '{ "success": "' . ($success ? 'yes' : 'no') . '" }';
+            } else {
+                header('Location: ?');
             }
             exit;
-        } else if (isset($_GET['reset']) && $this->getOption('allow_reset')) {
-            $this->resetCache();
-            header('Location: ?');
-            exit;
+        };
+
+        if (isset($_GET['reset']) && $this->getOption('allow_reset')) {
+            $response($this->resetCache());
         } else if (isset($_GET['invalidate']) && $this->getOption('allow_invalidate')) {
-            $this->resetCache($_GET['invalidate']);
-            header('Location: ?');
+            $response($this->resetCache($_GET['invalidate']));
+        } else if (isset($_GET['invalidate_searched']) && $this->getOption('allow_invalidate')) {
+            $response($this->resetSearched($_GET['invalidate_searched']));
+        } else if (isset($_GET['invalidate_searched']) && $this->getOption('allow_invalidate')) {
+            $response($this->resetSearched($_GET['invalidate_searched']));
+        } else if ($this->isJsonRequest() && $this->getOption('allow_realtime')) {
+            echo json_encode($this->getData((empty($_GET['section']) ? null : $_GET['section'])));
             exit;
         }
 
@@ -202,6 +203,26 @@ class Service
     }
 
     /**
+     * @param string $search
+     * @return bool
+     */
+    public function resetSearched(string $search): bool
+    {
+        $found = $success = 0;
+        $search = urldecode($search);
+        foreach ($this->getData('files') as $file) {
+            if (strpos($file['full_path'], $search) !== false) {
+                ++$found;
+                $success += (int)opcache_invalidate($file['full_path'], true);
+            }
+        }
+        if ($success) {
+            $this->compileState();
+        }
+        return $found === $success;
+    }
+
+    /**
      * @param mixed $size
      * @return string
      */
@@ -216,6 +237,15 @@ class Service
         return sprintf('%.' . $this->getOption('size_precision') . 'f%s%s',
             $size, ($this->getOption('size_space') ? ' ' : ''), $val[$i]
         );
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isJsonRequest(): bool
+    {
+        return !empty($_SERVER['HTTP_ACCEPT'])
+            && stripos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false;
     }
 
     /**
@@ -380,7 +410,7 @@ class Interface extends React.Component {
           fetching: true,
           resetting: false
         });
-        axios.get('#', {
+        axios.get('?', {
           time: Date.now()
         }).then(response => {
           this.setState({
@@ -413,7 +443,7 @@ class Interface extends React.Component {
         this.setState({
           resetting: true
         });
-        axios.get('#', {
+        axios.get('?', {
           params: {
             reset: 1
           }
@@ -991,6 +1021,22 @@ class CachedFiles extends React.Component {
       });
     });
 
+    _defineProperty(this, "handleInvalidate", e => {
+      e.preventDefault();
+
+      if (this.props.realtime) {
+        axios.get('?', {
+          params: {
+            invalidate_searched: this.state.searchTerm
+          }
+        }).then(response => {
+          console.log('success: ', response.data);
+        });
+      } else {
+        window.location.href = e.currentTarget.href;
+      }
+    });
+
     this.doPagination = typeof props.perPageLimit === "number" && props.perPageLimit > 0;
     this.state = {
       currentPage: 1,
@@ -1031,7 +1077,10 @@ class CachedFiles extends React.Component {
       onChange: e => {
         this.setSearchTerm(e.target.value);
       }
-    })), /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " files cached", showingTotal !== allFilesTotal && `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
+    })), /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " files cached", showingTotal !== allFilesTotal && `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`), this.state.searchTerm && showingTotal !== allFilesTotal && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("a", {
+      href: `?invalidate_searched=${encodeURIComponent(this.state.searchTerm)}`,
+      onClick: this.handleInvalidate
+    }, "Invalidate all matching files")), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
       totalRecords: filesInSearch.length,
       pageLimit: this.props.perPageLimit,
       pageNeighbours: 2,
@@ -1058,10 +1107,7 @@ class CachedFile extends React.Component {
       e.preventDefault();
 
       if (this.props.realtime) {
-        console.log({
-          invalidate: e.currentTarget.getAttribute('data-file')
-        });
-        axios.get('#', {
+        axios.get('?', {
           params: {
             invalidate: e.currentTarget.getAttribute('data-file')
           }

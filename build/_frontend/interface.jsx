@@ -13,7 +13,7 @@ class Interface extends React.Component {
         this.setState({realtime: true})
         this.polling = setInterval(() => {
             this.setState({fetching: true, resetting: false});
-            axios.get('#', {time: Date.now()})
+            axios.get('?', {time: Date.now()})
                 .then((response) => {
                     this.setState({opstate: response.data});
                 });
@@ -37,7 +37,7 @@ class Interface extends React.Component {
     resetHandler = () => {
         if (this.state.realtime) {
             this.setState({resetting: true});
-            axios.get('#', {params: {reset: 1}})
+            axios.get('?', {params: {reset: 1}})
                 .then((response) => {
                     console.log('success: ', response.data);
                 });
@@ -627,6 +627,18 @@ class CachedFiles extends React.Component {
         this.setState({ currentPage });
     }
 
+    handleInvalidate = e => {
+        e.preventDefault();
+        if (this.props.realtime) {
+            axios.get('?', {params: { invalidate_searched: this.state.searchTerm }})
+                .then((response) => {
+                    console.log('success: ' , response.data);
+                });
+        } else {
+            window.location.href = e.currentTarget.href;
+        }
+    }
+
     render() {
         if (!this.props.allow.fileList) {
             return null;
@@ -659,6 +671,10 @@ class CachedFiles extends React.Component {
                 </form>
 
                 <h3>{allFilesTotal} files cached{showingTotal !== allFilesTotal && `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`}</h3>
+
+                { this.state.searchTerm && showingTotal !== allFilesTotal &&
+                    <p><a href={`?invalidate_searched=${encodeURIComponent(this.state.searchTerm)}`} onClick={this.handleInvalidate}>Invalidate all matching files</a></p>
+                }
 
                 {this.doPagination && <Pagination
                     totalRecords={filesInSearch.length}
@@ -695,8 +711,7 @@ class CachedFile extends React.Component {
     handleInvalidate = e => {
         e.preventDefault();
         if (this.props.realtime) {
-            console.log({ invalidate: e.currentTarget.getAttribute('data-file') });
-            axios.get('#', {params: { invalidate: e.currentTarget.getAttribute('data-file') }})
+            axios.get('?', {params: { invalidate: e.currentTarget.getAttribute('data-file') }})
                 .then((response) => {
                     console.log('success: ' , response.data);
                 });
