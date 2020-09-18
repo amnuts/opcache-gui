@@ -353,7 +353,7 @@ $opcache = (new Service($options))->handle();
     <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js" crossorigin></script>
     <style type="text/css">
-        :root{--opcache-gui-graph-track-fill-color: #6CA6EF;--opcache-gui-graph-track-background-color: rgba(229,231,231,0.905882)}.opcache-gui{font-family:sans-serif;font-size:90%;padding:0;margin:0}.opcache-gui .hide{display:none}.opcache-gui .sr-only{border:0 !important;clip:rect(1px, 1px, 1px, 1px) !important;-webkit-clip-path:inset(50%) !important;clip-path:inset(50%) !important;height:1px !important;margin:-1px !important;overflow:hidden !important;padding:0 !important;position:absolute !important;width:1px !important;white-space:nowrap !important}.opcache-gui .main-nav{padding-top:20px}.opcache-gui .nav-tab-list{list-style-type:none;padding-left:8px;margin:0;border-bottom:1px solid #CCC}.opcache-gui .nav-tab{display:inline-block;margin:0 0 -1px 0;padding:15px 30px;border:1px solid transparent;border-bottom-color:#CCC;text-decoration:none;background-color:#fff}.opcache-gui .nav-tab:hover{background-color:#F4F4F4;text-decoration:underline}.opcache-gui .nav-tab.active{border:1px solid #CCC;border-bottom-color:#fff;border-top:3px solid #6CA6EF}.opcache-gui .nav-tab.active:hover{background-color:initial}.opcache-gui .nav-tab-link-reset{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .nav-tab-link-reset.is-resetting{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgb(0, 186, 0)"/></svg>')}.opcache-gui .nav-tab-link-realtime{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="rgb(98, 98, 98)"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .nav-tab-link-realtime.live-update{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="rgb(0, 186, 0)"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="rgb(0, 186, 0)"/></svg>')}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime{position:relative;padding-left:50px}.opcache-gui .nav-tab-link-reset.pulse::before,.opcache-gui .nav-tab-link-realtime.pulse::before{content:"";position:absolute;top:12px;left:25px;width:18px;height:18px;z-index:10;opacity:0;background-color:transparent;border:2px solid #00ba00;border-radius:100%;animation:pulse 2s linear infinite}.opcache-gui .tab-content{padding:2em}.opcache-gui .tab-content-overview-counts{width:270px;float:right}.opcache-gui .tab-content-overview-info{margin-right:280px}.opcache-gui .graph-widget{max-width:100%;height:auto;margin:0 auto;display:flex;position:relative}.opcache-gui .graph-widget .widget-value{display:flex;align-items:center;justify-content:center;text-align:center;position:absolute;top:0;width:100%;height:100%;margin:0 auto;font-size:3.2em;font-weight:100;color:#6CA6EF;user-select:none}.opcache-gui .widget-panel{background-color:#EDEDED;margin-bottom:10px}.opcache-gui .widget-header{background-color:#CDCDCD;padding:4px 6px;margin:0;text-align:center;font-size:1rem;font-weight:bold}.opcache-gui .widget-value{margin:0;text-align:center}.opcache-gui .widget-value span.large{color:#6CA6EF;font-size:80pt;margin:0;padding:0;text-align:center}.opcache-gui .widget-value span.large+span{font-size:20pt;margin:0;color:#6CA6EF}.opcache-gui .widget-info{margin:0;padding:10px}.opcache-gui .widget-info *{margin:0;line-height:1.75em;text-align:left}.opcache-gui .tables{margin:0 0 1em 0;border-collapse:collapse;width:100%;table-layout:fixed}.opcache-gui .tables tr:nth-child(odd){background-color:#EFFEFF}.opcache-gui .tables tr:nth-child(even){background-color:#E0ECEF}.opcache-gui .tables th{text-align:left;padding:6px;background-color:#6CA6EF;color:#fff;border-color:#fff;font-weight:normal}.opcache-gui .tables td{padding:4px 6px;line-height:1.4em;vertical-align:top;border-color:#fff;overflow:hidden;overflow-wrap:break-word;text-overflow:ellipsis}.opcache-gui .tables.file-list-table tr{background-color:#EFFEFF}.opcache-gui .tables.file-list-table tr.alternate{background-color:#E0ECEF}.opcache-gui .file-filter{width:520px}.opcache-gui .file-metainfo{font-size:80%}.opcache-gui .file-metainfo.invalid{font-style:italic}.opcache-gui .file-pathname{width:70%;display:block}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime,.opcache-gui .github-link{background-repeat:no-repeat;background-color:transparent}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime{background-position:24px 50%}.opcache-gui .github-link{background-position:5px 50%}.opcache-gui .main-footer{border-top:1px solid #CCC;padding:1em 2em}.opcache-gui .github-link{background-position:0 50%;padding:2em 0 2em 2.3em;text-decoration:none;opacity:0.7;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.19em" height="1em" viewBox="0 0 1664 1408"><path d="M640 960q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm640 0q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm160 0q0-120-69-204t-187-84q-41 0-195 21q-71 11-157 11t-157-11q-152-21-195-21q-118 0-187 84t-69 204q0 88 32 153.5t81 103t122 60t140 29.5t149 7h168q82 0 149-7t140-29.5t122-60t81-103t32-153.5zm224-176q0 207-61 331q-38 77-105.5 133t-141 86t-170 47.5t-171.5 22t-167 4.5q-78 0-142-3t-147.5-12.5t-152.5-30t-137-51.5t-121-81t-86-115Q0 992 0 784q0-237 136-396q-27-82-27-170q0-116 51-218q108 0 190 39.5T539 163q147-35 309-35q148 0 280 32q105-82 187-121t189-39q51 102 51 218q0 87-27 168q136 160 136 398z" fill="rgb(98, 98, 98)"/></svg>');font-size:80%}.opcache-gui .github-link:hover{opacity:1}.opcache-gui .file-cache-only{margin-top:0}.opcache-gui .pagination{margin:10px 0;padding:0}.opcache-gui .pagination li{display:inline-block}.opcache-gui .pagination li a{display:inline-block;display:inline-flex;align-items:center;white-space:nowrap;line-height:1;padding:0.5rem 0.75rem;border-radius:3px;text-decoration:none;height:100%}.opcache-gui .pagination li a.arrow{font-size:1.1rem}.opcache-gui .pagination li a:active{transform:translateY(2px)}.opcache-gui .pagination li a.active{background-color:#4d75af;color:#fff}.opcache-gui .pagination li a:hover:not(.active){background-color:#FF7400;color:#fff}@media screen and (max-width: 750px){.opcache-gui .nav-tab-list{border-bottom:0}.opcache-gui .nav-tab{display:block;margin:0}.opcache-gui .nav-tab-link{display:block;margin:0 10px;padding:10px 0 10px 30px;border:0}.opcache-gui .nav-tab-link[data-for].active{border-bottom-color:#CCC}.opcache-gui .tab-content-overview-info{margin-right:auto;clear:both}.opcache-gui .tab-content-overview-counts{position:relative;display:block;width:100%}}@media screen and (max-width: 550px){.opcache-gui .file-filter{width:100%}}@keyframes pulse{0%{transform:scale(1);opacity:1}50%,100%{transform:scale(2);opacity:0}}
+        :root{--opcache-gui-graph-track-fill-color: #6CA6EF;--opcache-gui-graph-track-background-color: rgba(229,231,231,0.905882)}.opcache-gui{font-family:sans-serif;font-size:90%;padding:0;margin:0}.opcache-gui .hide{display:none}.opcache-gui .sr-only{border:0 !important;clip:rect(1px, 1px, 1px, 1px) !important;-webkit-clip-path:inset(50%) !important;clip-path:inset(50%) !important;height:1px !important;margin:-1px !important;overflow:hidden !important;padding:0 !important;position:absolute !important;width:1px !important;white-space:nowrap !important}.opcache-gui .main-nav{padding-top:20px}.opcache-gui .nav-tab-list{list-style-type:none;padding-left:8px;margin:0;border-bottom:1px solid #CCC}.opcache-gui .nav-tab{display:inline-block;margin:0 0 -1px 0;padding:15px 30px;border:1px solid transparent;border-bottom-color:#CCC;text-decoration:none;background-color:#fff}.opcache-gui .nav-tab:hover{background-color:#F4F4F4;text-decoration:underline}.opcache-gui .nav-tab.active{border:1px solid #CCC;border-bottom-color:#fff;border-top:3px solid #6CA6EF}.opcache-gui .nav-tab.active:hover{background-color:initial}.opcache-gui .nav-tab-link-reset{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .nav-tab-link-reset.is-resetting{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgb(0, 186, 0)"/></svg>')}.opcache-gui .nav-tab-link-realtime{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="rgb(98, 98, 98)"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .nav-tab-link-realtime.live-update{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="rgb(0, 186, 0)"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="rgb(0, 186, 0)"/></svg>')}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime{position:relative;padding-left:50px}.opcache-gui .nav-tab-link-reset.pulse::before,.opcache-gui .nav-tab-link-realtime.pulse::before{content:"";position:absolute;top:12px;left:25px;width:18px;height:18px;z-index:10;opacity:0;background-color:transparent;border:2px solid #00ba00;border-radius:100%;animation:pulse 2s linear infinite}.opcache-gui .tab-content{padding:2em}.opcache-gui .tab-content-overview-counts{width:270px;float:right}.opcache-gui .tab-content-overview-info{margin-right:280px}.opcache-gui .graph-widget{max-width:100%;height:auto;margin:0 auto;display:flex;position:relative}.opcache-gui .graph-widget .widget-value{display:flex;align-items:center;justify-content:center;text-align:center;position:absolute;top:0;width:100%;height:100%;margin:0 auto;font-size:3.2em;font-weight:100;color:#6CA6EF;user-select:none}.opcache-gui .widget-panel{background-color:#EDEDED;margin-bottom:10px}.opcache-gui .widget-header{background-color:#CDCDCD;padding:4px 6px;margin:0;text-align:center;font-size:1rem;font-weight:bold}.opcache-gui .widget-value{margin:0;text-align:center}.opcache-gui .widget-value span.large{color:#6CA6EF;font-size:80pt;margin:0;padding:0;text-align:center}.opcache-gui .widget-value span.large+span{font-size:20pt;margin:0;color:#6CA6EF}.opcache-gui .widget-info{margin:0;padding:10px}.opcache-gui .widget-info *{margin:0;line-height:1.75em;text-align:left}.opcache-gui .tables{margin:0 0 1em 0;border-collapse:collapse;width:100%;table-layout:fixed}.opcache-gui .tables tr:nth-child(odd){background-color:#EFFEFF}.opcache-gui .tables tr:nth-child(even){background-color:#E0ECEF}.opcache-gui .tables th{text-align:left;padding:6px;background-color:#6CA6EF;color:#fff;border-color:#fff;font-weight:normal}.opcache-gui .tables td{padding:4px 6px;line-height:1.4em;vertical-align:top;border-color:#fff;overflow:hidden;overflow-wrap:break-word;text-overflow:ellipsis}.opcache-gui .file-filter{width:520px}.opcache-gui .file-metainfo{font-size:80%}.opcache-gui .file-metainfo.invalid{font-style:italic}.opcache-gui .file-pathname{width:70%;display:block}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime,.opcache-gui .github-link{background-repeat:no-repeat;background-color:transparent}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime{background-position:24px 50%}.opcache-gui .github-link{background-position:5px 50%}.opcache-gui .main-footer{border-top:1px solid #CCC;padding:1em 2em}.opcache-gui .github-link{background-position:0 50%;padding:2em 0 2em 2.3em;text-decoration:none;opacity:0.7;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.19em" height="1em" viewBox="0 0 1664 1408"><path d="M640 960q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm640 0q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm160 0q0-120-69-204t-187-84q-41 0-195 21q-71 11-157 11t-157-11q-152-21-195-21q-118 0-187 84t-69 204q0 88 32 153.5t81 103t122 60t140 29.5t149 7h168q82 0 149-7t140-29.5t122-60t81-103t32-153.5zm224-176q0 207-61 331q-38 77-105.5 133t-141 86t-170 47.5t-171.5 22t-167 4.5q-78 0-142-3t-147.5-12.5t-152.5-30t-137-51.5t-121-81t-86-115Q0 992 0 784q0-237 136-396q-27-82-27-170q0-116 51-218q108 0 190 39.5T539 163q147-35 309-35q148 0 280 32q105-82 187-121t189-39q51 102 51 218q0 87-27 168q136 160 136 398z" fill="rgb(98, 98, 98)"/></svg>');font-size:80%}.opcache-gui .github-link:hover{opacity:1}.opcache-gui .file-cache-only{margin-top:0}.opcache-gui .pagination{margin:10px 0;padding:0}.opcache-gui .pagination li{display:inline-block}.opcache-gui .pagination li a{display:inline-block;display:inline-flex;align-items:center;white-space:nowrap;line-height:1;padding:0.5rem 0.75rem;border-radius:3px;text-decoration:none;height:100%}.opcache-gui .pagination li a.arrow{font-size:1.1rem}.opcache-gui .pagination li a:active{transform:translateY(2px)}.opcache-gui .pagination li a.active{background-color:#4d75af;color:#fff}.opcache-gui .pagination li a:hover:not(.active){background-color:#FF7400;color:#fff}@media screen and (max-width: 750px){.opcache-gui .nav-tab-list{border-bottom:0}.opcache-gui .nav-tab{display:block;margin:0}.opcache-gui .nav-tab-link{display:block;margin:0 10px;padding:10px 0 10px 30px;border:0}.opcache-gui .nav-tab-link[data-for].active{border-bottom-color:#CCC}.opcache-gui .tab-content-overview-info{margin-right:auto;clear:both}.opcache-gui .tab-content-overview-counts{position:relative;display:block;width:100%}}@media screen and (max-width: 550px){.opcache-gui .file-filter{width:100%}}@keyframes pulse{0%{transform:scale(1);opacity:1}50%,100%{transform:scale(2);opacity:0}}
     </style>
 </head>
 
@@ -474,9 +474,9 @@ function MainNavigation(props) {
   }), /*#__PURE__*/React.createElement(Functions, {
     functions: props.opstate.functions
   }))), props.allow.filelist && /*#__PURE__*/React.createElement("div", {
-    label: "Files",
-    tabId: "files"
-  }, /*#__PURE__*/React.createElement(Files, {
+    label: "Cached",
+    tabId: "cached"
+  }, /*#__PURE__*/React.createElement(CachedFiles, {
     perPageLimit: props.perPageLimit,
     allFiles: props.opstate.files,
     searchTerm: props.searchTerm,
@@ -486,6 +486,15 @@ function MainNavigation(props) {
       invalidate: props.allow.invalidate
     },
     realtime: props.realtime
+  })), props.allow.filelist && props.opstate.blacklist.length && /*#__PURE__*/React.createElement("div", {
+    label: "Ignored",
+    tabId: "ignored"
+  }, /*#__PURE__*/React.createElement(IgnoredFiles, {
+    perPageLimit: props.perPageLimit,
+    allFiles: props.opstate.blacklist,
+    allow: {
+      fileList: props.allow.filelist
+    }
   })), props.allow.reset && /*#__PURE__*/React.createElement("div", {
     label: "Reset cache",
     tabId: "resetCache",
@@ -517,13 +526,11 @@ class Tabs extends React.Component {
   render() {
     const {
       onClickTabItem,
-      props: {
-        children
-      },
       state: {
         activeTab
       }
     } = this;
+    const children = this.props.children.filter(Boolean);
     return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("ul", {
       className: "nav-tab-list"
     }, children.map(child => {
@@ -645,7 +652,7 @@ function OverviewCounts(props) {
     blacklist_miss: props.overview.readable.blacklist_miss,
     num_cached_keys: props.overview.readable.num_cached_keys,
     max_cached_keys: props.overview.readable.max_cached_keys
-  }), !props.overview.readable.interned ? null : /*#__PURE__*/React.createElement(InternedStringsPanel, {
+  }), props.overview.readable.interned && /*#__PURE__*/React.createElement(InternedStringsPanel, {
     buffer_size: props.overview.readable.interned.buffer_size,
     strings_used_memory: props.overview.readable.interned.strings_used_memory,
     strings_free_memory: props.overview.readable.interned.strings_free_memory,
@@ -967,7 +974,7 @@ function InternedStringsPanel(props) {
   }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "buffer size:"), " ", props.buffer_size), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "used memory:"), " ", props.strings_used_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "free memory:"), " ", props.strings_free_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of strings:"), " ", props.number_of_strings)));
 }
 
-class Files extends React.Component {
+class CachedFiles extends React.Component {
   constructor(props) {
     super(props);
 
@@ -1031,21 +1038,19 @@ class Files extends React.Component {
       onPageChanged: this.onPageChanged,
       refresh: this.state.refreshPagination
     }), /*#__PURE__*/React.createElement("table", {
-      className: "tables file-list-table"
+      className: "tables cached-list-table"
     }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Script"))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
-      return /*#__PURE__*/React.createElement(File, _extends({
+      return /*#__PURE__*/React.createElement(CachedFile, _extends({
         key: file.full_path,
-        canInvalidate: this.props.allow.invalidate
-      }, file, {
-        colourRow: index,
+        canInvalidate: this.props.allow.invalidate,
         realtime: this.props.realtime
-      }));
+      }, file));
     }))));
   }
 
 }
 
-class File extends React.Component {
+class CachedFile extends React.Component {
   constructor(...args) {
     super(...args);
 
@@ -1071,8 +1076,7 @@ class File extends React.Component {
 
   render() {
     return /*#__PURE__*/React.createElement("tr", {
-      "data-path": this.props.full_path.toLowerCase(),
-      className: this.props.colourRow % 2 ? 'alternate' : ''
+      "data-path": this.props.full_path.toLowerCase()
     }, /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
       className: "file-pathname"
     }, this.props.full_path), /*#__PURE__*/React.createElement("span", {
@@ -1085,6 +1089,55 @@ class File extends React.Component {
       "data-file": this.props.full_path,
       onClick: this.handleInvalidate
     }, "force file invalidation"))));
+  }
+
+}
+
+class IgnoredFiles extends React.Component {
+  constructor(props) {
+    super(props);
+
+    _defineProperty(this, "onPageChanged", currentPage => {
+      this.setState({
+        currentPage
+      });
+    });
+
+    this.doPagination = typeof props.perPageLimit === "number" && props.perPageLimit > 0;
+    this.state = {
+      currentPage: 1,
+      refreshPagination: 0
+    };
+  }
+
+  render() {
+    if (!this.props.allow.fileList) {
+      return null;
+    }
+
+    if (this.props.allFiles.length === 0) {
+      return /*#__PURE__*/React.createElement("p", null, "No files have been ignored via ", /*#__PURE__*/React.createElement("i", null, "opcache.blacklist_filename"));
+    }
+
+    const {
+      currentPage
+    } = this.state;
+    const offset = (currentPage - 1) * this.props.perPageLimit;
+    const filesInPage = this.doPagination ? this.props.allFiles.slice(offset, offset + this.props.perPageLimit) : this.props.allFiles;
+    const allFilesTotal = this.props.allFiles.length;
+    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " ignore file locations"), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
+      totalRecords: allFilesTotal,
+      pageLimit: this.props.perPageLimit,
+      pageNeighbours: 2,
+      onPageChanged: this.onPageChanged,
+      refresh: this.state.refreshPagination
+    }), /*#__PURE__*/React.createElement("table", {
+      className: "tables ignored-list-table"
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Path"))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
+      return /*#__PURE__*/React.createElement("tr", {
+        key: file
+      }, /*#__PURE__*/React.createElement("td", null, file));
+    }))));
   }
 
 }

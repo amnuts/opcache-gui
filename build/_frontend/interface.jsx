@@ -92,8 +92,8 @@ function MainNavigation(props) {
                 </div>
                 {
                     props.allow.filelist &&
-                        <div label="Files" tabId="files">
-                            <Files
+                        <div label="Cached" tabId="cached">
+                            <CachedFiles
                                 perPageLimit={props.perPageLimit}
                                 allFiles={props.opstate.files}
                                 searchTerm={props.searchTerm}
@@ -102,6 +102,16 @@ function MainNavigation(props) {
                                 realtime={props.realtime}
                             />
                         </div>
+                }
+                {
+                    (props.allow.filelist && props.opstate.blacklist.length &&
+                        <div label="Ignored" tabId="ignored">
+                            <IgnoredFiles
+                                perPageLimit={props.perPageLimit}
+                                allFiles={props.opstate.blacklist}
+                                allow={{fileList: props.allow.filelist }}
+                            />
+                        </div>)
                 }
                 {
                     props.allow.reset &&
@@ -138,9 +148,10 @@ class Tabs extends React.Component {
     render() {
         const {
             onClickTabItem,
-            props: { children },
             state: { activeTab }
         } = this;
+
+        const children = this.props.children.filter(Boolean);
 
         return (
             <>
@@ -592,7 +603,7 @@ function InternedStringsPanel(props) {
 }
 
 
-class Files extends React.Component {
+class CachedFiles extends React.Component {
     constructor(props) {
         super(props);
         this.doPagination = (typeof props.perPageLimit === "number"
@@ -657,7 +668,7 @@ class Files extends React.Component {
                     refresh={this.state.refreshPagination}
                 />}
 
-                <table className="tables file-list-table">
+                <table className="tables cached-list-table">
                     <thead>
                     <tr>
                         <th>Script</th>
@@ -665,12 +676,11 @@ class Files extends React.Component {
                     </thead>
                     <tbody>
                     {filesInPage.map((file, index) => {
-                        return <File
+                        return <CachedFile
                             key={file.full_path}
                             canInvalidate={this.props.allow.invalidate}
-                            {...file}
-                            colourRow={index}
                             realtime={this.props.realtime}
+                            {...file}
                         />
                     })}
                     </tbody>
@@ -681,7 +691,7 @@ class Files extends React.Component {
 }
 
 
-class File extends React.Component {
+class CachedFile extends React.Component {
     handleInvalidate = e => {
         e.preventDefault();
         if (this.props.realtime) {
@@ -697,7 +707,7 @@ class File extends React.Component {
 
     render() {
         return (
-            <tr data-path={this.props.full_path.toLowerCase()} className={this.props.colourRow % 2 ? 'alternate' : ''}>
+            <tr data-path={this.props.full_path.toLowerCase()}>
                 <td>
                     <span className="file-pathname">{this.props.full_path}</span>
                     <span className="file-metainfo">
@@ -711,6 +721,69 @@ class File extends React.Component {
                           onClick={this.handleInvalidate}>force file invalidation</a></span> }
                 </td>
             </tr>
+        );
+    }
+}
+
+
+class IgnoredFiles extends React.Component {
+    constructor(props) {
+        super(props);
+        this.doPagination = (typeof props.perPageLimit === "number"
+            && props.perPageLimit > 0
+        );
+        this.state = {
+            currentPage: 1,
+            refreshPagination: 0
+        }
+    }
+
+    onPageChanged = currentPage => {
+        this.setState({ currentPage });
+    }
+
+    render() {
+        if (!this.props.allow.fileList) {
+            return null;
+        }
+
+        if (this.props.allFiles.length === 0) {
+            return <p>No files have been ignored via <i>opcache.blacklist_filename</i></p>;
+        }
+
+        const { currentPage } = this.state;
+        const offset = (currentPage - 1) * this.props.perPageLimit;
+        const filesInPage = (this.doPagination
+            ? this.props.allFiles.slice(offset, offset + this.props.perPageLimit)
+            : this.props.allFiles
+        );
+        const allFilesTotal = this.props.allFiles.length;
+
+        return (
+            <div>
+                <h3>{allFilesTotal} ignore file locations</h3>
+
+                {this.doPagination && <Pagination
+                    totalRecords={allFilesTotal}
+                    pageLimit={this.props.perPageLimit}
+                    pageNeighbours={2}
+                    onPageChanged={this.onPageChanged}
+                    refresh={this.state.refreshPagination}
+                />}
+
+                <table className="tables ignored-list-table">
+                    <thead>
+                    <tr>
+                        <th>Path</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {filesInPage.map((file, index) => {
+                        return <tr key={file}><td>{file}</td></tr>
+                    })}
+                    </tbody>
+                </table>
+            </div>
         );
     }
 }

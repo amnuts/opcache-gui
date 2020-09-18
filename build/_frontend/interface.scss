@@ -240,15 +240,6 @@ $footer-border-color: #CCC;
       overflow-wrap: break-word;
       text-overflow: ellipsis;
     }
-
-    &.file-list-table {
-      tr {
-        background-color: $table-row-color;
-        &.alternate {
-          background-color: $table-row-color-alternative;
-        }
-      }
-    }
   }
 
   .file-filter {
