@@ -132,7 +132,7 @@ function MainNavigation(props) {
                 }
                 {
                     props.allow.realtime &&
-                        <div label="Enable real-time update" tabId="toggleRealtime"
+                        <div label={`${props.realtime ? 'Disable' : 'Enable'} real-time update`} tabId="toggleRealtime"
                             className={`nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`}
                             handler={props.realtimeHandler}
                         ></div>

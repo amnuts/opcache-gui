@@ -76,6 +76,8 @@ $footer-border-color: #CCC;
     border-bottom-color: $nav-border-color;
     text-decoration: none;
     background-color: $nav-background-color;
+    cursor: pointer;
+    user-select: none;
 
     &:hover {
       background-color: $nav-hover-color;
