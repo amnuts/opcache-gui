@@ -110,7 +110,9 @@ If you update those files, you will want to build the interface again and have t
 
 The build script will only need to install the `node_modules` once, so on subsequent builds it should be a fair bit quicker!
 
-The build process will create a compiled css file at `build/interface.css` and the javascript of the interface will be in `build/interface.js`.  You could probably use both of these within your own frameworks and templating systems, should you wish. 
+The build process will create a compiled css file at `build/interface.css` and the javascript of the interface will be in `build/interface.js`.  You could probably use both of these within your own frameworks and templating systems, should you wish.
+
+The core PHP template used in the build process, and that acts to pass various bits of data to the ReactJS side of things, is located at `build/template.phps`.  If you wanted to update the version of ReactJS used, or how the wrapper html is structured, then this would be the file you'd want to update. 
 
 ### Overview
 
