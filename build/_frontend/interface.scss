@@ -93,6 +93,11 @@ $footer-border-color: #CCC;
     &.active:hover {
       background-color: initial;
     }
+
+    &:focus {
+      outline: 0;
+      text-decoration: underline;
+    }
   }
 
   .nav-tab-link-reset {
