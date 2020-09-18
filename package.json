@@ -11,7 +11,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "compile-jsx": "node_modules/.bin/babel --presets @babel/preset-react build/_frontend/interface.jsx -o build/interface.js",
+    "compile-jsx": "node_modules/.bin/babel --presets @babel/preset-react build/_frontend/interface.jsx --plugins @babel/plugin-proposal-class-properties -o build/interface.js",
     "compile-scss": "node_modules/.bin/node-sass -xi build/_frontend/interface.scss -o build/ --output-style=compressed"
   },
   "repository": {
@@ -23,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/amnuts/opcache-gui/issues"
   },
-  "homepage": "https://github.com/amnuts/opcache-gui#readme"
+  "homepage": "https://github.com/amnuts/opcache-gui#readme",
+  "dependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.10.4"
+  }
 }

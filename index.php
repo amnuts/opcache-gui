@@ -15,6 +15,8 @@ namespace Amnuts\Opcache;
 
 /*
  * User configuration
+ * These are all the default values; you only really need to supply the ones
+ * that you wish to change.
  */
 
 $options = [
@@ -27,12 +29,13 @@ $options = [
     'size_space'       => false,         // have '1MB' or '1 MB' when showing sizes
     'charts'           => true,          // show gauge chart or just big numbers
     'debounce_rate'    => 250,           // milliseconds after key press to send keyup event when filtering
+    'per_page'         => 200,           // How many results per page to show in the file list, false for no pagination
     'cookie_name'      => 'opcachegui',  // name of cookie
     'cookie_ttl'       => 365,           // days to store cookie
-    'highlight'        => [              // highlight charts/big numbers
-        'memory' => true,
-        'hits'   => true,
-        'keys'   => true
+    'highlight'        => [
+        'memory' => true,                // show the memory chart/big number
+        'hits'   => true,                // show the hit rate chart/big number
+        'keys'   => true                 // show the keys used chart/big number
     ]
 ];
 
@@ -60,17 +63,23 @@ class Service
     protected $options;
     protected $optimizationLevels;
     protected $defaults = [
-        'allow_filelist' => true,
-        'allow_invalidate' => true,
-        'allow_reset' => true,
-        'allow_realtime' => true,
-        'refresh_time' => 5,
-        'size_precision' => 2,
-        'size_space' => false,
-        'charts' => true,
-        'debounce_rate' => 250,
-        'cookie_name' => 'opcachegui',
-        'cookie_ttl' => 365
+        'allow_filelist'   => true,          // show/hide the files tab
+        'allow_invalidate' => true,          // give a link to invalidate files
+        'allow_reset'      => true,          // give option to reset the whole cache
+        'allow_realtime'   => true,          // give option to enable/disable real-time updates
+        'refresh_time'     => 5,             // how often the data will refresh, in seconds
+        'size_precision'   => 2,             // Digits after decimal point
+        'size_space'       => false,         // have '1MB' or '1 MB' when showing sizes
+        'charts'           => true,          // show gauge chart or just big numbers
+        'debounce_rate'    => 250,           // milliseconds after key press to send keyup event when filtering
+        'per_page'         => 200,           // How many results per page to show in the file list, false for no pagination
+        'cookie_name'      => 'opcachegui',  // name of cookie
+        'cookie_ttl'       => 365,           // days to store cookie
+        'highlight'        => [
+            'memory' => true,                // show the memory chart/big number
+            'hits'   => true,                // show the hit rate chart/big number
+            'keys'   => true                 // show the keys used chart/big number
+        ]
     ];
 
     /**
@@ -107,14 +116,14 @@ class Service
      */
     public function handle(): Service
     {
-        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
-            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
+        if (!empty($_SERVER['HTTP_ACCEPT'])
+            && stripos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false
         ) {
             if (isset($_GET['reset']) && $this->getOption('allow_reset')) {
                 echo '{ "success": "' . ($this->resetCache() ? 'yes' : 'no') . '" }';
             } else if (isset($_GET['invalidate']) && $this->getOption('allow_invalidate')) {
                 echo '{ "success": "' . ($this->resetCache($_GET['invalidate']) ? 'yes' : 'no') . '" }';
-            } else {
+            } else if ($this->getOption('allow_realtime')) {
                 echo json_encode($this->getData((empty($_GET['section']) ? null : $_GET['section'])));
             }
             exit;
@@ -315,7 +324,8 @@ class Service
                             : $_SERVER['SERVER_NAME']
                         )
                     )
-                )
+                ),
+                'gui' => self::VERSION
             ]
         );
 
@@ -338,545 +348,1047 @@ $opcache = (new Service($options))->handle();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>OPcache statistics on <?php echo $opcache->getData('version', 'host'); ?></title>
-    <script src="//cdn.jsdelivr.net/react/15.5.4/react.min.js"></script>
-    <script src="//cdn.jsdelivr.net/react/15.5.4/react-dom.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/jquery@3.5.0/dist/jquery.min.js"></script>
+    <title>OPcache statistics on <?= $opcache->getData('version', 'host'); ?></title>
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js" crossorigin></script>
     <style type="text/css">
-        .opcache-gui{font-family:sans-serif;font-size:90%;padding:0;margin:0}.opcache-gui .hide{display:none}.opcache-gui .main-nav{padding-top:20px}.opcache-gui .nav-tab-list{list-style-type:none;padding-left:8px;margin:0;border-bottom:1px solid #ccc}.opcache-gui .nav-tab{display:inline-block;padding:0;margin:0 0 -1px 0}.opcache-gui .nav-tab-link{display:block;margin:0 10px;padding:15px 30px;border:1px solid transparent;border-bottom-color:#ccc;text-decoration:none}.opcache-gui .nav-tab-link:hover{background-color:#f4f4f4;text-decoration:underline}.opcache-gui .nav-tab-link.active:hover{background-color:initial}.opcache-gui .nav-tab-link[data-for].active{border:1px solid #ccc;border-bottom-color:#ffffff;border-top:3px solid #6ca6ef}.opcache-gui .nav-tab-link-reset{background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NjBFMUMyMjI3NDlGMTFFNEE3QzNGNjQ0OEFDQzQ1MkMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NjBFMUMyMjM3NDlGMTFFNEE3QzNGNjQ0OEFDQzQ1MkMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo2MEUxQzIyMDc0OUYxMUU0QTdDM0Y2NDQ4QUNDNDUyQyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo2MEUxQzIyMTc0OUYxMUU0QTdDM0Y2NDQ4QUNDNDUyQyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PplZ+ZkAAAD1SURBVHjazFPtDYJADIUJZAMZ4UbACWQENjBO4Ao6AW5AnODcADZQJwAnwJ55NbWhB/6zycsdpX39uDZNpsURtjgzwkDoCBecs5ITPGGMwCNAkIrQw+8ri36GhBHsavFdpILEo4wEpZxRigy009EhG760gr0VhFoyZfvJKPwsheIWIeGejBZRIxRVhMRFevbuUXBew/iE/lhlBduV0j8Jx+TvJEWPphq8n5li9utgaw6cW/h6NSt/JcnVBhQxotIgKTBrbNvIHo2G0x1rwlKqTDusxiAz6hHNL1zayTVqVKRKpa/LPljPH1sJh6l/oNSrZfwSYABtq3tFdZA5BAAAAABJRU5ErkJggg==")}.opcache-gui .nav-tab-link-realtime{position:relative;background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAUCAYAAACAl21KAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6ODE5RUU4NUE3NDlGMTFFNDkyMzA4QzY1RjRBQkIzQjUiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6ODE5RUU4NUI3NDlGMTFFNDkyMzA4QzY1RjRBQkIzQjUiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MTlFRTg1ODc0OUYxMUU0OTIzMDhDNjVGNEFCQjNCNSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4MTlFRTg1OTc0OUYxMUU0OTIzMDhDNjVGNEFCQjNCNSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PpXjpvMAAAD2SURBVHjarFQBEcMgDKR3E1AJldA5wMEqAQmTgINqmILdFCChdUAdMAeMcukuSwnQbbnLlZLwJPkQIcrSiT/IGNQHNb8CGQDyRw+2QWUBqC+luzo4OKQZIAVrB+ssyKp3Bkijf0+ijzIh4wQppoBauMSjyDZfMSCDxYZMsfHF120T36AqWZMkgyguQ3GOfottJ5TKnHC+wfeRsC2oDVayPgr3bbN2tHBH3tWuJCPa0JUgKtFzMQrcZH3FNHAc0yOp1cCASALyngoN6lhDopkJWxdifwY9A3u7l29ImpxOFSWIOVsGwHKENIWxss2eBVKdOeeXAAMAk/Z9h4QhXmUAAAAASUVORK5CYII=")}.opcache-gui .nav-tab-link-realtime.pulse::before{content:"";position:absolute;top:13px;left:3px;width:18px;height:18px;z-index:10;opacity:0;background-color:transparent;border:2px solid #ff7400;border-radius:100%;animation:pulse 1s linear 2}.opcache-gui .tab-content-container{padding:2em}.opcache-gui .tab-content{display:none}.opcache-gui .tab-content-overview{display:block}.opcache-gui .tab-content-overview-counts{width:270px;float:right}.opcache-gui .tab-content-overview-info{margin-right:280px}.opcache-gui .graph-widget{display:block;max-width:100%;height:auto;margin:0 auto}.opcache-gui .widget-panel{background-color:#ededed;margin-bottom:10px}.opcache-gui .widget-header{background-color:#cdcdcd;padding:4px 6px;margin:0;text-align:center;font-size:1rem;font-weight:bold}.opcache-gui .widget-value{margin:0;text-align:center}.opcache-gui .widget-value span.large+span{font-size:20pt;margin:0;color:#6ca6ef}.opcache-gui .widget-value span.large span.large{color:#6ca6ef;font-size:80pt;margin:0;padding:0;text-align:center}.opcache-gui .widget-info{margin:0;padding:10px}.opcache-gui .widget-info *{margin:0;line-height:1.75em;text-align:left}.opcache-gui .tables{margin:0 0 1em 0;border-collapse:collapse;border-color:#fff;width:100%;table-layout:fixed}.opcache-gui .tables tr{background-color:#99D0DF;border-color:#fff}.opcache-gui .tables tr:nth-child(odd){background-color:#EFFEFF}.opcache-gui .tables tr:nth-child(even){background-color:#E0ECEF}.opcache-gui .tables th{text-align:left;padding:6px;background-color:#6ca6ef;color:#fff;border-color:#fff;font-weight:normal}.opcache-gui .tables td{padding:4px 6px;line-height:1.4em;vertical-align:top;border-color:#fff;overflow:hidden;overflow-wrap:break-word;text-overflow:ellipsis}.opcache-gui .tables.file-list-table tr{background-color:#EFFEFF}.opcache-gui .tables.file-list-table tr.alternate{background-color:#E0ECEF}.opcache-gui .file-filter{width:520px}.opcache-gui .file-metainfo{font-size:80%}.opcache-gui .file-pathname{width:70%;display:block}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime,.opcache-gui .github-link{background-position:5px 50%;background-repeat:no-repeat;background-color:transparent}.opcache-gui .main-footer{border-top:1px solid #ccc;padding:1em 2em}.opcache-gui .github-link{background-position:0 50%;padding:2em;text-decoration:none;opacity:0.7;background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAQCAYAAAAbBi9cAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyBpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBXaW5kb3dzIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjE2MENCRkExNzVBQjExRTQ5NDBGRTUzMzQyMDVDNzFFIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjE2MENCRkEyNzVBQjExRTQ5NDBGRTUzMzQyMDVDNzFFIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTYwQ0JGOUY3NUFCMTFFNDk0MEZFNTMzNDIwNUM3MUUiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6MTYwQ0JGQTA3NUFCMTFFNDk0MEZFNTMzNDIwNUM3MUUiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7HtUU1AAABN0lEQVR42qyUvWoCQRSF77hCLLKC+FOlCKTyIbYQUuhbWPkSFnZ2NpabUvANLGyz5CkkYGMlFtFAUmiSM8lZOVkWsgm58K079+fMnTusZl92BXbgDrTtZ2szd8fas/XBOzmBKaiCEFyTkL4pc9L8vgpNJJDyWtDna61EoXpO+xcFfXUVqtrf7Vx7m9Pub/EatvgHoYXD4ylztC14BBVwydvydgDPHPgNaErN3jLKIxAUmEvAXK21I18SJpXBGAxyBAaMlblOWOs1bMXFkMGeBFsi0pJNe/QNuV7563+gs8LfhrRfE6GaHLuRqfnUiKi6lJ034B44EXL0baTTJWujNGkG3kBX5uRyZuRkPl3WzDTBtzjnxxiDDq83yNxUk7GYuXM53jeLuMNavvAXkv4zrJkTaeGHAAMAIal3icPMsyQAAAAASUVORK5CYII=");font-size:80%}.opcache-gui .github-link:hover{opacity:1}.opcache-gui .file-cache-only{margin-top:0}@media screen and (max-width: 750px){.opcache-gui .nav-tab-list{border-bottom:0}.opcache-gui .nav-tab{display:block;margin:0}.opcache-gui .nav-tab-link{display:block;margin:0 10px;padding:10px 0 10px 30px;border:0}.opcache-gui .nav-tab-link[data-for].active{border-bottom-color:#ccc}.opcache-gui .tab-content-overview-info{margin-right:auto;clear:both}.opcache-gui .tab-content-overview-counts{position:relative;display:block;width:100%}.opcache-gui .nav-tab-link-realtime.pulse::before{top:8px}}@media screen and (max-width: 550px){.opcache-gui .file-filter{width:100%}}@keyframes pulse{0%{transform:scale(1);opacity:0}50%{transform:scale(1.3);opacity:0.7}100%{transform:scale(1.6);opacity:1}}
+        :root{--opcache-gui-graph-track-fill-color: #6CA6EF;--opcache-gui-graph-track-background-color: rgba(229,231,231,0.905882)}.opcache-gui{font-family:sans-serif;font-size:90%;padding:0;margin:0}.opcache-gui .hide{display:none}.opcache-gui .sr-only{border:0 !important;clip:rect(1px, 1px, 1px, 1px) !important;-webkit-clip-path:inset(50%) !important;clip-path:inset(50%) !important;height:1px !important;margin:-1px !important;overflow:hidden !important;padding:0 !important;position:absolute !important;width:1px !important;white-space:nowrap !important}.opcache-gui .main-nav{padding-top:20px}.opcache-gui .nav-tab-list{list-style-type:none;padding-left:8px;margin:0;border-bottom:1px solid #CCC}.opcache-gui .nav-tab{display:inline-block;margin:0 0 -1px 0;padding:15px 30px;border:1px solid transparent;border-bottom-color:#CCC;text-decoration:none;background-color:#fff}.opcache-gui .nav-tab:hover{background-color:#F4F4F4;text-decoration:underline}.opcache-gui .nav-tab.active{border:1px solid #CCC;border-bottom-color:#fff;border-top:3px solid #6CA6EF}.opcache-gui .nav-tab.active:hover{background-color:initial}.opcache-gui .nav-tab-link-reset{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .nav-tab-link-reset.is-resetting{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgb(0, 186, 0)"/></svg>')}.opcache-gui .nav-tab-link-realtime{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="rgb(98, 98, 98)"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .nav-tab-link-realtime.live-update{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="rgb(0, 186, 0)"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="rgb(0, 186, 0)"/></svg>')}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime{position:relative;padding-left:50px}.opcache-gui .nav-tab-link-reset.pulse::before,.opcache-gui .nav-tab-link-realtime.pulse::before{content:"";position:absolute;top:12px;left:25px;width:18px;height:18px;z-index:10;opacity:0;background-color:transparent;border:2px solid #00ba00;border-radius:100%;animation:pulse 2s linear infinite}.opcache-gui .tab-content{padding:2em}.opcache-gui .tab-content-overview-counts{width:270px;float:right}.opcache-gui .tab-content-overview-info{margin-right:280px}.opcache-gui .graph-widget{max-width:100%;height:auto;margin:0 auto;display:flex;position:relative}.opcache-gui .graph-widget .widget-value{display:flex;align-items:center;justify-content:center;text-align:center;position:absolute;top:0;width:100%;height:100%;margin:0 auto;font-size:3.2em;font-weight:100;color:#6CA6EF;user-select:none}.opcache-gui .widget-panel{background-color:#EDEDED;margin-bottom:10px}.opcache-gui .widget-header{background-color:#CDCDCD;padding:4px 6px;margin:0;text-align:center;font-size:1rem;font-weight:bold}.opcache-gui .widget-value{margin:0;text-align:center}.opcache-gui .widget-value span.large{color:#6CA6EF;font-size:80pt;margin:0;padding:0;text-align:center}.opcache-gui .widget-value span.large+span{font-size:20pt;margin:0;color:#6CA6EF}.opcache-gui .widget-info{margin:0;padding:10px}.opcache-gui .widget-info *{margin:0;line-height:1.75em;text-align:left}.opcache-gui .tables{margin:0 0 1em 0;border-collapse:collapse;width:100%;table-layout:fixed}.opcache-gui .tables tr:nth-child(odd){background-color:#EFFEFF}.opcache-gui .tables tr:nth-child(even){background-color:#E0ECEF}.opcache-gui .tables th{text-align:left;padding:6px;background-color:#6CA6EF;color:#fff;border-color:#fff;font-weight:normal}.opcache-gui .tables td{padding:4px 6px;line-height:1.4em;vertical-align:top;border-color:#fff;overflow:hidden;overflow-wrap:break-word;text-overflow:ellipsis}.opcache-gui .file-filter{width:520px}.opcache-gui .file-metainfo{font-size:80%}.opcache-gui .file-metainfo.invalid{font-style:italic}.opcache-gui .file-pathname{width:70%;display:block}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime,.opcache-gui .github-link{background-repeat:no-repeat;background-color:transparent}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime{background-position:24px 50%}.opcache-gui .github-link{background-position:5px 50%}.opcache-gui .main-footer{border-top:1px solid #CCC;padding:1em 2em}.opcache-gui .github-link{background-position:0 50%;padding:2em 0 2em 2.3em;text-decoration:none;opacity:0.7;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.19em" height="1em" viewBox="0 0 1664 1408"><path d="M640 960q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm640 0q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm160 0q0-120-69-204t-187-84q-41 0-195 21q-71 11-157 11t-157-11q-152-21-195-21q-118 0-187 84t-69 204q0 88 32 153.5t81 103t122 60t140 29.5t149 7h168q82 0 149-7t140-29.5t122-60t81-103t32-153.5zm224-176q0 207-61 331q-38 77-105.5 133t-141 86t-170 47.5t-171.5 22t-167 4.5q-78 0-142-3t-147.5-12.5t-152.5-30t-137-51.5t-121-81t-86-115Q0 992 0 784q0-237 136-396q-27-82-27-170q0-116 51-218q108 0 190 39.5T539 163q147-35 309-35q148 0 280 32q105-82 187-121t189-39q51 102 51 218q0 87-27 168q136 160 136 398z" fill="rgb(98, 98, 98)"/></svg>');font-size:80%}.opcache-gui .github-link:hover{opacity:1}.opcache-gui .file-cache-only{margin-top:0}.opcache-gui .pagination{margin:10px 0;padding:0}.opcache-gui .pagination li{display:inline-block}.opcache-gui .pagination li a{display:inline-block;display:inline-flex;align-items:center;white-space:nowrap;line-height:1;padding:0.5rem 0.75rem;border-radius:3px;text-decoration:none;height:100%}.opcache-gui .pagination li a.arrow{font-size:1.1rem}.opcache-gui .pagination li a:active{transform:translateY(2px)}.opcache-gui .pagination li a.active{background-color:#4d75af;color:#fff}.opcache-gui .pagination li a:hover:not(.active){background-color:#FF7400;color:#fff}@media screen and (max-width: 750px){.opcache-gui .nav-tab-list{border-bottom:0}.opcache-gui .nav-tab{display:block;margin:0}.opcache-gui .nav-tab-link{display:block;margin:0 10px;padding:10px 0 10px 30px;border:0}.opcache-gui .nav-tab-link[data-for].active{border-bottom-color:#CCC}.opcache-gui .tab-content-overview-info{margin-right:auto;clear:both}.opcache-gui .tab-content-overview-counts{position:relative;display:block;width:100%}}@media screen and (max-width: 550px){.opcache-gui .file-filter{width:100%}}@keyframes pulse{0%{transform:scale(1);opacity:1}50%,100%{transform:scale(2);opacity:0}}
     </style>
 </head>
 
 <body style="padding: 0; margin: 0;">
 
-<div class="opcache-gui">
+    <div class="opcache-gui" id="interface" />
 
-    <header>
-        <nav class="main-nav">
-            <ul class="nav-tab-list">
-                <li class="nav-tab"><a data-for="overview" href="#overview" class="active nav-tab-link">Overview</a></li>
-                <?php if ($opcache->getOption('allow_filelist')): ?>
-                    <li class="nav-tab"><a data-for="files" href="#files" class="nav-tab-link">File usage</a></li>
-                <?php endif; ?>
-                <?php if ($opcache->getOption('allow_reset')): ?>
-                    <li class="nav-tab"><a href="?reset=1" id="resetCache" onclick="return confirm('Are you sure you want to reset the cache?');" class="nav-tab-link nav-tab-link-reset">Reset cache</a></li>
-                <?php endif; ?>
-                <?php if ($opcache->getOption('allow_realtime')): ?>
-                    <li class="nav-tab"><a href="#" id="toggleRealtime" class="nav-tab-link nav-tab-link-realtime">Enable real-time update</a></li>
-                <?php endif; ?>
-            </ul>
-        </nav>
-    </header>
+    <script type="text/javascript">
 
-    <div id="tabs" class="tab-content-container">
-        <div id="overview" class="tab-content tab-content-overview">
-            <div>
-                <div id="counts" class="tab-content-overview-counts"></div>
-                <div id="info" class="tab-content-overview-info">
-                    <div id="generalInfo"></div>
-                    <div id="directives"></div>
-                    <div id="functions">
-                        <table class="tables">
-                            <thead>
-                            <tr><th>Available functions</th></tr>
-                            </thead>
-                            <tbody>
-                            <?php foreach ($opcache->getData('functions') as $func): ?>
-                                <tr><td><a href="http://php.net/<?php echo $func; ?>" title="View manual page" target="_blank"><?php echo $func; ?></a></td></tr>
-                            <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                    <br style="clear:both;" />
-                </div>
-            </div>
-        </div>
-        <div id="files" class="tab-content tab-content-files">
-            <?php if ($opcache->getOption('allow_filelist')): ?>
-                <form action="#">
-                    <label for="frmFilter">Start typing to filter on script path</label><br>
-                    <input type="text" name="filter" id="frmFilter" class="file-filter">
-                </form>
-            <?php endif; ?>
-            <div id="filelist"></div>
-        </div>
-    </div>
+    function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
-    <footer class="main-footer">
-        <a class="github-link" href="https://github.com/amnuts/opcache-gui" target="_blank" title="opcache-gui (currently version <?php echo Service::VERSION; ?>) on GitHub">https://github.com/amnuts/opcache-gui - version <?php echo Service::VERSION; ?></a>
-    </footer>
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-</div>
+class Interface extends React.Component {
+  constructor(props) {
+    super(props);
 
-<script type="text/javascript">
-    var realtime = false;
-    var opstate = <?php echo json_encode($opcache->getData()); ?>;
-    var canInvalidate = <?php echo json_encode($opcache->canInvalidate()); ?>;
-    var useCharts = <?php echo json_encode($opcache->getOption('charts')); ?>;
-    var highlight = <?php echo json_encode($opcache->getOption('highlight')); ?>;
-    var allowFiles = <?php echo json_encode($opcache->getOption('allow_filelist')); ?>;
-    var debounce = function(func, wait, immediate) {
-        var timeout;
-        wait = wait || 250;
-        return function() {
-            var context = this, args = arguments;
-            var later = function() {
-                timeout = null;
-                if (!immediate) {
-                    func.apply(context, args);
-                }
-            };
-            var callNow = immediate && !timeout;
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-            if (callNow) {
-                func.apply(context, args);
-            }
-        };
-    };
-    function keyUp(event){
-        var compare = $('#frmFilter').val().toLowerCase();
-        $('#filelist').find('table tbody tr').each(function(index){
-            if ($(this).data('path').indexOf(compare) == -1) {
-                $(this).addClass('hide');
-            } else {
-                $(this).removeClass('hide');
-            }
+    _defineProperty(this, "startTimer", () => {
+      this.setState({
+        realtime: true
+      });
+      this.polling = setInterval(() => {
+        this.setState({
+          fetching: true,
+          resetting: false
         });
-        $('#filelist table tbody').trigger('paint');
-    };
-    <?php if ($opcache->getOption('charts')): ?>
-    var Gauge = function(el, colour) {
-        this.canvas  = $(el).get(0);
-        this.ctx     = this.canvas.getContext('2d');
-        this.width   = this.canvas.width;
-        this.height  = this.canvas.height;
-        this.colour  = colour || '#6ca6ef';
-        this.loop    = null;
-        this.degrees = 0;
-        this.newdegs = 0;
-        this.text    = '';
-        this.init = function() {
-            this.ctx.clearRect(0, 0, this.width, this.height);
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = '#e2e2e2';
-            this.ctx.lineWidth = 30;
-            this.ctx.arc(this.width/2, this.height/2, 100, 0, Math.PI*2, false);
-            this.ctx.stroke();
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = this.colour;
-            this.ctx.lineWidth = 30;
-            this.ctx.arc(this.width/2, this.height/2, 100, 0 - (90 * Math.PI / 180), (this.degrees * Math.PI / 180) - (90 * Math.PI / 180), false);
-            this.ctx.stroke();
-            this.ctx.fillStyle = this.colour;
-            this.ctx.font = '60px sans-serif';
-            this.text = Math.round((this.degrees/360)*100) + '%';
-            this.ctx.fillText(this.text, (this.width/2) - (this.ctx.measureText(this.text).width/2), (this.height/2) + 20);
-        };
-        this.draw = function() {
-            if (typeof this.loop != 'undefined') {
-                clearInterval(this.loop);
-            }
-            var self = this;
-            self.loop = setInterval(function(){ self.animate(); }, 1000/(this.newdegs - this.degrees));
-        };
-        this.animate = function() {
-            if (this.degrees == this.newdegs) {
-                clearInterval(this.loop);
-            }
-            if (this.degrees < this.newdegs) {
-                ++this.degrees;
-            } else {
-                --this.degrees;
-            }
-            this.init();
-        };
-        this.setValue = function(val) {
-            this.newdegs = Math.round(3.6 * val);
-            this.draw();
-        };
-    }
-    <?php endif; ?>
-
-    $(function(){
-        <?php if ($opcache->getOption('allow_realtime')): ?>
-        function setCookie() {
-            var d = new Date();
-            var secure = (window.location.protocol === 'https:' ? ';secure' : '');
-            d.setTime(d.getTime() + (<?php echo ($opcache->getOption('cookie_ttl')); ?> * 86400000));
-            var expires = "expires="+d.toUTCString();
-            document.cookie = "<?php echo ($opcache->getOption('cookie_name')); ?>=true;" + expires + ";path=/" + secure;
-        };
-        function removeCookie() {
-            var secure = (window.location.protocol === 'https:' ? ';secure' : '');
-            document.cookie = "<?php echo ($opcache->getOption('cookie_name')); ?>=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/" + secure;
-        };
-        function getCookie() {
-            var v = document.cookie.match('(^|;) ?<?php echo ($opcache->getOption('cookie_name')); ?>=([^;]*)(;|$)');
-            return v ? v[2] : null;
-        };
-        function updateStatus() {
-            $('#toggleRealtime').removeClass('pulse');
-            $.ajax({
-                url: "#",
-                dataType: "json",
-                cache: false,
-                success: function(data) {
-                    $('#toggleRealtime').addClass('pulse');
-                    opstate = data;
-                    overviewCountsObj.setState({
-                        data : opstate.overview
-                    });
-                    generalInfoObj.setState({
-                        version : opstate.version,
-                        start : opstate.overview.readable.start_time,
-                        reset : opstate.overview.readable.last_restart_time
-                    });
-                    filesObj.setState({
-                        data : opstate.files,
-                        count_formatted : opstate.overview.readable.num_cached_scripts,
-                        count : opstate.overview.num_cached_scripts
-                    });
-                    keyUp();
-                }
-            });
-        }
-        $('#toggleRealtime').click(function(){
-            if (realtime === false) {
-                realtime = setInterval(function(){updateStatus()}, <?php echo (int)$opcache->getOption('refresh_time') * 1000; ?>);
-                $(this).text('Disable real-time update');
-                setCookie();
-            } else {
-                clearInterval(realtime);
-                realtime = false;
-                $(this).text('Enable real-time update').removeClass('pulse');
-                removeCookie();
-            }
+        axios.get('#', {
+          time: Date.now()
+        }).then(response => {
+          this.setState({
+            opstate: response.data
+          });
         });
-        if (getCookie() == 'true') {
-            realtime = setInterval(function(){updateStatus()}, <?php echo (int)$opcache->getOption('refresh_time') * 1000; ?>);
-            $('#toggleRealtime').text('Disable real-time update');
-        }
-        <?php endif; ?>
-        $('nav a[data-for]').click(function(){
-            $('#tabs > div').hide();
-            $('#' + $(this).data('for')).show();
-            $('nav a[data-for]').removeClass('active');
-            $(this).addClass('active');
-            return false;
-        });
-        $(document).on('paint', '#filelist table tbody', function(event, params) {
-            var trs = $('#filelist').find('tbody tr');
-            trs.removeClass('alternate');
-            trs.filter(':not(.hide):odd').addClass('alternate');
-            filesObj.setState({showing: trs.filter(':not(.hide)').length});
-        });
-        $('#frmFilter').bind('keyup', debounce(keyUp, <?php echo $opcache->getOption('debounce_rate'); ?>));
+      }, this.props.realtimeRefresh * 1000);
     });
 
-    var UsageGraph = React.createClass({
-  displayName: "UsageGraph",
-  getInitialState: function () {
-    return {
-      gauge: null
-    };
-  },
-  componentDidMount: function () {
-    if (this.props.chart) {
-      this.state.gauge = new Gauge('#' + this.props.gaugeId);
-      this.state.gauge.setValue(this.props.value);
-    }
-  },
-  componentDidUpdate: function () {
-    if (this.state.gauge != null) {
-      this.state.gauge.setValue(this.props.value);
-    }
-  },
-  render: function () {
-    if (this.props.chart == true) {
-      return /*#__PURE__*/React.createElement("canvas", {
-        id: this.props.gaugeId,
-        className: "graph-widget",
-        width: "250",
-        height: "250",
-        "data-value": this.props.value
+    _defineProperty(this, "stopTimer", () => {
+      this.setState({
+        realtime: false,
+        resetting: false
       });
-    }
+      clearInterval(this.polling);
+    });
 
-    return /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("span", {
-      className: "large"
-    }, this.props.value), /*#__PURE__*/React.createElement("span", null, "%"));
-  }
-});
-var MemoryUsagePanel = React.createClass({
-  displayName: "MemoryUsagePanel",
-  render: function () {
-    return /*#__PURE__*/React.createElement("div", {
-      className: "widget-panel"
-    }, /*#__PURE__*/React.createElement("h3", {
-      className: "widget-header"
-    }, "memory usage"), /*#__PURE__*/React.createElement("div", {
-      className: "widget-value widget-info"
-    }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "total memory:"), " ", this.props.total), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "used memory:"), " ", this.props.used), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "free memory:"), " ", this.props.free), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "wasted memory:"), " ", this.props.wasted, " (", this.props.wastedPercent, "%)")));
-  }
-});
-var StatisticsPanel = React.createClass({
-  displayName: "StatisticsPanel",
-  render: function () {
-    return /*#__PURE__*/React.createElement("div", {
-      className: "widget-panel"
-    }, /*#__PURE__*/React.createElement("h3", {
-      className: "widget-header"
-    }, "opcache statistics"), /*#__PURE__*/React.createElement("div", {
-      className: "widget-value widget-info"
-    }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of cached files:"), " ", this.props.num_cached_scripts), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of hits:"), " ", this.props.hits), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of misses:"), " ", this.props.misses), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "blacklist misses:"), " ", this.props.blacklist_miss), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of cached keys:"), " ", this.props.num_cached_keys), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "max cached keys:"), " ", this.props.max_cached_keys)));
-  }
-});
-var InternedStringsPanel = React.createClass({
-  displayName: "InternedStringsPanel",
-  render: function () {
-    return /*#__PURE__*/React.createElement("div", {
-      className: "widget-panel"
-    }, /*#__PURE__*/React.createElement("h3", {
-      className: "widget-header"
-    }, "interned strings usage"), /*#__PURE__*/React.createElement("div", {
-      className: "widget-value widget-info"
-    }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "buffer size:"), " ", this.props.buffer_size), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "used memory:"), " ", this.props.strings_used_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "free memory:"), " ", this.props.strings_free_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of strings:"), " ", this.props.number_of_strings)));
-  }
-});
-var OverviewCounts = React.createClass({
-  displayName: "OverviewCounts",
-  getInitialState: function () {
-    return {
-      data: opstate.overview,
-      chart: useCharts,
-      highlight: highlight
-    };
-  },
-  render: function () {
-    if (this.state.data == false) {
-      return /*#__PURE__*/React.createElement("p", {
-        class: "file-cache-only"
-      }, "You have ", /*#__PURE__*/React.createElement("i", null, "opcache.file_cache_only"), " turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by ", /*#__PURE__*/React.createElement("i", null, "opcache_get_statistics()"), ".");
-    }
+    _defineProperty(this, "realtimeHandler", () => {
+      const realtime = !this.state.realtime;
 
-    var interned = this.state.data.readable.interned != null ? /*#__PURE__*/React.createElement(InternedStringsPanel, {
-      buffer_size: this.state.data.readable.interned.buffer_size,
-      strings_used_memory: this.state.data.readable.interned.strings_used_memory,
-      strings_free_memory: this.state.data.readable.interned.strings_free_memory,
-      number_of_strings: this.state.data.readable.interned.number_of_strings
-    }) : '';
-    var memoryHighlight = this.state.highlight.memory ? /*#__PURE__*/React.createElement("div", {
-      className: "widget-panel"
-    }, /*#__PURE__*/React.createElement("h3", {
-      className: "widget-header"
-    }, "memory"), /*#__PURE__*/React.createElement("p", {
-      className: "widget-value"
-    }, /*#__PURE__*/React.createElement(UsageGraph, {
-      chart: this.state.chart,
-      value: this.state.data.used_memory_percentage,
-      gaugeId: "memoryUsageCanvas"
-    }))) : null;
-    var hitsHighlight = this.state.highlight.hits ? /*#__PURE__*/React.createElement("div", {
-      className: "widget-panel"
-    }, /*#__PURE__*/React.createElement("h3", {
-      className: "widget-header"
-    }, "hit rate"), /*#__PURE__*/React.createElement("p", {
-      className: "widget-value"
-    }, /*#__PURE__*/React.createElement(UsageGraph, {
-      chart: this.state.chart,
-      value: this.state.data.hit_rate_percentage,
-      gaugeId: "hitRateCanvas"
-    }))) : null;
-    var keysHighlight = this.state.highlight.keys ? /*#__PURE__*/React.createElement("div", {
-      className: "widget-panel"
-    }, /*#__PURE__*/React.createElement("h3", {
-      className: "widget-header"
-    }, "keys"), /*#__PURE__*/React.createElement("p", {
-      className: "widget-value"
-    }, /*#__PURE__*/React.createElement(UsageGraph, {
-      chart: this.state.chart,
-      value: this.state.data.used_key_percentage,
-      gaugeId: "keyUsageCanvas"
-    }))) : null;
-    return /*#__PURE__*/React.createElement("div", null, memoryHighlight, hitsHighlight, keysHighlight, /*#__PURE__*/React.createElement(MemoryUsagePanel, {
-      total: this.state.data.readable.total_memory,
-      used: this.state.data.readable.used_memory,
-      free: this.state.data.readable.free_memory,
-      wasted: this.state.data.readable.wasted_memory,
-      wastedPercent: this.state.data.wasted_percentage
-    }), /*#__PURE__*/React.createElement(StatisticsPanel, {
-      num_cached_scripts: this.state.data.readable.num_cached_scripts,
-      hits: this.state.data.readable.hits,
-      misses: this.state.data.readable.misses,
-      blacklist_miss: this.state.data.readable.blacklist_miss,
-      num_cached_keys: this.state.data.readable.num_cached_keys,
-      max_cached_keys: this.state.data.readable.max_cached_keys
-    }), interned);
-  }
-});
-var GeneralInfo = React.createClass({
-  displayName: "GeneralInfo",
-  getInitialState: function () {
-    return {
-      version: opstate.version,
-      start: opstate.overview ? opstate.overview.readable.start_time : null,
-      reset: opstate.overview ? opstate.overview.readable.last_restart_time : null
-    };
-  },
-  render: function () {
-    var startTime = this.state.start ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Start time"), /*#__PURE__*/React.createElement("td", null, this.state.start)) : '';
-    var lastReset = this.state.reset ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Last reset"), /*#__PURE__*/React.createElement("td", null, this.state.reset)) : '';
-    return /*#__PURE__*/React.createElement("table", {
-      className: "tables general-info-table"
-    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
-      colSpan: "2"
-    }, "General info"))), /*#__PURE__*/React.createElement("tbody", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Zend OPcache"), /*#__PURE__*/React.createElement("td", null, this.state.version.version)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "PHP"), /*#__PURE__*/React.createElement("td", null, this.state.version.php)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Host"), /*#__PURE__*/React.createElement("td", null, this.state.version.host)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Server Software"), /*#__PURE__*/React.createElement("td", null, this.state.version.server)), startTime, lastReset));
-  }
-});
-var Directives = React.createClass({
-  displayName: "Directives",
-  getInitialState: function () {
-    return {
-      data: opstate.directives
-    };
-  },
-  render: function () {
-    var directiveNodes = this.state.data.map(function (directive) {
-      var map = {
-        'opcache.': '',
-        '_': ' '
-      };
-      var dShow = directive.k.replace(/opcache\.|_/gi, function (matched) {
-        return map[matched];
-      });
-      var vShow;
-
-      if (directive.v === true || directive.v === false) {
-        vShow = React.createElement('i', {}, directive.v.toString());
-      } else if (directive.v === '') {
-        vShow = React.createElement('i', {}, 'no value');
+      if (!realtime) {
+        this.stopTimer();
       } else {
-        if (Array.isArray(directive.v)) {
-          vShow = directive.v.map((item, key) => {
-            return /*#__PURE__*/React.createElement("span", {
-              key: key
-            }, item, /*#__PURE__*/React.createElement("br", null));
-          });
-        } else {
-          vShow = directive.v;
-        }
+        this.startTimer();
+      }
+    });
+
+    _defineProperty(this, "resetHandler", () => {
+      if (this.state.realtime) {
+        this.setState({
+          resetting: true
+        });
+        axios.get('#', {
+          params: {
+            reset: 1
+          }
+        }).then(response => {
+          console.log('success: ', response.data);
+        });
+      } else {
+        window.location.href = '?reset=1';
+      }
+    });
+
+    this.state = {
+      realtime: false,
+      resetting: false,
+      opstate: props.opstate
+    };
+    this.polling = false;
+  }
+
+  render() {
+    const {
+      opstate,
+      realtimeRefresh,
+      ...otherProps
+    } = this.props;
+    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("header", null, /*#__PURE__*/React.createElement(MainNavigation, _extends({}, otherProps, {
+      opstate: this.state.opstate,
+      realtime: this.state.realtime,
+      resetting: this.state.resetting,
+      realtimeHandler: this.realtimeHandler,
+      resetHandler: this.resetHandler
+    }))), /*#__PURE__*/React.createElement(Footer, {
+      version: this.props.opstate.version.gui
+    }));
+  }
+
+}
+
+function MainNavigation(props) {
+  return /*#__PURE__*/React.createElement("nav", {
+    className: "main-nav"
+  }, /*#__PURE__*/React.createElement(Tabs, null, /*#__PURE__*/React.createElement("div", {
+    label: "Overview",
+    tabId: "overview"
+  }, /*#__PURE__*/React.createElement(OverviewCounts, {
+    overview: props.opstate.overview,
+    highlight: props.highlight,
+    useCharts: props.useCharts
+  }), /*#__PURE__*/React.createElement("div", {
+    id: "info",
+    className: "tab-content-overview-info"
+  }, /*#__PURE__*/React.createElement(GeneralInfo, {
+    start: props.opstate.overview && props.opstate.overview.readable.start_time || null,
+    reset: props.opstate.overview && props.opstate.overview.readable.last_restart_time || null,
+    version: props.opstate.version
+  }), /*#__PURE__*/React.createElement(Directives, {
+    directives: props.opstate.directives
+  }), /*#__PURE__*/React.createElement(Functions, {
+    functions: props.opstate.functions
+  }))), props.allow.filelist && /*#__PURE__*/React.createElement("div", {
+    label: "Cached",
+    tabId: "cached"
+  }, /*#__PURE__*/React.createElement(CachedFiles, {
+    perPageLimit: props.perPageLimit,
+    allFiles: props.opstate.files,
+    searchTerm: props.searchTerm,
+    debounceRate: props.debounceRate,
+    allow: {
+      fileList: props.allow.filelist,
+      invalidate: props.allow.invalidate
+    },
+    realtime: props.realtime
+  })), props.allow.filelist && props.opstate.blacklist.length && /*#__PURE__*/React.createElement("div", {
+    label: "Ignored",
+    tabId: "ignored"
+  }, /*#__PURE__*/React.createElement(IgnoredFiles, {
+    perPageLimit: props.perPageLimit,
+    allFiles: props.opstate.blacklist,
+    allow: {
+      fileList: props.allow.filelist
+    }
+  })), props.allow.reset && /*#__PURE__*/React.createElement("div", {
+    label: "Reset cache",
+    tabId: "resetCache",
+    className: `nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`,
+    handler: props.resetHandler
+  }), props.allow.realtime && /*#__PURE__*/React.createElement("div", {
+    label: "Enable real-time update",
+    tabId: "toggleRealtime",
+    className: `nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`,
+    handler: props.realtimeHandler
+  })));
+}
+
+class Tabs extends React.Component {
+  constructor(props) {
+    super(props);
+
+    _defineProperty(this, "onClickTabItem", tab => {
+      this.setState({
+        activeTab: tab
+      });
+    });
+
+    this.state = {
+      activeTab: this.props.children[0].props.label
+    };
+  }
+
+  render() {
+    const {
+      onClickTabItem,
+      state: {
+        activeTab
+      }
+    } = this;
+    const children = this.props.children.filter(Boolean);
+    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("ul", {
+      className: "nav-tab-list"
+    }, children.map(child => {
+      const {
+        tabId,
+        label,
+        className,
+        handler
+      } = child.props;
+      return /*#__PURE__*/React.createElement(Tab, {
+        activeTab: activeTab,
+        key: tabId,
+        label: label,
+        onClick: handler || onClickTabItem,
+        className: className
+      });
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "tab-content"
+    }, children.map(child => /*#__PURE__*/React.createElement("div", {
+      key: child.props.label,
+      style: {
+        display: child.props.label === activeTab ? 'block' : 'none'
+      }
+    }, child.props.children))));
+  }
+
+}
+
+class Tab extends React.Component {
+  constructor(...args) {
+    super(...args);
+
+    _defineProperty(this, "onClick", () => {
+      const {
+        label,
+        onClick
+      } = this.props;
+      onClick(label);
+    });
+  }
+
+  render() {
+    const {
+      onClick,
+      props: {
+        activeTab,
+        label
+      }
+    } = this;
+    let className = 'nav-tab';
+
+    if (this.props.className) {
+      className += ` ${this.props.className}`;
+    }
+
+    if (activeTab === label) {
+      className += ' active';
+    }
+
+    return /*#__PURE__*/React.createElement("li", {
+      className: className,
+      onClick: onClick
+    }, label);
+  }
+
+}
+
+function OverviewCounts(props) {
+  if (props.overview === false) {
+    return /*#__PURE__*/React.createElement("p", {
+      class: "file-cache-only"
+    }, "You have ", /*#__PURE__*/React.createElement("i", null, "opcache.file_cache_only"), " turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by ", /*#__PURE__*/React.createElement("i", null, "opcache_get_statistics()"), ".");
+  }
+
+  const graphList = [{
+    id: 'memoryUsageCanvas',
+    title: 'memory',
+    show: props.highlight.memory,
+    value: props.overview.used_memory_percentage
+  }, {
+    id: 'hitRateCanvas',
+    title: 'hit rate',
+    show: props.highlight.hits,
+    value: props.overview.hit_rate_percentage
+  }, {
+    id: 'keyUsageCanvas',
+    title: 'keys',
+    show: props.highlight.keys,
+    value: props.overview.used_key_percentage
+  }];
+  return /*#__PURE__*/React.createElement("div", {
+    id: "counts",
+    className: "tab-content-overview-counts"
+  }, graphList.map(graph => {
+    if (!graph.show) {
+      return null;
+    }
+
+    return /*#__PURE__*/React.createElement("div", {
+      className: "widget-panel",
+      key: graph.id
+    }, /*#__PURE__*/React.createElement("h3", {
+      className: "widget-header"
+    }, graph.title), /*#__PURE__*/React.createElement(UsageGraph, {
+      charts: props.useCharts,
+      value: graph.value,
+      gaugeId: graph.id
+    }));
+  }), /*#__PURE__*/React.createElement(MemoryUsagePanel, {
+    total: props.overview.readable.total_memory,
+    used: props.overview.readable.used_memory,
+    free: props.overview.readable.free_memory,
+    wasted: props.overview.readable.wasted_memory,
+    wastedPercent: props.overview.wasted_percentage
+  }), /*#__PURE__*/React.createElement(StatisticsPanel, {
+    num_cached_scripts: props.overview.readable.num_cached_scripts,
+    hits: props.overview.readable.hits,
+    misses: props.overview.readable.misses,
+    blacklist_miss: props.overview.readable.blacklist_miss,
+    num_cached_keys: props.overview.readable.num_cached_keys,
+    max_cached_keys: props.overview.readable.max_cached_keys
+  }), props.overview.readable.interned && /*#__PURE__*/React.createElement(InternedStringsPanel, {
+    buffer_size: props.overview.readable.interned.buffer_size,
+    strings_used_memory: props.overview.readable.interned.strings_used_memory,
+    strings_free_memory: props.overview.readable.interned.strings_free_memory,
+    number_of_strings: props.overview.readable.interned.number_of_strings
+  }));
+}
+
+function GeneralInfo(props) {
+  return /*#__PURE__*/React.createElement("table", {
+    className: "tables general-info-table"
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+    colSpan: "2"
+  }, "General info"))), /*#__PURE__*/React.createElement("tbody", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Zend OPcache"), /*#__PURE__*/React.createElement("td", null, props.version.version)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "PHP"), /*#__PURE__*/React.createElement("td", null, props.version.php)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Host"), /*#__PURE__*/React.createElement("td", null, props.version.host)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Server Software"), /*#__PURE__*/React.createElement("td", null, props.version.server)), props.start ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Start time"), /*#__PURE__*/React.createElement("td", null, props.start)) : null, props.reset ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Last reset"), /*#__PURE__*/React.createElement("td", null, props.reset)) : null));
+}
+
+function Directives(props) {
+  let directiveNodes = props.directives.map(function (directive) {
+    let map = {
+      'opcache.': '',
+      '_': ' '
+    };
+    let dShow = directive.k.replace(/opcache\.|_/gi, function (matched) {
+      return map[matched];
+    });
+    let vShow;
+
+    if (directive.v === true || directive.v === false) {
+      vShow = React.createElement('i', {}, directive.v.toString());
+    } else if (directive.v === '') {
+      vShow = React.createElement('i', {}, 'no value');
+    } else {
+      if (Array.isArray(directive.v)) {
+        vShow = directive.v.map((item, key) => {
+          return /*#__PURE__*/React.createElement("span", {
+            key: key
+          }, item, /*#__PURE__*/React.createElement("br", null));
+        });
+      } else {
+        vShow = directive.v;
+      }
+    }
+
+    return /*#__PURE__*/React.createElement("tr", {
+      key: directive.k
+    }, /*#__PURE__*/React.createElement("td", {
+      title: 'View ' + directive.k + ' manual entry'
+    }, /*#__PURE__*/React.createElement("a", {
+      href: 'http://php.net/manual/en/opcache.configuration.php#ini.' + directive.k.replace(/_/g, '-'),
+      target: "_blank"
+    }, dShow)), /*#__PURE__*/React.createElement("td", null, vShow));
+  });
+  return /*#__PURE__*/React.createElement("table", {
+    className: "tables directives-table"
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+    colSpan: "2"
+  }, "Directives"))), /*#__PURE__*/React.createElement("tbody", null, directiveNodes));
+}
+
+function Functions(props) {
+  return /*#__PURE__*/React.createElement("div", {
+    id: "functions"
+  }, /*#__PURE__*/React.createElement("table", {
+    className: "tables"
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Available functions"))), /*#__PURE__*/React.createElement("tbody", null, props.functions.map(f => /*#__PURE__*/React.createElement("tr", {
+    key: f
+  }, /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("a", {
+    href: "http://php.net/" + f,
+    title: "View manual page",
+    target: "_blank"
+  }, f)))))));
+}
+
+function UsageGraph(props) {
+  const percentage = Math.round(3.6 * props.value / 360 * 100);
+  return props.charts ? /*#__PURE__*/React.createElement(ReactCustomizableProgressbar, {
+    progress: percentage,
+    radius: 100,
+    strokeWidth: 30,
+    trackStrokeWidth: 30,
+    strokeColor: getComputedStyle(document.documentElement).getPropertyValue('--opcache-gui-graph-track-fill-color') || "#6CA6EF",
+    trackStrokeColor: getComputedStyle(document.documentElement).getPropertyValue('--opcache-gui-graph-track-background-color') || "#CCC",
+    gaugeId: props.gaugeId
+  }) : /*#__PURE__*/React.createElement("p", {
+    className: "widget-value"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "large"
+  }, percentage), /*#__PURE__*/React.createElement("span", null, "%"));
+}
+/**
+ * This component is from <https://github.com/martyan/react-customizable-progressbar/>
+ * MIT License (MIT), Copyright (c) 2019 Martin Juzl
+ */
+
+
+class ReactCustomizableProgressbar extends React.Component {
+  constructor(props) {
+    super(props);
+
+    _defineProperty(this, "initAnimation", () => {
+      this.setState({
+        animationInited: true
+      });
+    });
+
+    _defineProperty(this, "getProgress", () => {
+      const {
+        initialAnimation,
+        progress
+      } = this.props;
+      const {
+        animationInited
+      } = this.state;
+      return initialAnimation && !animationInited ? 0 : progress;
+    });
+
+    _defineProperty(this, "getStrokeDashoffset", strokeLength => {
+      const {
+        counterClockwise,
+        inverse,
+        steps
+      } = this.props;
+      const progress = this.getProgress();
+      const progressLength = strokeLength / steps * (steps - progress);
+      if (inverse) return counterClockwise ? 0 : progressLength - strokeLength;
+      return counterClockwise ? -1 * progressLength : progressLength;
+    });
+
+    _defineProperty(this, "getStrokeDashArray", (strokeLength, circumference) => {
+      const {
+        counterClockwise,
+        inverse,
+        steps
+      } = this.props;
+      const progress = this.getProgress();
+      const progressLength = strokeLength / steps * (steps - progress);
+      if (inverse) return `${progressLength}, ${circumference}`;
+      return counterClockwise ? `${strokeLength * (progress / 100)}, ${circumference}` : `${strokeLength}, ${circumference}`;
+    });
+
+    _defineProperty(this, "getTrackStrokeDashArray", (strokeLength, circumference) => {
+      const {
+        initialAnimation
+      } = this.props;
+      const {
+        animationInited
+      } = this.state;
+      if (initialAnimation && !animationInited) return `0, ${circumference}`;
+      return `${strokeLength}, ${circumference}`;
+    });
+
+    _defineProperty(this, "getExtendedWidth", () => {
+      const {
+        strokeWidth,
+        pointerRadius,
+        pointerStrokeWidth,
+        trackStrokeWidth
+      } = this.props;
+      const pointerWidth = pointerRadius + pointerStrokeWidth;
+      if (pointerWidth > strokeWidth && pointerWidth > trackStrokeWidth) return pointerWidth * 2;else if (strokeWidth > trackStrokeWidth) return strokeWidth * 2;else return trackStrokeWidth * 2;
+    });
+
+    _defineProperty(this, "getPointerAngle", () => {
+      const {
+        cut,
+        counterClockwise,
+        steps
+      } = this.props;
+      const progress = this.getProgress();
+      return counterClockwise ? (360 - cut) / steps * (steps - progress) : (360 - cut) / steps * progress;
+    });
+
+    this.state = {
+      animationInited: false
+    };
+  }
+
+  componentDidMount() {
+    const {
+      initialAnimation,
+      initialAnimationDelay
+    } = this.props;
+    if (initialAnimation) setTimeout(this.initAnimation, initialAnimationDelay);
+  }
+
+  render() {
+    const {
+      radius,
+      pointerRadius,
+      pointerStrokeWidth,
+      pointerFillColor,
+      pointerStrokeColor,
+      fillColor,
+      trackStrokeWidth,
+      trackStrokeColor,
+      trackStrokeLinecap,
+      strokeColor,
+      strokeWidth,
+      strokeLinecap,
+      rotate,
+      cut,
+      trackTransition,
+      transition,
+      progress
+    } = this.props;
+    const d = 2 * radius;
+    const width = d + this.getExtendedWidth();
+    const circumference = 2 * Math.PI * radius;
+    const strokeLength = circumference / 360 * (360 - cut);
+    return /*#__PURE__*/React.createElement("figure", {
+      className: `graph-widget`,
+      style: {
+        width: `${width || 250}px`
+      },
+      "data-value": progress,
+      id: this.props.guageId
+    }, /*#__PURE__*/React.createElement("svg", {
+      width: width,
+      height: width,
+      viewBox: `0 0 ${width} ${width}`,
+      style: {
+        transform: `rotate(${rotate}deg)`
+      }
+    }, trackStrokeWidth > 0 && /*#__PURE__*/React.createElement("circle", {
+      cx: width / 2,
+      cy: width / 2,
+      r: radius,
+      fill: "none",
+      stroke: trackStrokeColor,
+      strokeWidth: trackStrokeWidth,
+      strokeDasharray: this.getTrackStrokeDashArray(strokeLength, circumference),
+      strokeLinecap: trackStrokeLinecap,
+      style: {
+        transition: trackTransition
+      }
+    }), strokeWidth > 0 && /*#__PURE__*/React.createElement("circle", {
+      cx: width / 2,
+      cy: width / 2,
+      r: radius,
+      fill: fillColor,
+      stroke: strokeColor,
+      strokeWidth: strokeWidth,
+      strokeDasharray: this.getStrokeDashArray(strokeLength, circumference),
+      strokeDashoffset: this.getStrokeDashoffset(strokeLength),
+      strokeLinecap: strokeLinecap,
+      style: {
+        transition
+      }
+    }), pointerRadius > 0 && /*#__PURE__*/React.createElement("circle", {
+      cx: d,
+      cy: "50%",
+      r: pointerRadius,
+      fill: pointerFillColor,
+      stroke: pointerStrokeColor,
+      strokeWidth: pointerStrokeWidth,
+      style: {
+        transformOrigin: '50% 50%',
+        transform: `rotate(${this.getPointerAngle()}deg) translate(${this.getExtendedWidth() / 2}px)`,
+        transition
+      }
+    })), /*#__PURE__*/React.createElement("figcaption", {
+      className: `widget-value`
+    }, progress, "%"));
+  }
+
+}
+
+ReactCustomizableProgressbar.defaultProps = {
+  radius: 100,
+  progress: 0,
+  steps: 100,
+  cut: 0,
+  rotate: -90,
+  strokeWidth: 20,
+  strokeColor: 'indianred',
+  fillColor: 'none',
+  strokeLinecap: 'round',
+  transition: '.3s ease',
+  pointerRadius: 0,
+  pointerStrokeWidth: 20,
+  pointerStrokeColor: 'indianred',
+  pointerFillColor: 'white',
+  trackStrokeColor: '#e6e6e6',
+  trackStrokeWidth: 20,
+  trackStrokeLinecap: 'round',
+  trackTransition: '.3s ease',
+  counterClockwise: false,
+  inverse: false,
+  initialAnimation: false,
+  initialAnimationDelay: 0
+};
+
+function MemoryUsagePanel(props) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "widget-panel"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "widget-header"
+  }, "memory usage"), /*#__PURE__*/React.createElement("div", {
+    className: "widget-value widget-info"
+  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "total memory:"), " ", props.total), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "used memory:"), " ", props.used), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "free memory:"), " ", props.free), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "wasted memory:"), " ", props.wasted, " (", props.wastedPercent, "%)")));
+}
+
+function StatisticsPanel(props) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "widget-panel"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "widget-header"
+  }, "opcache statistics"), /*#__PURE__*/React.createElement("div", {
+    className: "widget-value widget-info"
+  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of cached files:"), " ", props.num_cached_scripts), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of hits:"), " ", props.hits), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of misses:"), " ", props.misses), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "blacklist misses:"), " ", props.blacklist_miss), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of cached keys:"), " ", props.num_cached_keys), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "max cached keys:"), " ", props.max_cached_keys)));
+}
+
+function InternedStringsPanel(props) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "widget-panel"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "widget-header"
+  }, "interned strings usage"), /*#__PURE__*/React.createElement("div", {
+    className: "widget-value widget-info"
+  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "buffer size:"), " ", props.buffer_size), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "used memory:"), " ", props.strings_used_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "free memory:"), " ", props.strings_free_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of strings:"), " ", props.number_of_strings)));
+}
+
+class CachedFiles extends React.Component {
+  constructor(props) {
+    super(props);
+
+    _defineProperty(this, "setSearchTerm", debounce(searchTerm => {
+      this.setState({
+        searchTerm,
+        refreshPagination: !this.state.refreshPagination
+      });
+    }, this.props.debounceRate));
+
+    _defineProperty(this, "onPageChanged", currentPage => {
+      this.setState({
+        currentPage
+      });
+    });
+
+    this.doPagination = typeof props.perPageLimit === "number" && props.perPageLimit > 0;
+    this.state = {
+      currentPage: 1,
+      searchTerm: props.searchTerm,
+      refreshPagination: 0
+    };
+  }
+
+  render() {
+    if (!this.props.allow.fileList) {
+      return null;
+    }
+
+    if (this.props.allFiles.length === 0) {
+      return /*#__PURE__*/React.createElement("p", null, "No files have been cached or you have ", /*#__PURE__*/React.createElement("i", null, "opcache.file_cache_only"), " turned on");
+    }
+
+    const {
+      searchTerm,
+      currentPage
+    } = this.state;
+    const offset = (currentPage - 1) * this.props.perPageLimit;
+    const filesInSearch = searchTerm ? this.props.allFiles.filter(file => {
+      return !(file.full_path.indexOf(searchTerm) == -1);
+    }) : this.props.allFiles;
+    const filesInPage = this.doPagination ? filesInSearch.slice(offset, offset + this.props.perPageLimit) : filesInSearch;
+    const allFilesTotal = this.props.allFiles.length;
+    const showingTotal = filesInSearch.length;
+    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("form", {
+      action: "#"
+    }, /*#__PURE__*/React.createElement("label", {
+      htmlFor: "frmFilter"
+    }, "Start typing to filter on script path"), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("input", {
+      type: "text",
+      name: "filter",
+      id: "frmFilter",
+      className: "file-filter",
+      onChange: e => {
+        this.setSearchTerm(e.target.value);
+      }
+    })), /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " files cached", showingTotal !== allFilesTotal && `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
+      totalRecords: filesInSearch.length,
+      pageLimit: this.props.perPageLimit,
+      pageNeighbours: 2,
+      onPageChanged: this.onPageChanged,
+      refresh: this.state.refreshPagination
+    }), /*#__PURE__*/React.createElement("table", {
+      className: "tables cached-list-table"
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Script"))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
+      return /*#__PURE__*/React.createElement(CachedFile, _extends({
+        key: file.full_path,
+        canInvalidate: this.props.allow.invalidate,
+        realtime: this.props.realtime
+      }, file));
+    }))));
+  }
+
+}
+
+class CachedFile extends React.Component {
+  constructor(...args) {
+    super(...args);
+
+    _defineProperty(this, "handleInvalidate", e => {
+      e.preventDefault();
+
+      if (this.props.realtime) {
+        console.log({
+          invalidate: e.currentTarget.getAttribute('data-file')
+        });
+        axios.get('#', {
+          params: {
+            invalidate: e.currentTarget.getAttribute('data-file')
+          }
+        }).then(response => {
+          console.log('success: ', response.data);
+        });
+      } else {
+        window.location.href = e.currentTarget.href;
+      }
+    });
+  }
+
+  render() {
+    return /*#__PURE__*/React.createElement("tr", {
+      "data-path": this.props.full_path.toLowerCase()
+    }, /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+      className: "file-pathname"
+    }, this.props.full_path), /*#__PURE__*/React.createElement("span", {
+      className: "file-metainfo"
+    }, /*#__PURE__*/React.createElement("b", null, "hits: "), /*#__PURE__*/React.createElement("span", null, this.props.readable.hits, ", "), /*#__PURE__*/React.createElement("b", null, "memory: "), /*#__PURE__*/React.createElement("span", null, this.props.readable.memory_consumption, ", "), /*#__PURE__*/React.createElement("b", null, "last used: "), /*#__PURE__*/React.createElement("span", null, this.props.last_used)), !this.props.timestamp && /*#__PURE__*/React.createElement("span", {
+      className: "invalid file-metainfo"
+    }, " - has been invalidated"), this.props.canInvalidate && /*#__PURE__*/React.createElement("span", null, ",\xA0", /*#__PURE__*/React.createElement("a", {
+      className: "file-metainfo",
+      href: '?invalidate=' + this.props.full_path,
+      "data-file": this.props.full_path,
+      onClick: this.handleInvalidate
+    }, "force file invalidation"))));
+  }
+
+}
+
+class IgnoredFiles extends React.Component {
+  constructor(props) {
+    super(props);
+
+    _defineProperty(this, "onPageChanged", currentPage => {
+      this.setState({
+        currentPage
+      });
+    });
+
+    this.doPagination = typeof props.perPageLimit === "number" && props.perPageLimit > 0;
+    this.state = {
+      currentPage: 1,
+      refreshPagination: 0
+    };
+  }
+
+  render() {
+    if (!this.props.allow.fileList) {
+      return null;
+    }
+
+    if (this.props.allFiles.length === 0) {
+      return /*#__PURE__*/React.createElement("p", null, "No files have been ignored via ", /*#__PURE__*/React.createElement("i", null, "opcache.blacklist_filename"));
+    }
+
+    const {
+      currentPage
+    } = this.state;
+    const offset = (currentPage - 1) * this.props.perPageLimit;
+    const filesInPage = this.doPagination ? this.props.allFiles.slice(offset, offset + this.props.perPageLimit) : this.props.allFiles;
+    const allFilesTotal = this.props.allFiles.length;
+    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " ignore file locations"), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
+      totalRecords: allFilesTotal,
+      pageLimit: this.props.perPageLimit,
+      pageNeighbours: 2,
+      onPageChanged: this.onPageChanged,
+      refresh: this.state.refreshPagination
+    }), /*#__PURE__*/React.createElement("table", {
+      className: "tables ignored-list-table"
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Path"))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
+      return /*#__PURE__*/React.createElement("tr", {
+        key: file
+      }, /*#__PURE__*/React.createElement("td", null, file));
+    }))));
+  }
+
+}
+
+class Pagination extends React.Component {
+  constructor(props) {
+    super(props);
+
+    _defineProperty(this, "gotoPage", page => {
+      const {
+        onPageChanged = f => f
+      } = this.props;
+      const currentPage = Math.max(0, Math.min(page, this.totalPages()));
+      this.setState({
+        currentPage
+      }, () => onPageChanged(currentPage));
+    });
+
+    _defineProperty(this, "totalPages", () => {
+      return Math.ceil(this.props.totalRecords / this.props.pageLimit);
+    });
+
+    _defineProperty(this, "handleClick", (page, evt) => {
+      evt.preventDefault();
+      this.gotoPage(page);
+    });
+
+    _defineProperty(this, "handleJumpLeft", evt => {
+      evt.preventDefault();
+      this.gotoPage(this.state.currentPage - this.pageNeighbours * 2 - 1);
+    });
+
+    _defineProperty(this, "handleJumpRight", evt => {
+      evt.preventDefault();
+      this.gotoPage(this.state.currentPage + this.pageNeighbours * 2 + 1);
+    });
+
+    _defineProperty(this, "handleMoveLeft", evt => {
+      evt.preventDefault();
+      this.gotoPage(this.state.currentPage - 1);
+    });
+
+    _defineProperty(this, "handleMoveRight", evt => {
+      evt.preventDefault();
+      this.gotoPage(this.state.currentPage + 1);
+    });
+
+    _defineProperty(this, "range", (from, to, step = 1) => {
+      let i = from;
+      const range = [];
+
+      while (i <= to) {
+        range.push(i);
+        i += step;
       }
 
-      return /*#__PURE__*/React.createElement("tr", {
-        key: directive.k
-      }, /*#__PURE__*/React.createElement("td", {
-        title: 'View ' + directive.k + ' manual entry'
-      }, /*#__PURE__*/React.createElement("a", {
-        href: 'http://php.net/manual/en/opcache.configuration.php#ini.' + directive.k.replace(/_/g, '-'),
-        target: "_blank"
-      }, dShow)), /*#__PURE__*/React.createElement("td", null, vShow));
+      return range;
     });
-    return /*#__PURE__*/React.createElement("table", {
-      className: "tables directives-table"
-    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
-      colSpan: "2"
-    }, "Directives"))), /*#__PURE__*/React.createElement("tbody", null, directiveNodes));
-  }
-});
-var Files = React.createClass({
-  displayName: "Files",
-  getInitialState: function () {
-    return {
-      data: opstate.files,
-      showing: null,
-      allowFiles: allowFiles
-    };
-  },
-  handleInvalidate: function (e) {
-    e.preventDefault();
 
-    if (realtime) {
-      $.get('#', {
-        invalidate: e.currentTarget.getAttribute('data-file')
-      }, function (data) {
-        console.log('success: ' + data.success);
-      }, 'json');
-    } else {
-      window.location.href = e.currentTarget.href;
-    }
-  },
-  render: function () {
-    if (this.state.allowFiles) {
-      var fileNodes = this.state.data.map(function (file, i) {
-        var invalidate, invalidated;
+    _defineProperty(this, "fetchPageNumbers", () => {
+      const totalPages = this.totalPages();
+      const pageNeighbours = this.pageNeighbours;
+      const totalNumbers = this.pageNeighbours * 2 + 3;
+      const totalBlocks = totalNumbers + 2;
 
-        if (file.timestamp == 0) {
-          invalidated = /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("i", {
-            className: "invalid metainfo"
-          }, " - has been invalidated"));
+      if (totalPages > totalBlocks) {
+        let pages = [];
+        const leftBound = this.state.currentPage - pageNeighbours;
+        const rightBound = this.state.currentPage + pageNeighbours;
+        const beforeLastPage = totalPages - 1;
+        const startPage = leftBound > 2 ? leftBound : 2;
+        const endPage = rightBound < beforeLastPage ? rightBound : beforeLastPage;
+        pages = this.range(startPage, endPage);
+        const pagesCount = pages.length;
+        const singleSpillOffset = totalNumbers - pagesCount - 1;
+        const leftSpill = startPage > 2;
+        const rightSpill = endPage < beforeLastPage;
+        const leftSpillPage = "LEFT";
+        const rightSpillPage = "RIGHT";
+
+        if (leftSpill && !rightSpill) {
+          const extraPages = this.range(startPage - singleSpillOffset, startPage - 1);
+          pages = [leftSpillPage, ...extraPages, ...pages];
+        } else if (!leftSpill && rightSpill) {
+          const extraPages = this.range(endPage + 1, endPage + singleSpillOffset);
+          pages = [...pages, ...extraPages, rightSpillPage];
+        } else if (leftSpill && rightSpill) {
+          pages = [leftSpillPage, ...pages, rightSpillPage];
         }
 
-        if (canInvalidate) {
-          invalidate = /*#__PURE__*/React.createElement("span", null, ",\xA0", /*#__PURE__*/React.createElement("a", {
-            className: "file-metainfo",
-            href: '?invalidate=' + file.full_path,
-            "data-file": file.full_path,
-            onClick: this.handleInvalidate
-          }, "force file invalidation"));
-        }
+        return [1, ...pages, totalPages];
+      }
 
-        return /*#__PURE__*/React.createElement("tr", {
-          key: file.full_path,
-          "data-path": file.full_path.toLowerCase(),
-          className: i % 2 ? 'alternate' : ''
-        }, /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
-          className: "file-pathname"
-        }, file.full_path), /*#__PURE__*/React.createElement(FilesMeta, {
-          data: [file.readable.hits, file.readable.memory_consumption, file.last_used]
-        }), invalidate, invalidated));
-      }.bind(this));
-      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(FilesListed, {
-        showing: this.state.showing
-      }), /*#__PURE__*/React.createElement("table", {
-        className: "tables file-list-table"
-      }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Script"))), /*#__PURE__*/React.createElement("tbody", null, fileNodes)));
-    } else {
-      return /*#__PURE__*/React.createElement("span", null);
-    }
-  }
-});
-var FilesMeta = React.createClass({
-  displayName: "FilesMeta",
-  render: function () {
-    return /*#__PURE__*/React.createElement("span", {
-      className: "file-metainfo"
-    }, /*#__PURE__*/React.createElement("b", null, "hits: "), /*#__PURE__*/React.createElement("span", null, this.props.data[0], ", "), /*#__PURE__*/React.createElement("b", null, "memory: "), /*#__PURE__*/React.createElement("span", null, this.props.data[1], ", "), /*#__PURE__*/React.createElement("b", null, "last used: "), /*#__PURE__*/React.createElement("span", null, this.props.data[2]));
-  }
-});
-var FilesListed = React.createClass({
-  displayName: "FilesListed",
-  getInitialState: function () {
-    return {
-      formatted: opstate.overview ? opstate.overview.readable.num_cached_scripts : 0,
-      total: opstate.overview ? opstate.overview.num_cached_scripts : 0
+      return this.range(1, totalPages);
+    });
+
+    this.state = {
+      currentPage: 1
     };
-  },
-  render: function () {
-    var display = this.state.formatted + ' file' + (this.state.total == 1 ? '' : 's') + ' cached';
+    this.pageNeighbours = typeof props.pageNeighbours === "number" ? Math.max(0, Math.min(props.pageNeighbours, 2)) : 0;
+  }
 
-    if (this.props.showing !== null && this.props.showing != this.state.total) {
-      display += ', ' + this.props.showing + ' showing due to filter';
+  componentDidMount() {
+    this.gotoPage(1);
+  }
+
+  componentDidUpdate(props) {
+    const {
+      refresh
+    } = this.props;
+
+    if (props.refresh !== refresh) {
+      this.gotoPage(1);
+    }
+  }
+
+  render() {
+    if (!this.props.totalRecords || this.totalPages() === 1) {
+      return null;
     }
 
-    return /*#__PURE__*/React.createElement("h3", null, display);
+    const {
+      currentPage
+    } = this.state;
+    const pages = this.fetchPageNumbers();
+    return /*#__PURE__*/React.createElement("nav", {
+      "aria-label": "File list pagination"
+    }, /*#__PURE__*/React.createElement("ul", {
+      className: "pagination"
+    }, pages.map((page, index) => {
+      if (page === "LEFT") {
+        return /*#__PURE__*/React.createElement(React.Fragment, {
+          key: index
+        }, /*#__PURE__*/React.createElement("li", {
+          className: "page-item arrow"
+        }, /*#__PURE__*/React.createElement("a", {
+          className: "page-link",
+          href: "#",
+          "aria-label": "Previous",
+          onClick: this.handleJumpLeft
+        }, /*#__PURE__*/React.createElement("span", {
+          "aria-hidden": "true"
+        }, "\u219E"), /*#__PURE__*/React.createElement("span", {
+          className: "sr-only"
+        }, "Jump back"))), /*#__PURE__*/React.createElement("li", {
+          className: "page-item arrow"
+        }, /*#__PURE__*/React.createElement("a", {
+          className: "page-link",
+          href: "#",
+          "aria-label": "Previous",
+          onClick: this.handleMoveLeft
+        }, /*#__PURE__*/React.createElement("span", {
+          "aria-hidden": "true"
+        }, "\u21E0"), /*#__PURE__*/React.createElement("span", {
+          className: "sr-only"
+        }, "Previous page"))));
+      }
+
+      if (page === "RIGHT") {
+        return /*#__PURE__*/React.createElement(React.Fragment, {
+          key: index
+        }, /*#__PURE__*/React.createElement("li", {
+          className: "page-item arrow"
+        }, /*#__PURE__*/React.createElement("a", {
+          className: "page-link",
+          href: "#",
+          "aria-label": "Next",
+          onClick: this.handleMoveRight
+        }, /*#__PURE__*/React.createElement("span", {
+          "aria-hidden": "true"
+        }, "\u21E2"), /*#__PURE__*/React.createElement("span", {
+          className: "sr-only"
+        }, "Next page"))), /*#__PURE__*/React.createElement("li", {
+          className: "page-item arrow"
+        }, /*#__PURE__*/React.createElement("a", {
+          className: "page-link",
+          href: "#",
+          "aria-label": "Next",
+          onClick: this.handleJumpRight
+        }, /*#__PURE__*/React.createElement("span", {
+          "aria-hidden": "true"
+        }, "\u21A0"), /*#__PURE__*/React.createElement("span", {
+          className: "sr-only"
+        }, "Jump forward"))));
+      }
+
+      return /*#__PURE__*/React.createElement("li", {
+        key: index,
+        className: "page-item"
+      }, /*#__PURE__*/React.createElement("a", {
+        className: `page-link${currentPage === page ? " active" : ""}`,
+        href: "#",
+        onClick: e => this.handleClick(page, e)
+      }, page));
+    })));
   }
-});
-var overviewCountsObj = ReactDOM.render( /*#__PURE__*/React.createElement(OverviewCounts, null), document.getElementById('counts'));
-var generalInfoObj = ReactDOM.render( /*#__PURE__*/React.createElement(GeneralInfo, null), document.getElementById('generalInfo'));
-var filesObj = ReactDOM.render( /*#__PURE__*/React.createElement(Files, null), document.getElementById('filelist'));
-ReactDOM.render( /*#__PURE__*/React.createElement(Directives, null), document.getElementById('directives'));
-</script>
+
+}
+
+function Footer(props) {
+  return /*#__PURE__*/React.createElement("footer", {
+    className: "main-footer"
+  }, /*#__PURE__*/React.createElement("a", {
+    className: "github-link",
+    href: "https://github.com/amnuts/opcache-gui",
+    target: "_blank",
+    title: "opcache-gui (currently version {props.version}) on GitHub"
+  }, "https://github.com/amnuts/opcache-gui - version ", props.version));
+}
+
+function debounce(func, wait, immediate) {
+  let timeout;
+  wait = wait || 250;
+  return function () {
+    let context = this,
+        args = arguments;
+
+    let later = function () {
+      timeout = null;
+
+      if (!immediate) {
+        func.apply(context, args);
+      }
+    };
+
+    let callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+
+    if (callNow) {
+      func.apply(context, args);
+    }
+  };
+}
+
+    ReactDOM.render(React.createElement(Interface, {
+        allow: {
+            filelist: <?= $opcache->getOption('allow_filelist') ? 'true' : 'false'; ?>,
+            invalidate: <?= $opcache->getOption('allow_invalidate') ? 'true' : 'false'; ?>,
+            reset: <?= $opcache->getOption('allow_reset') ? 'true' : 'false'; ?>,
+            realtime: <?= $opcache->getOption('allow_realtime') ? 'true' : 'false'; ?>
+        },
+        opstate: <?= json_encode($opcache->getData()); ?>,
+        useCharts: <?= json_encode($opcache->getOption('charts')); ?>,
+        highlight: <?= json_encode($opcache->getOption('highlight')); ?>,
+        debounceRate: <?= $opcache->getOption('debounce_rate'); ?>,
+        perPageLimit: <?= json_encode($opcache->getOption('per_page')); ?>,
+        realtimeRefresh: <?= json_encode($opcache->getOption('refresh_time')); ?>
+    }), document.getElementById('interface'));
+
+    </script>
 
 </body>
 </html>

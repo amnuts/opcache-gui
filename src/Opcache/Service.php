@@ -10,17 +10,23 @@ class Service
     protected $options;
     protected $optimizationLevels;
     protected $defaults = [
-        'allow_filelist' => true,
-        'allow_invalidate' => true,
-        'allow_reset' => true,
-        'allow_realtime' => true,
-        'refresh_time' => 5,
-        'size_precision' => 2,
-        'size_space' => false,
-        'charts' => true,
-        'debounce_rate' => 250,
-        'cookie_name' => 'opcachegui',
-        'cookie_ttl' => 365
+        'allow_filelist'   => true,          // show/hide the files tab
+        'allow_invalidate' => true,          // give a link to invalidate files
+        'allow_reset'      => true,          // give option to reset the whole cache
+        'allow_realtime'   => true,          // give option to enable/disable real-time updates
+        'refresh_time'     => 5,             // how often the data will refresh, in seconds
+        'size_precision'   => 2,             // Digits after decimal point
+        'size_space'       => false,         // have '1MB' or '1 MB' when showing sizes
+        'charts'           => true,          // show gauge chart or just big numbers
+        'debounce_rate'    => 250,           // milliseconds after key press to send keyup event when filtering
+        'per_page'         => 200,           // How many results per page to show in the file list, false for no pagination
+        'cookie_name'      => 'opcachegui',  // name of cookie
+        'cookie_ttl'       => 365,           // days to store cookie
+        'highlight'        => [
+            'memory' => true,                // show the memory chart/big number
+            'hits'   => true,                // show the hit rate chart/big number
+            'keys'   => true                 // show the keys used chart/big number
+        ]
     ];
 
     /**
@@ -57,14 +63,14 @@ class Service
      */
     public function handle(): Service
     {
-        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
-            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
+        if (!empty($_SERVER['HTTP_ACCEPT'])
+            && stripos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false
         ) {
             if (isset($_GET['reset']) && $this->getOption('allow_reset')) {
                 echo '{ "success": "' . ($this->resetCache() ? 'yes' : 'no') . '" }';
             } else if (isset($_GET['invalidate']) && $this->getOption('allow_invalidate')) {
                 echo '{ "success": "' . ($this->resetCache($_GET['invalidate']) ? 'yes' : 'no') . '" }';
-            } else {
+            } else if ($this->getOption('allow_realtime')) {
                 echo json_encode($this->getData((empty($_GET['section']) ? null : $_GET['section'])));
             }
             exit;
@@ -265,7 +271,8 @@ class Service
                             : $_SERVER['SERVER_NAME']
                         )
                     )
-                )
+                ),
+                'gui' => self::VERSION
             ]
         );
 
