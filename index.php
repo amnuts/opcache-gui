@@ -498,7 +498,8 @@ function MainNavigation(props) {
     className: "main-nav"
   }, /*#__PURE__*/React.createElement(Tabs, null, /*#__PURE__*/React.createElement("div", {
     label: "Overview",
-    tabId: "overview"
+    tabId: "overview",
+    tabIndex: 1
   }, /*#__PURE__*/React.createElement(OverviewCounts, {
     overview: props.opstate.overview,
     highlight: props.highlight,
@@ -516,7 +517,8 @@ function MainNavigation(props) {
     functions: props.opstate.functions
   }))), props.allow.filelist && /*#__PURE__*/React.createElement("div", {
     label: "Cached",
-    tabId: "cached"
+    tabId: "cached",
+    tabIndex: 2
   }, /*#__PURE__*/React.createElement(CachedFiles, {
     perPageLimit: props.perPageLimit,
     allFiles: props.opstate.files,
@@ -529,7 +531,8 @@ function MainNavigation(props) {
     realtime: props.realtime
   })), props.allow.filelist && props.opstate.blacklist.length && /*#__PURE__*/React.createElement("div", {
     label: "Ignored",
-    tabId: "ignored"
+    tabId: "ignored",
+    tabIndex: 3
   }, /*#__PURE__*/React.createElement(IgnoredFiles, {
     perPageLimit: props.perPageLimit,
     allFiles: props.opstate.blacklist,
@@ -538,7 +541,8 @@ function MainNavigation(props) {
     }
   })), props.allow.filelist && props.opstate.preload.length && /*#__PURE__*/React.createElement("div", {
     label: "Preloaded",
-    tabId: "preloaded"
+    tabId: "preloaded",
+    tabIndex: 4
   }, /*#__PURE__*/React.createElement(PreloadedFiles, {
     perPageLimit: props.perPageLimit,
     allFiles: props.opstate.preload,
@@ -549,12 +553,14 @@ function MainNavigation(props) {
     label: "Reset cache",
     tabId: "resetCache",
     className: `nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`,
-    handler: props.resetHandler
+    handler: props.resetHandler,
+    tabIndex: 5
   }), props.allow.realtime && /*#__PURE__*/React.createElement("div", {
     label: `${props.realtime ? 'Disable' : 'Enable'} real-time update`,
     tabId: "toggleRealtime",
     className: `nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`,
-    handler: props.realtimeHandler
+    handler: props.realtimeHandler,
+    tabIndex: 6
   })));
 }
 
@@ -588,14 +594,17 @@ class Tabs extends React.Component {
         tabId,
         label,
         className,
-        handler
+        handler,
+        tabIndex
       } = child.props;
       return /*#__PURE__*/React.createElement(Tab, {
         activeTab: activeTab,
         key: tabId,
         label: label,
         onClick: handler || onClickTabItem,
-        className: className
+        className: className,
+        tabIndex: tabIndex,
+        tabId: tabId
       });
     })), /*#__PURE__*/React.createElement("div", {
       className: "tab-content"
@@ -603,7 +612,8 @@ class Tabs extends React.Component {
       key: child.props.label,
       style: {
         display: child.props.label === activeTab ? 'block' : 'none'
-      }
+      },
+      id: `${child.props.tabId}-content`
     }, child.props.children))));
   }
 
@@ -627,7 +637,9 @@ class Tab extends React.Component {
       onClick,
       props: {
         activeTab,
-        label
+        label,
+        tabIndex,
+        tabId
       }
     } = this;
     let className = 'nav-tab';
@@ -642,7 +654,10 @@ class Tab extends React.Component {
 
     return /*#__PURE__*/React.createElement("li", {
       className: className,
-      onClick: onClick
+      onClick: onClick,
+      tabIndex: tabIndex,
+      role: "tab",
+      "aria-controls": `${tabId}-content`
     }, label);
   }
 

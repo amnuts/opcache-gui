@@ -70,7 +70,7 @@ function MainNavigation(props) {
     return (
         <nav className="main-nav">
             <Tabs>
-                <div label="Overview" tabId="overview">
+                <div label="Overview" tabId="overview" tabIndex={1}>
                     <OverviewCounts
                         overview={props.opstate.overview}
                         highlight={props.highlight}
@@ -92,7 +92,7 @@ function MainNavigation(props) {
                 </div>
                 {
                     props.allow.filelist &&
-                        <div label="Cached" tabId="cached">
+                        <div label="Cached" tabId="cached" tabIndex={2}>
                             <CachedFiles
                                 perPageLimit={props.perPageLimit}
                                 allFiles={props.opstate.files}
@@ -105,7 +105,7 @@ function MainNavigation(props) {
                 }
                 {
                     (props.allow.filelist && props.opstate.blacklist.length &&
-                        <div label="Ignored" tabId="ignored">
+                        <div label="Ignored" tabId="ignored" tabIndex={3}>
                             <IgnoredFiles
                                 perPageLimit={props.perPageLimit}
                                 allFiles={props.opstate.blacklist}
@@ -115,7 +115,7 @@ function MainNavigation(props) {
                 }
                 {
                     (props.allow.filelist && props.opstate.preload.length &&
-                        <div label="Preloaded" tabId="preloaded">
+                        <div label="Preloaded" tabId="preloaded" tabIndex={4}>
                             <PreloadedFiles
                                 perPageLimit={props.perPageLimit}
                                 allFiles={props.opstate.preload}
@@ -128,6 +128,7 @@ function MainNavigation(props) {
                         <div label="Reset cache" tabId="resetCache"
                            className={`nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`}
                            handler={props.resetHandler}
+                           tabIndex={5}
                         ></div>
                 }
                 {
@@ -135,6 +136,7 @@ function MainNavigation(props) {
                         <div label={`${props.realtime ? 'Disable' : 'Enable'} real-time update`} tabId="toggleRealtime"
                             className={`nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`}
                             handler={props.realtimeHandler}
+                            tabIndex={6}
                         ></div>
                 }
             </Tabs>
@@ -167,7 +169,7 @@ class Tabs extends React.Component {
             <>
                 <ul className="nav-tab-list">
                     {children.map((child) => {
-                        const { tabId, label, className, handler } = child.props;
+                        const { tabId, label, className, handler, tabIndex } = child.props;
                         return (
                             <Tab
                                 activeTab={activeTab}
@@ -175,13 +177,18 @@ class Tabs extends React.Component {
                                 label={label}
                                 onClick={handler || onClickTabItem}
                                 className={className}
+                                tabIndex={tabIndex}
+                                tabId={tabId}
                             />
                         );
                     })}
                 </ul>
                 <div className="tab-content">
                     {children.map((child) => (
-                        <div key={child.props.label} style={{ display: child.props.label === activeTab ? 'block' : 'none' }}>
+                        <div key={child.props.label}
+                             style={{ display: child.props.label === activeTab ? 'block' : 'none' }}
+                             id={`${child.props.tabId}-content`}
+                        >
                             {child.props.children}
                         </div>
                     ))}
@@ -201,7 +208,7 @@ class Tab extends React.Component {
     render() {
         const {
             onClick,
-            props: { activeTab, label },
+            props: { activeTab, label, tabIndex, tabId },
         } = this;
 
         let className = 'nav-tab';
@@ -213,7 +220,12 @@ class Tab extends React.Component {
         }
 
         return (
-            <li className={className} onClick={onClick}>{label}</li>
+            <li className={className}
+                onClick={onClick}
+                tabIndex={tabIndex}
+                role="tab"
+                aria-controls={`${tabId}-content`}
+            >{label}</li>
         );
     }
 }
