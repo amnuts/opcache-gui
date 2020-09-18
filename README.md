@@ -1,6 +1,8 @@
 # opcache-gui
 
-A clean and responsive interface for Zend OPcache information, showing statistics, settings and cached files, and providing a real-time update for the information (using jQuery and React).
+A clean and responsive interface for Zend OPcache information, showing statistics, settings and cached files, and providing a real-time update for the information.
+
+This interface uses ReactJS and Axios and is for modern browsers.
 
 [![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=acollington&url=https://github.com/amnuts/opcache-gui&title=opcache-gui&language=&tags=github&category=software)
 If you like this software or find it helpful then maybe you'll consider supporting my efforts in some way by [signing up to Flattr and leaving a micro-donation](https://flattr.com/@acollington).
@@ -138,7 +140,7 @@ If you have not supplied that configuration option in the `php.ini` file then th
 
 PHP 7.4 introduced the ability to pre-load a set of files on server start by way of the `opcache.preload` setting in your `php.ini` file.  If you have set that up then the list of files specifically pre-loaded will be listed within this tab.
 
-As with the ignored file, if you have not supplied the ini setting or the `allow_filelist` configuration option is set to `false`, then this tab will not be displayed.
+As with the ignored file, if you have not supplied the ini setting, or the `allow_filelist` configuration option is `false`, then this tab will not be displayed.
 
 ### Reset the cache
 
@@ -152,13 +154,20 @@ The interface can poll every so often to get a fresh look at the opcache.  You c
 
 When the real-time updates are active the interface will automatically update all the values as needed.  Also, if you choose to invalidate any files or reset the cache it will do this without reloading the page, so the search term you've entered, or the page you've navigated to do not get reset.  If the real-time update is not on then the page will reload on any invalidation usage.
 
-
 ## Releases
 
 **Version 3.0.0**\
-The css, js, and php have all been split up into different files, with the css moving to scss.  This was done so that the core PHP could be included via composer and integrated into your own app without any dependency of the html output (so you can use your own html).  A build script is in place to assemble the single script, which will also allow people to use just the `index.php` as normal, so you only need the one file for the interface.
-
-Along with this, the namespace has changed.  
+Although the interface looks mostly the same, it's had a complete re-write under the hood!  Some of the more notable changes are:
+* New namespace for the base service class which ensure composer compatibility
+* You can now paginate the cached files list to make it easier to render a large file list
+* Any scripts that have been preloaded are displayed in a tab
+* Any file paths ignored are displayed in a tab
+* You can now invalidate all the files matching a search in one go
+* jQuery has been removed; the whole interface is now using ReactJS and more modern javascript (so only modern browsers)
+* The CSS is now using SASS and is now much easier to change all the colours of the interface as you wish
+* SVGs are now used for any icons or gauge graphs
+* A more responsive interface when the 'enable real-time' is activated
+* Build script added to compile the ReactJS and SASS and put them into the single, simple, gui script
 
 **Version 2.5.4**\
 Refined placement of initial css namespace to play nicely within Moodle plugin and possibly other systems.  Also tweaked some CSS.
