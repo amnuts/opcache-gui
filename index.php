@@ -312,6 +312,16 @@ class Service
             );
         }
 
+        $preload = [];
+        if (!empty($status['preload_statistics']['scripts']) && $this->getOption('allow_filelist')) {
+            $preload = $status['preload_statistics']['scripts'];
+            sort($preload, SORT_STRING);
+            if ($overview) {
+                $overview['preload_memory'] = $status['preload_statistics']['memory_consumption'];
+                $overview['readable']['preload_memory'] = $this->size($status['preload_statistics']['memory_consumption']);
+            }
+        }
+
         if (!empty($status['interned_strings_usage'])) {
             $overview['readable']['interned'] = [
                 'buffer_size' => $this->size($status['interned_strings_usage']['buffer_size']),
@@ -363,6 +373,7 @@ class Service
             'version' => $version,
             'overview' => $overview,
             'files' => $files,
+            'preload' => $preload,
             'directives' => $directives,
             'blacklist' => $config['blacklist'],
             'functions' => get_extension_funcs('Zend OPcache')
@@ -525,6 +536,15 @@ function MainNavigation(props) {
     allow: {
       fileList: props.allow.filelist
     }
+  })), props.allow.filelist && props.opstate.preload.length && /*#__PURE__*/React.createElement("div", {
+    label: "Preloaded",
+    tabId: "preloaded"
+  }, /*#__PURE__*/React.createElement(PreloadedFiles, {
+    perPageLimit: props.perPageLimit,
+    allFiles: props.opstate.preload,
+    allow: {
+      fileList: props.allow.filelist
+    }
   })), props.allow.reset && /*#__PURE__*/React.createElement("div", {
     label: "Reset cache",
     tabId: "resetCache",
@@ -674,6 +694,7 @@ function OverviewCounts(props) {
     used: props.overview.readable.used_memory,
     free: props.overview.readable.free_memory,
     wasted: props.overview.readable.wasted_memory,
+    preload: props.overview.readable.preload_memory || null,
     wastedPercent: props.overview.wasted_percentage
   }), /*#__PURE__*/React.createElement(StatisticsPanel, {
     num_cached_scripts: props.overview.readable.num_cached_scripts,
@@ -981,7 +1002,7 @@ function MemoryUsagePanel(props) {
     className: "widget-header"
   }, "memory usage"), /*#__PURE__*/React.createElement("div", {
     className: "widget-value widget-info"
-  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "total memory:"), " ", props.total), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "used memory:"), " ", props.used), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "free memory:"), " ", props.free), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "wasted memory:"), " ", props.wasted, " (", props.wastedPercent, "%)")));
+  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "total memory:"), " ", props.total), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "used memory:"), " ", props.used), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "free memory:"), " ", props.free), props.preload && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "preload memory:"), " ", props.preload), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "wasted memory:"), " ", props.wasted, " (", props.wastedPercent, "%)")));
 }
 
 function StatisticsPanel(props) {
@@ -1179,6 +1200,55 @@ class IgnoredFiles extends React.Component {
       refresh: this.state.refreshPagination
     }), /*#__PURE__*/React.createElement("table", {
       className: "tables ignored-list-table"
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Path"))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
+      return /*#__PURE__*/React.createElement("tr", {
+        key: file
+      }, /*#__PURE__*/React.createElement("td", null, file));
+    }))));
+  }
+
+}
+
+class PreloadedFiles extends React.Component {
+  constructor(props) {
+    super(props);
+
+    _defineProperty(this, "onPageChanged", currentPage => {
+      this.setState({
+        currentPage
+      });
+    });
+
+    this.doPagination = typeof props.perPageLimit === "number" && props.perPageLimit > 0;
+    this.state = {
+      currentPage: 1,
+      refreshPagination: 0
+    };
+  }
+
+  render() {
+    if (!this.props.allow.fileList) {
+      return null;
+    }
+
+    if (this.props.allFiles.length === 0) {
+      return /*#__PURE__*/React.createElement("p", null, "No files have been preloaded ", /*#__PURE__*/React.createElement("i", null, "opcache.preload"));
+    }
+
+    const {
+      currentPage
+    } = this.state;
+    const offset = (currentPage - 1) * this.props.perPageLimit;
+    const filesInPage = this.doPagination ? this.props.allFiles.slice(offset, offset + this.props.perPageLimit) : this.props.allFiles;
+    const allFilesTotal = this.props.allFiles.length;
+    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " preloaded files"), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
+      totalRecords: allFilesTotal,
+      pageLimit: this.props.perPageLimit,
+      pageNeighbours: 2,
+      onPageChanged: this.onPageChanged,
+      refresh: this.state.refreshPagination
+    }), /*#__PURE__*/React.createElement("table", {
+      className: "tables preload-list-table"
     }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Path"))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
       return /*#__PURE__*/React.createElement("tr", {
         key: file

@@ -114,6 +114,16 @@ function MainNavigation(props) {
                         </div>)
                 }
                 {
+                    (props.allow.filelist && props.opstate.preload.length &&
+                        <div label="Preloaded" tabId="preloaded">
+                            <PreloadedFiles
+                                perPageLimit={props.perPageLimit}
+                                allFiles={props.opstate.preload}
+                                allow={{fileList: props.allow.filelist }}
+                            />
+                        </div>)
+                }
+                {
                     props.allow.reset &&
                         <div label="Reset cache" tabId="resetCache"
                            className={`nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`}
@@ -242,6 +252,7 @@ function OverviewCounts(props) {
                 used={props.overview.readable.used_memory}
                 free={props.overview.readable.free_memory}
                 wasted={props.overview.readable.wasted_memory}
+                preload={props.overview.readable.preload_memory || null}
                 wastedPercent={props.overview.wasted_percentage}
             />
             <StatisticsPanel
@@ -564,6 +575,7 @@ function MemoryUsagePanel(props) {
                 <p><b>total memory:</b> {props.total}</p>
                 <p><b>used memory:</b> {props.used}</p>
                 <p><b>free memory:</b> {props.free}</p>
+                { props.preload && <p><b>preload memory:</b> {props.preload}</p> }
                 <p><b>wasted memory:</b> {props.wasted} ({props.wastedPercent}%)</p>
             </div>
         </div>
@@ -787,15 +799,70 @@ class IgnoredFiles extends React.Component {
                 />}
 
                 <table className="tables ignored-list-table">
-                    <thead>
-                    <tr>
-                        <th>Path</th>
-                    </tr>
-                    </thead>
+                    <thead><tr><th>Path</th></tr></thead>
                     <tbody>
-                    {filesInPage.map((file, index) => {
-                        return <tr key={file}><td>{file}</td></tr>
-                    })}
+                        {filesInPage.map((file, index) => {
+                            return <tr key={file}><td>{file}</td></tr>
+                        })}
+                    </tbody>
+                </table>
+            </div>
+        );
+    }
+}
+
+
+class PreloadedFiles extends React.Component {
+    constructor(props) {
+        super(props);
+        this.doPagination = (typeof props.perPageLimit === "number"
+            && props.perPageLimit > 0
+        );
+        this.state = {
+            currentPage: 1,
+            refreshPagination: 0
+        }
+    }
+
+    onPageChanged = currentPage => {
+        this.setState({ currentPage });
+    }
+
+    render() {
+        if (!this.props.allow.fileList) {
+            return null;
+        }
+
+        if (this.props.allFiles.length === 0) {
+            return <p>No files have been preloaded <i>opcache.preload</i></p>;
+        }
+
+        const { currentPage } = this.state;
+        const offset = (currentPage - 1) * this.props.perPageLimit;
+        const filesInPage = (this.doPagination
+            ? this.props.allFiles.slice(offset, offset + this.props.perPageLimit)
+            : this.props.allFiles
+        );
+        const allFilesTotal = this.props.allFiles.length;
+
+        return (
+            <div>
+                <h3>{allFilesTotal} preloaded files</h3>
+
+                {this.doPagination && <Pagination
+                    totalRecords={allFilesTotal}
+                    pageLimit={this.props.perPageLimit}
+                    pageNeighbours={2}
+                    onPageChanged={this.onPageChanged}
+                    refresh={this.state.refreshPagination}
+                />}
+
+                <table className="tables preload-list-table">
+                    <thead><tr><th>Path</th></tr></thead>
+                    <tbody>
+                        {filesInPage.map((file, index) => {
+                            return <tr key={file}><td>{file}</td></tr>
+                        })}
                     </tbody>
                 </table>
             </div>

@@ -259,6 +259,16 @@ class Service
             );
         }
 
+        $preload = [];
+        if (!empty($status['preload_statistics']['scripts']) && $this->getOption('allow_filelist')) {
+            $preload = $status['preload_statistics']['scripts'];
+            sort($preload, SORT_STRING);
+            if ($overview) {
+                $overview['preload_memory'] = $status['preload_statistics']['memory_consumption'];
+                $overview['readable']['preload_memory'] = $this->size($status['preload_statistics']['memory_consumption']);
+            }
+        }
+
         if (!empty($status['interned_strings_usage'])) {
             $overview['readable']['interned'] = [
                 'buffer_size' => $this->size($status['interned_strings_usage']['buffer_size']),
@@ -310,6 +320,7 @@ class Service
             'version' => $version,
             'overview' => $overview,
             'files' => $files,
+            'preload' => $preload,
             'directives' => $directives,
             'blacklist' => $config['blacklist'],
             'functions' => get_extension_funcs('Zend OPcache')
