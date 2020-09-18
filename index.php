@@ -444,8 +444,10 @@ class Interface extends React.Component {
 
       if (!realtime) {
         this.stopTimer();
+        this.removeCookie();
       } else {
         this.startTimer();
+        this.setCookie();
       }
     });
 
@@ -466,12 +468,32 @@ class Interface extends React.Component {
       }
     });
 
+    _defineProperty(this, "setCookie", () => {
+      let d = new Date();
+      d.setTime(d.getTime() + this.props.cookie.ttl * 86400000);
+      document.cookie = `${this.props.cookie.name}=true;expires=${d.toUTCString()};path=/${this.isSecure ? ';secure' : ''}`;
+    });
+
+    _defineProperty(this, "removeCookie", () => {
+      document.cookie = `${this.props.cookie.name}=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/${this.isSecure ? ';secure' : ''}`;
+    });
+
+    _defineProperty(this, "getCookie", () => {
+      const v = document.cookie.match(`(^|;) ?${this.props.cookie.name}=([^;]*)(;|$)`);
+      return v ? !!v[2] : false;
+    });
+
     this.state = {
-      realtime: false,
+      realtime: this.getCookie(),
       resetting: false,
       opstate: props.opstate
     };
     this.polling = false;
+    this.isSecure = window.location.protocol === 'https:';
+
+    if (this.getCookie()) {
+      this.startTimer();
+    }
   }
 
   render() {
@@ -1510,6 +1532,10 @@ function debounce(func, wait, immediate) {
             invalidate: <?= $opcache->getOption('allow_invalidate') ? 'true' : 'false'; ?>,
             reset: <?= $opcache->getOption('allow_reset') ? 'true' : 'false'; ?>,
             realtime: <?= $opcache->getOption('allow_realtime') ? 'true' : 'false'; ?>
+        },
+        cookie: {
+            name: '<?= $opcache->getOption('cookie_name'); ?>',
+            ttl: <?= $opcache->getOption('cookie_ttl'); ?>
         },
         opstate: <?= json_encode($opcache->getData()); ?>,
         useCharts: <?= json_encode($opcache->getOption('charts')); ?>,

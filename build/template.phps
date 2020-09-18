@@ -89,6 +89,10 @@ $opcache = (new Service($options))->handle();
             reset: <?= $opcache->getOption('allow_reset') ? 'true' : 'false'; ?>,
             realtime: <?= $opcache->getOption('allow_realtime') ? 'true' : 'false'; ?>
         },
+        cookie: {
+            name: '<?= $opcache->getOption('cookie_name'); ?>',
+            ttl: <?= $opcache->getOption('cookie_ttl'); ?>
+        },
         opstate: <?= json_encode($opcache->getData()); ?>,
         useCharts: <?= json_encode($opcache->getOption('charts')); ?>,
         highlight: <?= json_encode($opcache->getOption('highlight')); ?>,

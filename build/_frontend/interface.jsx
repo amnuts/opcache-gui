@@ -2,11 +2,15 @@ class Interface extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            realtime: false,
+            realtime: this.getCookie(),
             resetting: false,
             opstate: props.opstate
         }
         this.polling = false;
+        this.isSecure = (window.location.protocol === 'https:');
+        if (this.getCookie()) {
+            this.startTimer();
+        }
     }
 
     startTimer = () => {
@@ -29,8 +33,10 @@ class Interface extends React.Component {
         const realtime = !this.state.realtime;
         if (!realtime) {
             this.stopTimer();
+            this.removeCookie();
         } else {
             this.startTimer();
+            this.setCookie();
         }
     }
 
@@ -45,6 +51,21 @@ class Interface extends React.Component {
             window.location.href = '?reset=1';
         }
     }
+
+    setCookie = () => {
+        let d = new Date();
+        d.setTime(d.getTime() + (this.props.cookie.ttl * 86400000));
+        document.cookie = `${this.props.cookie.name}=true;expires=${d.toUTCString()};path=/${this.isSecure ? ';secure' : ''}`;
+    }
+
+    removeCookie = () => {
+        document.cookie = `${this.props.cookie.name}=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/${this.isSecure ? ';secure' : ''}`;
+    }
+
+    getCookie = () => {
+        const v = document.cookie.match(`(^|;) ?${this.props.cookie.name}=([^;]*)(;|$)`);
+        return v ? !!v[2] : false;
+    };
 
     render() {
         const { opstate, realtimeRefresh, ...otherProps } = this.props;
