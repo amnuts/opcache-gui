@@ -158,6 +158,9 @@ When the real-time updates are active the interface will automatically update al
 
 ## Releases
 
+**Version 3.0.1**\
+A minor update that will use http or https to get the javascript libraries, depending on what you're using.
+
 **Version 3.0.0**\
 Although the interface looks mostly the same, it's had a complete re-write under the hood!  Some of the more notable changes are:
 * New namespace for the base service class which ensure composer compatibility
