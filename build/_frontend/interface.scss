@@ -304,6 +304,23 @@ $footer-border-color: #CCC;
     margin-top: 0;
   }
 
+  .paginate-filter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    .filter > * {
+      padding: 3px;
+      margin-left: 3px;
+
+      @media screen and (max-width: 550px) {
+        padding: 3px;
+        margin: 3px 3px 10px 0;
+      }
+    }
+  }
+
   .pagination {
     margin: 10px 0;
     padding: 0;

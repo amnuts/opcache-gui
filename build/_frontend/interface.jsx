@@ -657,7 +657,9 @@ class CachedFiles extends React.Component {
         this.state = {
             currentPage: 1,
             searchTerm: props.searchTerm,
-            refreshPagination: 0
+            refreshPagination: 0,
+            sortBy: `last_used_timestamp`,
+            sortDir: `desc`
         }
     }
 
@@ -684,6 +686,30 @@ class CachedFiles extends React.Component {
         }
     }
 
+    changeSort = e => {
+        this.setState({ [e.target.name]: e.target.value });
+    }
+
+    compareValues = (key, order = 'asc') => {
+        return function innerSort(a, b) {
+            if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
+                return 0;
+            }
+            const varA = (typeof a[key] === 'string') ? a[key].toUpperCase() : a[key];
+            const varB = (typeof b[key] === 'string') ? b[key].toUpperCase() : b[key];
+
+            let comparison = 0;
+            if (varA > varB) {
+                comparison = 1;
+            } else if (varA < varB) {
+                comparison = -1;
+            }
+            return (
+                (order === 'desc') ? (comparison * -1) : comparison
+            );
+        };
+    }
+
     render() {
         if (!this.props.allow.fileList) {
             return null;
@@ -701,6 +727,9 @@ class CachedFiles extends React.Component {
                 })
             : this.props.allFiles
         );
+
+        filesInSearch.sort(this.compareValues(this.state.sortBy, this.state.sortDir));
+
         const filesInPage = (this.doPagination
             ? filesInSearch.slice(offset, offset + this.props.perPageLimit)
             : filesInSearch
@@ -721,13 +750,27 @@ class CachedFiles extends React.Component {
                     <p><a href={`?invalidate_searched=${encodeURIComponent(this.state.searchTerm)}`} onClick={this.handleInvalidate}>Invalidate all matching files</a></p>
                 }
 
-                {this.doPagination && <Pagination
-                    totalRecords={filesInSearch.length}
-                    pageLimit={this.props.perPageLimit}
-                    pageNeighbours={2}
-                    onPageChanged={this.onPageChanged}
-                    refresh={this.state.refreshPagination}
-                />}
+                <div className="paginate-filter">
+                    {this.doPagination && <Pagination
+                        totalRecords={filesInSearch.length}
+                        pageLimit={this.props.perPageLimit}
+                        pageNeighbours={2}
+                        onPageChanged={this.onPageChanged}
+                        refresh={this.state.refreshPagination}
+                    />}
+                    <nav className="filter" aria-label="Sort order">
+                        <select name="sortBy" onChange={this.changeSort} value={this.state.sortBy}>
+                            <option value="last_used_timestamp">Last used</option>
+                            <option value="full_path">Path</option>
+                            <option value="hits">Number of hits</option>
+                            <option value="memory_consumption">Memory consumption</option>
+                        </select>
+                        <select name="sortDir" onChange={this.changeSort} value={this.state.sortDir}>
+                            <option value="desc">Descending</option>
+                            <option value="asc">Ascending</option>
+                        </select>
+                    </nav>
+                </div>
 
                 <table className="tables cached-list-table">
                     <thead>
