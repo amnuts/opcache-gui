@@ -4,7 +4,7 @@ namespace Amnuts\Opcache;
 
 class Service
 {
-    const VERSION = '3.0.1';
+    const VERSION = '3.1.0';
 
     protected $data;
     protected $options;
@@ -81,7 +81,7 @@ class Service
         } else if (isset($_GET['invalidate_searched']) && $this->getOption('allow_invalidate')) {
             $response($this->resetSearched($_GET['invalidate_searched']));
         } else if ($this->isJsonRequest() && $this->getOption('allow_realtime')) {
-            echo json_encode($this->getData((empty($_GET['section']) ? null : $_GET['section'])));
+            echo json_encode($this->getData($_GET['section'] ?? null));
             exit;
         }
 
