@@ -22,7 +22,8 @@
   },
   "require": {
     "ext-Zend-OPcache": "*",
-    "php": ">=7.1.0"
+    "php": ">=7.1.0",
+      "ext-json": "*"
   },
   "autoload": {
     "psr-4" : {
