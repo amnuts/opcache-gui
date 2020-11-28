@@ -4,7 +4,7 @@ namespace Amnuts\Opcache;
 
 class Service
 {
-    const VERSION = '3.0.1';
+    const VERSION = '3.1.0';
 
     protected $data;
     protected $options;

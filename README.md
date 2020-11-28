@@ -158,6 +158,9 @@ When the real-time updates are active the interface will automatically update al
 
 ## Releases
 
+**Version 3.1.0**\
+Added the ability to sort the cached file list in a variety of ways.
+
 **Version 3.0.1**\
 A minor update that will use http or https to get the javascript libraries, depending on what you're using.
 
