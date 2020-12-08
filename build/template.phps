@@ -8,7 +8,7 @@ namespace Amnuts\Opcache;
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.1.0
+ * @version 3.2.0
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, http://acollington.mit-license.org/
  */
@@ -66,8 +66,8 @@ $opcache = (new Service($options))->handle();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>OPcache statistics on <?= $opcache->getData('version', 'host'); ?></title>
-    <script src="//unpkg.com/react@16/umd/react.development.js" crossorigin></script>
-    <script src="//unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="//unpkg.com/react/umd/react.production.min.js" crossorigin></script>
+    <script src="//unpkg.com/react-dom/umd/react-dom.production.min.js" crossorigin></script>
     <script src="//unpkg.com/axios/dist/axios.min.js" crossorigin></script>
     <style type="text/css">
         {{CSS_OUTPUT}}

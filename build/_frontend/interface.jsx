@@ -723,7 +723,7 @@ class CachedFiles extends React.Component {
         const offset = (currentPage - 1) * this.props.perPageLimit;
         const filesInSearch = (searchTerm
             ? this.props.allFiles.filter(file => {
-                    return !(file.full_path.indexOf(searchTerm) == -1);
+                    return !(file.full_path.indexOf(searchTerm) === -1);
                 })
             : this.props.allFiles
         );
