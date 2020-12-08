@@ -306,18 +306,13 @@ $footer-border-color: #CCC;
 
   .paginate-filter {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
     flex-wrap: wrap;
 
     .filter > * {
       padding: 3px;
-      margin-left: 3px;
-
-      @media screen and (max-width: 550px) {
-        padding: 3px;
-        margin: 3px 3px 10px 0;
-      }
+      margin: 3px 3px 10px 0;
     }
   }
 

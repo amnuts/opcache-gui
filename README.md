@@ -13,7 +13,7 @@ There are two ways to getting started using this gui:
 
 #### Copy/clone this repo
 
-The easiest way to start using the opcache-gui is to clone this repo, or simply to copy/paste/download the `index.php` file, to a location which your web server can load.  Then simply point your browser to that location, such as `https://www.example.com/opcache/index.php`.
+The easiest way to start using the opcache-gui is to clone this repo, or simply to copy/paste/download the `index.php` file, to a location which your web server can load.  Then point your browser to that location, such as `https://www.example.com/opcache/index.php`.
 
 #### Install via composer
 
@@ -124,7 +124,7 @@ The overview will show you all the core information.  From here you'll be able t
 
 All the files currently in the cache are listed here with their associated statistics.
 
-You can filter the results to help find the particular scripts you're looking for, and you can optionally set levels of the path to be hidden.  From here you can invalidate the cache for individual files or invalidate the cache for all the files matching your search.
+You can filter the results to help find the particular scripts you're looking for and change the way cached files are sorted.  From here you can invalidate the cache for individual files or invalidate the cache for all the files matching your search.
 
 If you do not want to show the file list at all then you can use the `allow_filelist` configuration option; setting it to `false` will suppress the file list altogether.
 
@@ -157,6 +157,9 @@ The interface can poll every so often to get a fresh look at the opcache.  You c
 When the real-time updates are active the interface will automatically update all the values as needed.  Also, if you choose to invalidate any files or reset the cache it will do this without reloading the page, so the search term you've entered, or the page you've navigated to do not get reset.  If the real-time update is not on then the page will reload on any invalidation usage.
 
 ## Releases
+
+**Version 3.2.0**\
+Updated ReactJS to latest and used minified versions and made slight improvement to sort option when no pagination is present.
 
 **Version 3.1.0**\
 Added the ability to sort the cached file list in a variety of ways.
