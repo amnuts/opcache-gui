@@ -17,7 +17,7 @@ class Interface extends React.Component {
         this.setState({realtime: true})
         this.polling = setInterval(() => {
             this.setState({fetching: true, resetting: false});
-            axios.get('?', {time: Date.now()})
+            axios.get(window.location.pathname, {time: Date.now()})
                 .then((response) => {
                     this.setState({opstate: response.data});
                 });
@@ -43,7 +43,7 @@ class Interface extends React.Component {
     resetHandler = () => {
         if (this.state.realtime) {
             this.setState({resetting: true});
-            axios.get('?', {params: {reset: 1}})
+            axios.get(window.location.pathname, {params: {reset: 1}})
                 .then((response) => {
                     console.log('success: ', response.data);
                 });
@@ -677,7 +677,7 @@ class CachedFiles extends React.Component {
     handleInvalidate = e => {
         e.preventDefault();
         if (this.props.realtime) {
-            axios.get('?', {params: { invalidate_searched: this.state.searchTerm }})
+            axios.get(window.location.pathname, {params: { invalidate_searched: this.state.searchTerm }})
                 .then((response) => {
                     console.log('success: ' , response.data);
                 });
@@ -799,7 +799,7 @@ class CachedFile extends React.Component {
     handleInvalidate = e => {
         e.preventDefault();
         if (this.props.realtime) {
-            axios.get('?', {params: { invalidate: e.currentTarget.getAttribute('data-file') }})
+            axios.get(window.location.pathname, {params: { invalidate: e.currentTarget.getAttribute('data-file') }})
                 .then((response) => {
                     console.log('success: ' , response.data);
                 });

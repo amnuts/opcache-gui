@@ -421,7 +421,7 @@ class Interface extends React.Component {
           fetching: true,
           resetting: false
         });
-        axios.get('?', {
+        axios.get(window.location.pathname, {
           time: Date.now()
         }).then(response => {
           this.setState({
@@ -456,7 +456,7 @@ class Interface extends React.Component {
         this.setState({
           resetting: true
         });
-        axios.get('?', {
+        axios.get(window.location.pathname, {
           params: {
             reset: 1
           }
@@ -1083,7 +1083,7 @@ class CachedFiles extends React.Component {
       e.preventDefault();
 
       if (this.props.realtime) {
-        axios.get('?', {
+        axios.get(window.location.pathname, {
           params: {
             invalidate_searched: this.state.searchTerm
           }
@@ -1219,7 +1219,7 @@ class CachedFile extends React.Component {
       e.preventDefault();
 
       if (this.props.realtime) {
-        axios.get('?', {
+        axios.get(window.location.pathname, {
           params: {
             invalidate: e.currentTarget.getAttribute('data-file')
           }
