@@ -158,6 +158,12 @@ When the real-time updates are active the interface will automatically update al
 
 ## Releases
 
+**Version 3.2.1**\
+Minor maintenance release to:
+* Put back "spaceship operator" so PHP8 doesn't give deprecation warnings (must have been accidentally removed in a previous commit)
+* More refined axios usage when it comes to parameters
+* A little extra formatting on the opcache optimization levels
+
 **Version 3.2.0**\
 Updated ReactJS to latest and used minified versions and made slight improvement to sort option when no pagination is present.
 

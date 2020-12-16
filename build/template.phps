@@ -8,7 +8,7 @@ namespace Amnuts\Opcache;
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.2.0
+ * @version 3.2.1
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, http://acollington.mit-license.org/
  */

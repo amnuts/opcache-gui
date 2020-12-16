@@ -4,7 +4,7 @@ namespace Amnuts\Opcache;
 
 class Service
 {
-    const VERSION = '3.2.0';
+    const VERSION = '3.2.1';
 
     protected $data;
     protected $options;
@@ -210,7 +210,7 @@ class Service
         $files = [];
         if (!empty($status['scripts']) && $this->getOption('allow_filelist')) {
             uasort($status['scripts'], function ($a, $b) {
-                return $a['hits'] < $b['hits'];
+                return $a['hits'] <=> $b['hits'];
             });
             foreach ($status['scripts'] as &$file) {
                 $file['full_path'] = str_replace('\\', '/', $file['full_path']);
@@ -287,7 +287,7 @@ class Service
                 $levels = [];
                 foreach ($this->optimizationLevels as $level => $info) {
                     if ($level & $v) {
-                        $levels[] = $info;
+                        $levels[] = "{$info} [{$level}]";
                     }
                 }
                 $v = $levels ?: 'none';
