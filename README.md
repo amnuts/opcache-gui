@@ -2,7 +2,7 @@
 
 A clean and responsive interface for Zend OPcache information, showing statistics, settings and cached files, and providing a real-time update for the information.
 
-This interface uses ReactJS and Axios and is for modern browsers.
+This interface uses ReactJS and Axios and is for modern browsers and requires a minimum of PHP 7.1.
 
 [![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=acollington&url=https://github.com/amnuts/opcache-gui&title=opcache-gui&language=&tags=github&category=software)
 If you like this software or find it helpful then maybe you'll consider supporting my efforts in some way by [signing up to Flattr and leaving a micro-donation](https://flattr.com/@acollington).
@@ -235,6 +235,20 @@ Introduces the use of React.js provides the ability to seamlessly update more of
 Releases of the GUI are available at:
 
 https://github.com/amnuts/opcache-gui/releases/
+
+### Making is compatible with PHP 7.0
+
+The script requires PHP 7.1 or above.  I'm not tempted to downgrade the code to make it compatible with version 7.0, and hopefully most people would have upgraded by now. But I really do appreciate that sometimes people just don't have the ability to change the version of PHP they use because it's out of their control.  So if you're one of the unlucky ones, you can make the following changes to `index.php` (or `Service.php` and run the build script).  For the lines:
+
+```
+public function getOption(?string $name = null)
+
+public function getData(?string $section = null, ?string $property = null)
+
+public function resetCache(?string $file = null): bool
+```
+
+It'll just be a case of removing the `?` from each of the params.
 
 # License
 
