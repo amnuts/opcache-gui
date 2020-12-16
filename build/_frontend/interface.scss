@@ -249,6 +249,20 @@ $footer-border-color: #CCC;
     }
   }
 
+  .directive-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      margin-bottom: 0.5em;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
   .file-filter {
     width: 520px;
   }
@@ -324,7 +338,6 @@ $footer-border-color: #CCC;
       display: inline-block;
 
       a {
-        display: inline-block;
         display: inline-flex;
         align-items: center;
         white-space: nowrap;

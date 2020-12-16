@@ -329,6 +329,16 @@ function GeneralInfo(props) {
 
 
 function Directives(props) {
+    let directiveList = (directive) => {
+        return (
+            <ul className="directive-list">{
+                directive.v.map((item, key) => {
+                    return <li key={key}>{item}</li>
+                })
+            }</ul>
+        );
+    };
+
     let directiveNodes = props.directives.map(function(directive) {
         let map = { 'opcache.':'', '_':' ' };
         let dShow = directive.k.replace(/opcache\.|_/gi, function(matched){
@@ -341,9 +351,7 @@ function Directives(props) {
             vShow = React.createElement('i', {}, 'no value');
         } else {
             if (Array.isArray(directive.v)) {
-                vShow = directive.v.map((item, key) => {
-                    return <span key={key}>{item}<br/></span>
-                });
+                vShow = directiveList(directive);
             } else {
                 vShow = directive.v;
             }
