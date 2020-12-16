@@ -340,7 +340,7 @@ class Service
                 $levels = [];
                 foreach ($this->optimizationLevels as $level => $info) {
                     if ($level & $v) {
-                        $levels[] = $info;
+                        $levels[] = "{$info} [{$level}]";
                     }
                 }
                 $v = $levels ?: 'none';
