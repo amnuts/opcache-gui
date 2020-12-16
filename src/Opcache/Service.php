@@ -210,7 +210,7 @@ class Service
         $files = [];
         if (!empty($status['scripts']) && $this->getOption('allow_filelist')) {
             uasort($status['scripts'], function ($a, $b) {
-                return $a['hits'] < $b['hits'];
+                return $a['hits'] <=> $b['hits'];
             });
             foreach ($status['scripts'] as &$file) {
                 $file['full_path'] = str_replace('\\', '/', $file['full_path']);
