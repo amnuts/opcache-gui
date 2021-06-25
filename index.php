@@ -8,7 +8,7 @@ namespace Amnuts\Opcache;
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.2.1
+ * @version 3.3.0
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, https://acollington.mit-license.org/
  */
@@ -57,7 +57,7 @@ header('Pragma: no-cache');
 
 class Service
 {
-    const VERSION = '3.2.1';
+    const VERSION = '3.3.0';
 
     protected $data;
     protected $options;
@@ -79,6 +79,45 @@ class Service
             'memory' => true,                // show the memory chart/big number
             'hits'   => true,                // show the hit rate chart/big number
             'keys'   => true                 // show the keys used chart/big number
+        ]
+    ];
+    protected $jitModes = [
+        [
+            'flag' => 'CPU-specific optimization',
+            'value' => [
+                'Disable CPU-specific optimization',
+                'Enable use of AVX, if the CPU supports it'
+            ]
+        ],
+        [
+            'flag' => 'Register allocation',
+            'value' => [
+                'Do not perform register allocation',
+                'Perform block-local register allocation',
+                'Perform global register allocation'
+            ]
+        ],
+        [
+            'flag' => 'Trigger',
+            'value' => [
+                'Compile all functions on script load',
+                'Compile functions on first execution',
+                'Profile functions on first request and compile the hottest functions afterwards',
+                'Profile on the fly and compile hot functions',
+                'Currently unused',
+                'Use tracing JIT. Profile on the fly and compile traces for hot code segments'
+            ]
+        ],
+        [
+            'flag' => 'Optimization level',
+            'value' => [
+                'No JIT',
+                'Minimal JIT (call standard VM handlers)',
+                'Inline VM handlers',
+                'Use type inference',
+                'Use call graph',
+                'Optimize whole script'
+            ]
         ]
     ];
 
@@ -106,7 +145,6 @@ class Service
             1 << 14 => '(unsafe) Collect constants',
             1 << 15 => 'Inline functions'
         ];
-
         $this->options = array_merge($this->defaults, $options);
         $this->data = $this->compileState();
     }
@@ -150,10 +188,8 @@ class Service
         if ($name === null) {
             return $this->options;
         }
-        return (isset($this->options[$name])
-            ? $this->options[$name]
-            : null
-        );
+
+        return $this->options[$name] ?? null;
     }
 
     /**
@@ -336,7 +372,7 @@ class Service
         foreach ($config['directives'] as $k => $v) {
             if (in_array($k, ['opcache.max_file_size', 'opcache.memory_consumption']) && $v) {
                 $v = $this->size($v) . " ({$v})";
-            } elseif ($k == 'opcache.optimization_level') {
+            } elseif ($k === 'opcache.optimization_level') {
                 $levels = [];
                 foreach ($this->optimizationLevels as $level => $info) {
                     if ($level & $v) {
@@ -344,6 +380,16 @@ class Service
                     }
                 }
                 $v = $levels ?: 'none';
+            } elseif ($k === 'opcache.jit') {
+                if (is_numeric($v)) {
+                    $levels = [];
+                    foreach (str_split((string)$v) as $type => $level) {
+                        $levels[] = "{$level}: {$this->jitModes[$type]['value'][$level]} ({$this->jitModes[$type]['flag']})";
+                    }
+                    $v = $levels;
+                } elseif (strtolower($v) === 'off' || $v === '') {
+                    $v = 'Off';
+                }
             }
             $directives[] = [
                 'k' => $k,
