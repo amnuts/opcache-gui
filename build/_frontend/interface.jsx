@@ -623,7 +623,7 @@ function MemoryUsagePanel(props) {
                 { props.preload && <p><b>preload memory:</b> {props.preload}</p> }
                 <p><b>wasted memory:</b> {props.wasted} ({props.wastedPercent}%)</p>
                 { props.jitBuffer && <p><b>jit buffer:</b> {props.jitBuffer}</p> }
-                { props.jitBufferFree && <p><b>jit buffer free:</b> {props.jitBufferFree} ({props.jitBufferFreePercentage}%)</p> }
+                { props.jitBufferFree && <p><b>jit buffer free:</b> {props.jitBufferFree} ({100 - props.jitBufferFreePercentage}%)</p> }
             </div>
         </div>
     );
