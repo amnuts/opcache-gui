@@ -10,7 +10,7 @@ namespace Amnuts\Opcache;
  * @author Andrew Collington, andy@amnuts.com
  * @version 3.2.1
  * @link https://github.com/amnuts/opcache-gui
- * @license MIT, http://acollington.mit-license.org/
+ * @license MIT, https://acollington.mit-license.org/
  */
 
 /*
@@ -794,7 +794,7 @@ function Directives(props) {
     }, /*#__PURE__*/React.createElement("td", {
       title: 'View ' + directive.k + ' manual entry'
     }, /*#__PURE__*/React.createElement("a", {
-      href: 'http://php.net/manual/en/opcache.configuration.php#ini.' + directive.k.replace(/_/g, '-'),
+      href: 'https://php.net/manual/en/opcache.configuration.php#ini.' + directive.k.replace(/_/g, '-'),
       target: "_blank"
     }, dShow)), /*#__PURE__*/React.createElement("td", null, vShow));
   });
@@ -813,7 +813,7 @@ function Functions(props) {
   }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Available functions"))), /*#__PURE__*/React.createElement("tbody", null, props.functions.map(f => /*#__PURE__*/React.createElement("tr", {
     key: f
   }, /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("a", {
-    href: "http://php.net/" + f,
+    href: "https://php.net/" + f,
     title: "View manual page",
     target: "_blank"
   }, f)))))));
