@@ -358,7 +358,7 @@ function Directives(props) {
         }
         return (
             <tr key={directive.k}>
-                <td title={'View ' + directive.k + ' manual entry'}><a href={'http://php.net/manual/en/opcache.configuration.php#ini.'
+                <td title={'View ' + directive.k + ' manual entry'}><a href={'https://php.net/manual/en/opcache.configuration.php#ini.'
                 + (directive.k).replace(/_/g,'-')} target="_blank">{dShow}</a></td>
                 <td>{vShow}</td>
             </tr>
@@ -380,7 +380,7 @@ function Functions(props) {
                 <thead><tr><th>Available functions</th></tr></thead>
                 <tbody>
                 {props.functions.map(f =>
-                    <tr key={f}><td><a href={"http://php.net/"+f} title="View manual page" target="_blank">{f}</a></td></tr>
+                    <tr key={f}><td><a href={"https://php.net/"+f} title="View manual page" target="_blank">{f}</a></td></tr>
                 )}
                 </tbody>
             </table>
