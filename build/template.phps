@@ -35,7 +35,8 @@ $options = [
     'highlight'        => [
         'memory' => true,                // show the memory chart/big number
         'hits'   => true,                // show the hit rate chart/big number
-        'keys'   => true                 // show the keys used chart/big number
+        'keys'   => true,                // show the keys used chart/big number
+        'jit'    => true                 // show the jit buffer chart/big number
     ]
 ];
 

@@ -35,7 +35,8 @@ $options = [
     'highlight'        => [
         'memory' => true,                // show the memory chart/big number
         'hits'   => true,                // show the hit rate chart/big number
-        'keys'   => true                 // show the keys used chart/big number
+        'keys'   => true,                // show the keys used chart/big number
+        'jit'    => true                 // show the jit buffer chart/big number
     ]
 ];
 
@@ -78,7 +79,8 @@ class Service
         'highlight'        => [
             'memory' => true,                // show the memory chart/big number
             'hits'   => true,                // show the hit rate chart/big number
-            'keys'   => true                 // show the keys used chart/big number
+            'keys'   => true,                // show the keys used chart/big number
+            'jit'    => true                 // show the jit buffer chart/big number
         ]
     ];
     protected $jitModes = [
@@ -367,10 +369,23 @@ class Service
             ];
         }
 
+        if ($overview && !empty($status['jit'])) {
+            $overview['jit_buffer_used_percentage'] = ($status['jit']['buffer_size']
+                ? round(100 * (($status['jit']['buffer_size'] - $status['jit']['buffer_free']) / $status['jit']['buffer_size']))
+                : 0
+            );
+            $overview['readable'] = array_merge($overview['readable'], [
+                'jit_buffer_size' => $this->size($status['jit']['buffer_size']),
+                'jit_buffer_free' => $this->size($status['jit']['buffer_free'])
+            ]);
+        } else {
+            $this->options['highlight']['jit'] = false;
+        }
+
         $directives = [];
         ksort($config['directives']);
         foreach ($config['directives'] as $k => $v) {
-            if (in_array($k, ['opcache.max_file_size', 'opcache.memory_consumption']) && $v) {
+            if (in_array($k, ['opcache.max_file_size', 'opcache.memory_consumption', 'opcache.jit_buffer_size']) && $v) {
                 $v = $this->size($v) . " ({$v})";
             } elseif ($k === 'opcache.optimization_level') {
                 $levels = [];
@@ -753,6 +768,11 @@ function OverviewCounts(props) {
     title: 'keys',
     show: props.highlight.keys,
     value: props.overview.used_key_percentage
+  }, {
+    id: 'jitUsageCanvas',
+    title: 'jit buffer',
+    show: props.highlight.jit,
+    value: props.overview.jit_buffer_used_percentage
   }];
   return /*#__PURE__*/React.createElement("div", {
     id: "counts",
@@ -778,7 +798,10 @@ function OverviewCounts(props) {
     free: props.overview.readable.free_memory,
     wasted: props.overview.readable.wasted_memory,
     preload: props.overview.readable.preload_memory || null,
-    wastedPercent: props.overview.wasted_percentage
+    wastedPercent: props.overview.wasted_percentage,
+    jitBuffer: props.overview.readable.jit_buffer_size || null,
+    jitBufferFree: props.overview.readable.jit_buffer_free || null,
+    jitBufferFreePercentage: props.overview.jit_buffer_used_percentage || null
   }), /*#__PURE__*/React.createElement(StatisticsPanel, {
     num_cached_scripts: props.overview.readable.num_cached_scripts,
     hits: props.overview.readable.hits,
@@ -1091,7 +1114,7 @@ function MemoryUsagePanel(props) {
     className: "widget-header"
   }, "memory usage"), /*#__PURE__*/React.createElement("div", {
     className: "widget-value widget-info"
-  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "total memory:"), " ", props.total), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "used memory:"), " ", props.used), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "free memory:"), " ", props.free), props.preload && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "preload memory:"), " ", props.preload), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "wasted memory:"), " ", props.wasted, " (", props.wastedPercent, "%)")));
+  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "total memory:"), " ", props.total), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "used memory:"), " ", props.used), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "free memory:"), " ", props.free), props.preload && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "preload memory:"), " ", props.preload), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "wasted memory:"), " ", props.wasted, " (", props.wastedPercent, "%)"), props.jitBuffer && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "jit buffer:"), " ", props.jitBuffer), props.jitBufferFree && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "jit buffer free:"), " ", props.jitBufferFree, " (", props.jitBufferFreePercentage, "%)")));
 }
 
 function StatisticsPanel(props) {
