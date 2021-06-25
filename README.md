@@ -79,7 +79,8 @@ $options = [
    'highlight'        => [
        'memory' => true,                // show the memory chart/big number
        'hits'   => true,                // show the hit rate chart/big number
-       'keys'   => true                 // show the keys used chart/big number
+       'keys'   => true,                // show the keys used chart/big number
+       'jit'    => true                 // show the jit buffer chart/big number
    ]
 ];
 ```
@@ -118,7 +119,7 @@ The core PHP template used in the build process, and that acts to pass various b
 
 The overview will show you all the core information.  From here you'll be able to see what host and platform you're running on, what version of OPcache you're using, when it was last reset, the functions that are available, all the directives and all the statistics associated with the OPcache (number of hits, memory used, free and wasted memory, etc.)
 
-![Screenshot of the Overview tab](http://amnuts.com/images/opcache/screenshot/overview-v3.0.0.png)
+![Screenshot of the Overview tab](http://amnuts.com/images/opcache/screenshot/overview-v3.3.0.png)
 
 ### Cached files
 
@@ -157,6 +158,15 @@ The interface can poll every so often to get a fresh look at the opcache.  You c
 When the real-time updates are active the interface will automatically update all the values as needed.  Also, if you choose to invalidate any files or reset the cache it will do this without reloading the page, so the search term you've entered, or the page you've navigated to do not get reset.  If the real-time update is not on then the page will reload on any invalidation usage.
 
 ## Releases
+
+**Version 3.3.0**\
+Mostly added JIT information for PHP 8:
+* Added JIT buffer graph (optionally able to turn it off)
+* Added JIT information to the memory usage panel
+* Improved the JIT information shown in the directives
+* Fixed a long outstanding interface bug that allowed you to see the 'invalidate all' link even if invalidation option was`false`
+
+If you're not using PHP 8, the system will compensate and not show the additional JIT information.
 
 **Version 3.2.1**\
 Minor maintenance release to:
