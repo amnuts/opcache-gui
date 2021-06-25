@@ -760,7 +760,7 @@ class CachedFiles extends React.Component {
 
                 <h3>{allFilesTotal} files cached{showingTotal !== allFilesTotal && `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`}</h3>
 
-                { this.state.searchTerm && showingTotal !== allFilesTotal &&
+                { this.props.allow.invalidate && this.state.searchTerm && showingTotal !== allFilesTotal &&
                     <p><a href={`?invalidate_searched=${encodeURIComponent(this.state.searchTerm)}`} onClick={this.handleInvalidate}>Invalidate all matching files</a></p>
                 }
 

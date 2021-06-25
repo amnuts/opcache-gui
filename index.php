@@ -1239,7 +1239,7 @@ class CachedFiles extends React.Component {
       onChange: e => {
         this.setSearchTerm(e.target.value);
       }
-    })), /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " files cached", showingTotal !== allFilesTotal && `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`), this.state.searchTerm && showingTotal !== allFilesTotal && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("a", {
+    })), /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " files cached", showingTotal !== allFilesTotal && `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`), this.props.allow.invalidate && this.state.searchTerm && showingTotal !== allFilesTotal && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("a", {
       href: `?invalidate_searched=${encodeURIComponent(this.state.searchTerm)}`,
       onClick: this.handleInvalidate
     }, "Invalidate all matching files")), /*#__PURE__*/React.createElement("div", {
