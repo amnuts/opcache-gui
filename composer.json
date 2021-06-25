@@ -8,7 +8,7 @@
     {
       "name": "Andrew Collington",
       "email": "andy@amnuts.com",
-      "homepage": "http://www.amnuts.com/",
+      "homepage": "https://blog.amnuts.com/",
       "role": "Developer"
     },
     {
@@ -23,7 +23,7 @@
   "require": {
     "ext-Zend-OPcache": "*",
     "php": ">=7.1.0",
-      "ext-json": "*"
+    "ext-json": "*"
   },
   "autoload": {
     "psr-4" : {
