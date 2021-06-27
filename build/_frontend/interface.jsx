@@ -264,7 +264,8 @@ function OverviewCounts(props) {
     const graphList = [
         {id: 'memoryUsageCanvas', title: 'memory', show: props.highlight.memory, value: props.overview.used_memory_percentage},
         {id: 'hitRateCanvas', title: 'hit rate', show: props.highlight.hits, value: props.overview.hit_rate_percentage},
-        {id: 'keyUsageCanvas', title: 'keys', show: props.highlight.keys, value: props.overview.used_key_percentage}
+        {id: 'keyUsageCanvas', title: 'keys', show: props.highlight.keys, value: props.overview.used_key_percentage},
+        {id: 'jitUsageCanvas', title: 'jit buffer', show: props.highlight.jit, value: props.overview.jit_buffer_used_percentage}
     ];
 
     return (
@@ -287,6 +288,9 @@ function OverviewCounts(props) {
                 wasted={props.overview.readable.wasted_memory}
                 preload={props.overview.readable.preload_memory || null}
                 wastedPercent={props.overview.wasted_percentage}
+                jitBuffer={props.overview.readable.jit_buffer_size || null}
+                jitBufferFree={props.overview.readable.jit_buffer_free || null}
+                jitBufferFreePercentage={props.overview.jit_buffer_used_percentage || null}
             />
             <StatisticsPanel
                 num_cached_scripts={props.overview.readable.num_cached_scripts}
@@ -358,7 +362,7 @@ function Directives(props) {
         }
         return (
             <tr key={directive.k}>
-                <td title={'View ' + directive.k + ' manual entry'}><a href={'http://php.net/manual/en/opcache.configuration.php#ini.'
+                <td title={'View ' + directive.k + ' manual entry'}><a href={'https://php.net/manual/en/opcache.configuration.php#ini.'
                 + (directive.k).replace(/_/g,'-')} target="_blank">{dShow}</a></td>
                 <td>{vShow}</td>
             </tr>
@@ -380,7 +384,7 @@ function Functions(props) {
                 <thead><tr><th>Available functions</th></tr></thead>
                 <tbody>
                 {props.functions.map(f =>
-                    <tr key={f}><td><a href={"http://php.net/"+f} title="View manual page" target="_blank">{f}</a></td></tr>
+                    <tr key={f}><td><a href={"https://php.net/"+f} title="View manual page" target="_blank">{f}</a></td></tr>
                 )}
                 </tbody>
             </table>
@@ -618,6 +622,8 @@ function MemoryUsagePanel(props) {
                 <p><b>free memory:</b> {props.free}</p>
                 { props.preload && <p><b>preload memory:</b> {props.preload}</p> }
                 <p><b>wasted memory:</b> {props.wasted} ({props.wastedPercent}%)</p>
+                { props.jitBuffer && <p><b>jit buffer:</b> {props.jitBuffer}</p> }
+                { props.jitBufferFree && <p><b>jit buffer free:</b> {props.jitBufferFree} ({100 - props.jitBufferFreePercentage}%)</p> }
             </div>
         </div>
     );
@@ -754,7 +760,7 @@ class CachedFiles extends React.Component {
 
                 <h3>{allFilesTotal} files cached{showingTotal !== allFilesTotal && `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`}</h3>
 
-                { this.state.searchTerm && showingTotal !== allFilesTotal &&
+                { this.props.allow.invalidate && this.state.searchTerm && showingTotal !== allFilesTotal &&
                     <p><a href={`?invalidate_searched=${encodeURIComponent(this.state.searchTerm)}`} onClick={this.handleInvalidate}>Invalidate all matching files</a></p>
                 }
 

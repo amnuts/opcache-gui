@@ -8,9 +8,9 @@ namespace Amnuts\Opcache;
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.2.1
+ * @version 3.3.0
  * @link https://github.com/amnuts/opcache-gui
- * @license MIT, http://acollington.mit-license.org/
+ * @license MIT, https://acollington.mit-license.org/
  */
 
 /*
@@ -35,7 +35,8 @@ $options = [
     'highlight'        => [
         'memory' => true,                // show the memory chart/big number
         'hits'   => true,                // show the hit rate chart/big number
-        'keys'   => true                 // show the keys used chart/big number
+        'keys'   => true,                // show the keys used chart/big number
+        'jit'    => true                 // show the jit buffer chart/big number
     ]
 ];
 
@@ -57,7 +58,7 @@ header('Pragma: no-cache');
 
 class Service
 {
-    const VERSION = '3.2.1';
+    const VERSION = '3.3.0';
 
     protected $data;
     protected $options;
@@ -78,7 +79,47 @@ class Service
         'highlight'        => [
             'memory' => true,                // show the memory chart/big number
             'hits'   => true,                // show the hit rate chart/big number
-            'keys'   => true                 // show the keys used chart/big number
+            'keys'   => true,                // show the keys used chart/big number
+            'jit'    => true                 // show the jit buffer chart/big number
+        ]
+    ];
+    protected $jitModes = [
+        [
+            'flag' => 'CPU-specific optimization',
+            'value' => [
+                'Disable CPU-specific optimization',
+                'Enable use of AVX, if the CPU supports it'
+            ]
+        ],
+        [
+            'flag' => 'Register allocation',
+            'value' => [
+                'Do not perform register allocation',
+                'Perform block-local register allocation',
+                'Perform global register allocation'
+            ]
+        ],
+        [
+            'flag' => 'Trigger',
+            'value' => [
+                'Compile all functions on script load',
+                'Compile functions on first execution',
+                'Profile functions on first request and compile the hottest functions afterwards',
+                'Profile on the fly and compile hot functions',
+                'Currently unused',
+                'Use tracing JIT. Profile on the fly and compile traces for hot code segments'
+            ]
+        ],
+        [
+            'flag' => 'Optimization level',
+            'value' => [
+                'No JIT',
+                'Minimal JIT (call standard VM handlers)',
+                'Inline VM handlers',
+                'Use type inference',
+                'Use call graph',
+                'Optimize whole script'
+            ]
         ]
     ];
 
@@ -106,7 +147,6 @@ class Service
             1 << 14 => '(unsafe) Collect constants',
             1 << 15 => 'Inline functions'
         ];
-
         $this->options = array_merge($this->defaults, $options);
         $this->data = $this->compileState();
     }
@@ -150,10 +190,8 @@ class Service
         if ($name === null) {
             return $this->options;
         }
-        return (isset($this->options[$name])
-            ? $this->options[$name]
-            : null
-        );
+
+        return $this->options[$name] ?? null;
     }
 
     /**
@@ -331,12 +369,25 @@ class Service
             ];
         }
 
+        if ($overview && !empty($status['jit'])) {
+            $overview['jit_buffer_used_percentage'] = ($status['jit']['buffer_size']
+                ? round(100 * (($status['jit']['buffer_size'] - $status['jit']['buffer_free']) / $status['jit']['buffer_size']))
+                : 0
+            );
+            $overview['readable'] = array_merge($overview['readable'], [
+                'jit_buffer_size' => $this->size($status['jit']['buffer_size']),
+                'jit_buffer_free' => $this->size($status['jit']['buffer_free'])
+            ]);
+        } else {
+            $this->options['highlight']['jit'] = false;
+        }
+
         $directives = [];
         ksort($config['directives']);
         foreach ($config['directives'] as $k => $v) {
-            if (in_array($k, ['opcache.max_file_size', 'opcache.memory_consumption']) && $v) {
+            if (in_array($k, ['opcache.max_file_size', 'opcache.memory_consumption', 'opcache.jit_buffer_size']) && $v) {
                 $v = $this->size($v) . " ({$v})";
-            } elseif ($k == 'opcache.optimization_level') {
+            } elseif ($k === 'opcache.optimization_level') {
                 $levels = [];
                 foreach ($this->optimizationLevels as $level => $info) {
                     if ($level & $v) {
@@ -344,6 +395,16 @@ class Service
                     }
                 }
                 $v = $levels ?: 'none';
+            } elseif ($k === 'opcache.jit') {
+                if (is_numeric($v)) {
+                    $levels = [];
+                    foreach (str_split((string)$v) as $type => $level) {
+                        $levels[] = "{$level}: {$this->jitModes[$type]['value'][$level]} ({$this->jitModes[$type]['flag']})";
+                    }
+                    $v = $levels;
+                } elseif (strtolower($v) === 'off' || $v === '') {
+                    $v = 'Off';
+                }
             }
             $directives[] = [
                 'k' => $k,
@@ -707,6 +768,11 @@ function OverviewCounts(props) {
     title: 'keys',
     show: props.highlight.keys,
     value: props.overview.used_key_percentage
+  }, {
+    id: 'jitUsageCanvas',
+    title: 'jit buffer',
+    show: props.highlight.jit,
+    value: props.overview.jit_buffer_used_percentage
   }];
   return /*#__PURE__*/React.createElement("div", {
     id: "counts",
@@ -732,7 +798,10 @@ function OverviewCounts(props) {
     free: props.overview.readable.free_memory,
     wasted: props.overview.readable.wasted_memory,
     preload: props.overview.readable.preload_memory || null,
-    wastedPercent: props.overview.wasted_percentage
+    wastedPercent: props.overview.wasted_percentage,
+    jitBuffer: props.overview.readable.jit_buffer_size || null,
+    jitBufferFree: props.overview.readable.jit_buffer_free || null,
+    jitBufferFreePercentage: props.overview.jit_buffer_used_percentage || null
   }), /*#__PURE__*/React.createElement(StatisticsPanel, {
     num_cached_scripts: props.overview.readable.num_cached_scripts,
     hits: props.overview.readable.hits,
@@ -794,7 +863,7 @@ function Directives(props) {
     }, /*#__PURE__*/React.createElement("td", {
       title: 'View ' + directive.k + ' manual entry'
     }, /*#__PURE__*/React.createElement("a", {
-      href: 'http://php.net/manual/en/opcache.configuration.php#ini.' + directive.k.replace(/_/g, '-'),
+      href: 'https://php.net/manual/en/opcache.configuration.php#ini.' + directive.k.replace(/_/g, '-'),
       target: "_blank"
     }, dShow)), /*#__PURE__*/React.createElement("td", null, vShow));
   });
@@ -813,7 +882,7 @@ function Functions(props) {
   }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Available functions"))), /*#__PURE__*/React.createElement("tbody", null, props.functions.map(f => /*#__PURE__*/React.createElement("tr", {
     key: f
   }, /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("a", {
-    href: "http://php.net/" + f,
+    href: "https://php.net/" + f,
     title: "View manual page",
     target: "_blank"
   }, f)))))));
@@ -1045,7 +1114,7 @@ function MemoryUsagePanel(props) {
     className: "widget-header"
   }, "memory usage"), /*#__PURE__*/React.createElement("div", {
     className: "widget-value widget-info"
-  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "total memory:"), " ", props.total), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "used memory:"), " ", props.used), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "free memory:"), " ", props.free), props.preload && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "preload memory:"), " ", props.preload), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "wasted memory:"), " ", props.wasted, " (", props.wastedPercent, "%)")));
+  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "total memory:"), " ", props.total), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "used memory:"), " ", props.used), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "free memory:"), " ", props.free), props.preload && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "preload memory:"), " ", props.preload), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "wasted memory:"), " ", props.wasted, " (", props.wastedPercent, "%)"), props.jitBuffer && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "jit buffer:"), " ", props.jitBuffer), props.jitBufferFree && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "jit buffer free:"), " ", props.jitBufferFree, " (", 100 - props.jitBufferFreePercentage, "%)")));
 }
 
 function StatisticsPanel(props) {
@@ -1170,7 +1239,7 @@ class CachedFiles extends React.Component {
       onChange: e => {
         this.setSearchTerm(e.target.value);
       }
-    })), /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " files cached", showingTotal !== allFilesTotal && `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`), this.state.searchTerm && showingTotal !== allFilesTotal && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("a", {
+    })), /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " files cached", showingTotal !== allFilesTotal && `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`), this.props.allow.invalidate && this.state.searchTerm && showingTotal !== allFilesTotal && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("a", {
       href: `?invalidate_searched=${encodeURIComponent(this.state.searchTerm)}`,
       onClick: this.handleInvalidate
     }, "Invalidate all matching files")), /*#__PURE__*/React.createElement("div", {

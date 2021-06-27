@@ -4,9 +4,9 @@
  * OPcache GUI - build script
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.2.1
+ * @version 3.3.0
  * @link https://github.com/amnuts/opcache-gui
- * @license MIT, http://acollington.mit-license.org/
+ * @license MIT, https://acollington.mit-license.org/
  */
 
 $parentPath = dirname(__DIR__);
