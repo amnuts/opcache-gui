@@ -13,13 +13,13 @@ There are two ways to getting started using this gui:
 
 #### Copy/clone this repo
 
-The easiest way to start using the opcache-gui is to clone this repo, or simply to copy/paste/download the `index.php` file, to a location which your web server can load.  Then point your browser to that location, such as `https://www.example.com/opcache/index.php`.
+The easiest way to start using the opcache-gui is to clone this repo, or simply copy/paste/download the `index.php` file to a location which your web server can load.  Then point your browser to that location, such as `https://www.example.com/opcache/index.php`.
 
 #### Install via composer
 
 You can include the files with [Composer](https://getcomposer.org/) by running the command `composer require amnuts/opcache-gui`.
 
-Once in your `vendor` directory, there are numerous ways in which you can use the interface.  For example if you're using a framework such as Symfony or Laravel, you could load opcache-gui into a `Controller`.  Your requirements of setting it up within your framework of choice will vary, so it's not really possible to detail how to do that within this readme... but I have faith in your ability to figure it out!
+Once in your `vendor` directory, there are numerous ways in which you can use the interface.  For example, if you're using a framework such as Symfony or Laravel, you could load opcache-gui into a `Controller`.  Your requirements of setting it up within your framework of choice will vary, so it's not really possible to detail how to do that within this readme... but I have faith in your ability to figure it out!
 
 The namespace used for the class is `Amnuts\Opcache`, so once the dependency is in your `autoload.php` you can use the `\Amnuts\Opcache\Service` class.  For example, you could do something like:
 
@@ -117,7 +117,7 @@ The core PHP template used in the build process, and that acts to pass various b
 
 ### Overview
 
-The overview will show you all the core information.  From here you'll be able to see what host and platform you're running on, what version of OPcache you're using, when it was last reset, the functions that are available, all the directives and all the statistics associated with the OPcache (number of hits, memory used, free and wasted memory, etc.)
+The overview will show you all the core information.  From here you'll be able to see what host and platform you're running on, what version of OPcache you're using, when it was last reset, the functions and directives available (with links to the php.net manual), and all the statistics associated with the OPcache (number of hits, memory used, free and wasted memory, and more).
 
 ![Screenshot of the Overview tab](http://amnuts.com/images/opcache/screenshot/overview-v3.3.0.png)
 
@@ -155,7 +155,9 @@ Resetting can be disabled with the use of the configuration options `allow_reset
 
 The interface can poll every so often to get a fresh look at the opcache.  You can change how often this happens with the configuration option `refresh_time`, which is in seconds.
 
-When the real-time updates are active the interface will automatically update all the values as needed.  Also, if you choose to invalidate any files or reset the cache it will do this without reloading the page, so the search term you've entered, or the page you've navigated to do not get reset.  If the real-time update is not on then the page will reload on any invalidation usage.
+When the real-time updates are active, the interface will automatically update all the values as needed.
+
+Also, if you choose to invalidate any files or reset the cache it will do this without reloading the page, so the search term you've entered, or the page to which you've navigated do not get reset.  If the real-time update is not on then the page will reload on any invalidation usage.
 
 ## Releases
 
@@ -164,9 +166,11 @@ Mostly added JIT information for PHP 8:
 * Added JIT buffer graph (optionally able to turn it off)
 * Added JIT information to the memory usage panel
 * Improved the JIT information shown in the directives
-* Fixed a long outstanding interface bug that allowed you to see the 'invalidate all' link even if invalidation option was`false`
+* Fixed a long outstanding interface bug that allowed you to see the 'invalidate all' link even if invalidation option was `false`
 
-If you're not using PHP 8, the system will compensate and not show the additional JIT information.
+If you want to enable JIT you have to put in a value for the [opcache.jit_buffer_size](https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.jit-buffer-size) ini setting, else it's disabled by default.
+
+If you're not using PHP 8, the interface will compensate and not show the additional JIT information.
 
 **Version 3.2.1**\
 Minor maintenance release to:
