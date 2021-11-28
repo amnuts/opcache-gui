@@ -2,6 +2,9 @@
 
 namespace Amnuts\Opcache;
 
+use DateTimeImmutable;
+use Exception;
+
 class Service
 {
     const VERSION = '3.3.0';
@@ -234,6 +237,7 @@ class Service
 
     /**
      * @return array
+     * @throws Exception
      */
     protected function compileState(): array
     {
@@ -286,10 +290,14 @@ class Service
                         'num_cached_keys' => number_format($status['opcache_statistics']['num_cached_keys']),
                         'max_cached_keys' => number_format($status['opcache_statistics']['max_cached_keys']),
                         'interned' => null,
-                        'start_time' => date('Y-m-d H:i:s', $status['opcache_statistics']['start_time']),
+                        'start_time' => (new DateTimeImmutable(
+                                $status['opcache_statistics']['start_time'], date_default_timezone_get()
+                            ))->format('Y-m-d H:i:s'),
                         'last_restart_time' => ($status['opcache_statistics']['last_restart_time'] == 0
                             ? 'never'
-                            : date('Y-m-d H:i:s', $status['opcache_statistics']['last_restart_time'])
+                            : (new DateTimeImmutable(
+                                $status['opcache_statistics']['last_restart_time'], date_default_timezone_get())
+                              )->format('Y-m-d H:i:s')
                         )
                     ]
                 ]
