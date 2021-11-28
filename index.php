@@ -8,7 +8,7 @@ namespace Amnuts\Opcache;
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.3.0
+ * @version 3.3.1
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, https://acollington.mit-license.org/
  */
@@ -56,9 +56,12 @@ if (empty($ocEnabled)) {
 header('Cache-Control: no-cache, must-revalidate');
 header('Pragma: no-cache');
 
+use DateTimeImmutable;
+use Exception;
+
 class Service
 {
-    const VERSION = '3.3.0';
+    public const VERSION = '3.3.1';
 
     protected $data;
     protected $options;
@@ -153,6 +156,7 @@ class Service
 
     /**
      * @return $this
+     * @throws Exception
      */
     public function handle(): Service
     {
@@ -167,13 +171,11 @@ class Service
 
         if (isset($_GET['reset']) && $this->getOption('allow_reset')) {
             $response($this->resetCache());
-        } else if (isset($_GET['invalidate']) && $this->getOption('allow_invalidate')) {
+        } elseif (isset($_GET['invalidate']) && $this->getOption('allow_invalidate')) {
             $response($this->resetCache($_GET['invalidate']));
-        } else if (isset($_GET['invalidate_searched']) && $this->getOption('allow_invalidate')) {
+        } elseif (isset($_GET['invalidate_searched']) && $this->getOption('allow_invalidate')) {
             $response($this->resetSearched($_GET['invalidate_searched']));
-        } else if (isset($_GET['invalidate_searched']) && $this->getOption('allow_invalidate')) {
-            $response($this->resetSearched($_GET['invalidate_searched']));
-        } else if ($this->isJsonRequest() && $this->getOption('allow_realtime')) {
+        } elseif ($this->isJsonRequest() && $this->getOption('allow_realtime')) {
             echo json_encode($this->getData($_GET['section'] ?? null));
             exit;
         }
@@ -225,13 +227,14 @@ class Service
     /**
      * @param string|null $file
      * @return bool
+     * @throws Exception
      */
     public function resetCache(?string $file = null): bool
     {
         $success = false;
         if ($file === null) {
             $success = opcache_reset();
-        } else if (function_exists('opcache_invalidate')) {
+        } elseif (function_exists('opcache_invalidate')) {
             $success = opcache_invalidate(urldecode($file), true);
         }
         if ($success) {
@@ -243,6 +246,7 @@ class Service
     /**
      * @param string $search
      * @return bool
+     * @throws Exception
      */
     public function resetSearched(string $search): bool
     {
@@ -288,6 +292,7 @@ class Service
 
     /**
      * @return array
+     * @throws Exception
      */
     protected function compileState(): array
     {
@@ -300,7 +305,7 @@ class Service
 
         $files = [];
         if (!empty($status['scripts']) && $this->getOption('allow_filelist')) {
-            uasort($status['scripts'], function ($a, $b) {
+            uasort($status['scripts'], static function ($a, $b) {
                 return $a['hits'] <=> $b['hits'];
             });
             foreach ($status['scripts'] as &$file) {
@@ -340,10 +345,12 @@ class Service
                         'num_cached_keys' => number_format($status['opcache_statistics']['num_cached_keys']),
                         'max_cached_keys' => number_format($status['opcache_statistics']['max_cached_keys']),
                         'interned' => null,
-                        'start_time' => date('Y-m-d H:i:s', $status['opcache_statistics']['start_time']),
+                        'start_time' => (new DateTimeImmutable("@{$status['opcache_statistics']['start_time']}"))
+                            ->format('Y-m-d H:i:s'),
                         'last_restart_time' => ($status['opcache_statistics']['last_restart_time'] == 0
                             ? 'never'
-                            : date('Y-m-d H:i:s', $status['opcache_statistics']['last_restart_time'])
+                            : (new DateTimeImmutable("@{$status['opcache_statistics']['last_restart_time']}"))
+                                ->format('Y-m-d H:i:s')
                         )
                     ]
                 ]
@@ -402,7 +409,7 @@ class Service
                         $levels[] = "{$level}: {$this->jitModes[$type]['value'][$level]} ({$this->jitModes[$type]['flag']})";
                     }
                     $v = $levels;
-                } elseif (strtolower($v) === 'off' || $v === '') {
+                } elseif ($v === '' || strtolower($v) === 'off') {
                     $v = 'Off';
                 }
             }

@@ -291,14 +291,12 @@ class Service
                         'num_cached_keys' => number_format($status['opcache_statistics']['num_cached_keys']),
                         'max_cached_keys' => number_format($status['opcache_statistics']['max_cached_keys']),
                         'interned' => null,
-                        'start_time' => (new DateTimeImmutable(
-                                $status['opcache_statistics']['start_time'], date_default_timezone_get()
-                            ))->format('Y-m-d H:i:s'),
+                        'start_time' => (new DateTimeImmutable("@{$status['opcache_statistics']['start_time']}"))
+                            ->format('Y-m-d H:i:s'),
                         'last_restart_time' => ($status['opcache_statistics']['last_restart_time'] == 0
                             ? 'never'
-                            : (new DateTimeImmutable(
-                                $status['opcache_statistics']['last_restart_time'], date_default_timezone_get())
-                              )->format('Y-m-d H:i:s')
+                            : (new DateTimeImmutable("@{$status['opcache_statistics']['last_restart_time']}"))
+                                ->format('Y-m-d H:i:s')
                         )
                     ]
                 ]
