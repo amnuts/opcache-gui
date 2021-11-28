@@ -57,6 +57,7 @@ header('Cache-Control: no-cache, must-revalidate');
 header('Pragma: no-cache');
 
 use DateTimeImmutable;
+use DateTimeZone;
 use Exception;
 
 class Service
@@ -346,10 +347,12 @@ class Service
                         'max_cached_keys' => number_format($status['opcache_statistics']['max_cached_keys']),
                         'interned' => null,
                         'start_time' => (new DateTimeImmutable("@{$status['opcache_statistics']['start_time']}"))
+                            ->setTimezone(new DateTimeZone(date_default_timezone_get()))
                             ->format('Y-m-d H:i:s'),
                         'last_restart_time' => ($status['opcache_statistics']['last_restart_time'] == 0
                             ? 'never'
                             : (new DateTimeImmutable("@{$status['opcache_statistics']['last_restart_time']}"))
+                                ->setTimezone(new DateTimeZone(date_default_timezone_get()))
                                 ->format('Y-m-d H:i:s')
                         )
                     ]
