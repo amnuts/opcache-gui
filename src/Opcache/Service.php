@@ -72,6 +72,11 @@ class Service
             ]
         ]
     ];
+    protected $jitModeMapping = [
+        'tracing' => 1254,
+        'on' => 1254,
+        'function' => 1205
+    ];
 
     /**
      * Service constructor.
@@ -352,13 +357,16 @@ class Service
                 }
                 $v = $levels ?: 'none';
             } elseif ($k === 'opcache.jit') {
-                if (is_numeric($v)) {
+                if ($v === '1') {
+                    $v = 'on';
+                }
+                if (isset($this->jitModeMapping[$v]) || is_numeric($v)) {
                     $levels = [];
-                    foreach (str_split((string)$v) as $type => $level) {
+                    foreach (str_split((string)($this->jitModeMapping[$v] ?? $v)) as $type => $level) {
                         $levels[] = "{$level}: {$this->jitModes[$type]['value'][$level]} ({$this->jitModes[$type]['flag']})";
                     }
-                    $v = $levels;
-                } elseif ($v === '' || strtolower($v) === 'off') {
+                    $v = [$v, $levels];
+                } elseif (empty($v) || strtolower($v) === 'off') {
                     $v = 'Off';
                 }
             }
