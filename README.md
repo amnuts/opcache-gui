@@ -4,18 +4,27 @@ A clean and responsive interface for Zend OPcache information, showing statistic
 
 This interface uses ReactJS and Axios and is for modern browsers and requires a minimum of PHP 7.1.
 
-[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=acollington&url=https://github.com/amnuts/opcache-gui&title=opcache-gui&language=&tags=github&category=software)
-If you like this software or find it helpful then maybe you'll consider supporting my efforts in some way by [signing up to Flattr and leaving a micro-donation](https://flattr.com/@acollington).
+# License
 
-### Using the opcache-gui
+MIT: http://acollington.mit-license.org/
+
+# Sponsoring this work
+
+If you're able and would like to sponsor this work in some way, then feel free to do so through the [GitHub Sponsorship](https://github.com/sponsors/amnuts) page.
+
+Alternatively, if you'd just like to give me a [shout-out on Twitter](https://twitter.com/acollington) to say you use it, that'd be awesome, too!  (Any one else miss postcardware?)
+
+# Using the opcache-gui
+
+## Installing
 
 There are two ways to getting started using this gui:
 
-#### Copy/clone this repo
+### Copy/clone this repo
 
 The easiest way to start using the opcache-gui is to clone this repo, or simply copy/paste/download the `index.php` file to a location which your web server can load.  Then point your browser to that location, such as `https://www.example.com/opcache/index.php`.
 
-#### Install via composer
+### Install via composer
 
 You can include the files with [Composer](https://getcomposer.org/) by running the command `composer require amnuts/opcache-gui`.
 
@@ -58,7 +67,7 @@ ln -s /var/www/vendor/amnuts/opcache-gui/index.php /var/www/html/opcache.php
 
 Basically, there are plenty of ways to get the interface up and running - pick whichever suits your needs.
 
-### Configuration
+## Configuration
 
 The default configuration for the interface looks like this:
 
@@ -94,7 +103,7 @@ $opcache = (new Service([
 ]))->handle();
 ```
 
-### Changing the look
+## Changing the look
 
 The interface has been split up to allow you to easily change the colours of the gui, or even the core components, should you wish.
 
@@ -114,6 +123,8 @@ The build script will only need to install the `node_modules` once, so on subseq
 The build process will create a compiled css file at `build/interface.css` and the javascript of the interface will be in `build/interface.js`.  You could probably use both of these within your own frameworks and templating systems, should you wish.
 
 The core PHP template used in the build process, and that acts to pass various bits of data to the ReactJS side of things, is located at `build/template.phps`.  If you wanted to update the version of ReactJS used, or how the wrapper html is structured, then this would be the file you'd want to update. 
+
+## The interface
 
 ### Overview
 
@@ -159,7 +170,13 @@ When the real-time updates are active, the interface will automatically update a
 
 Also, if you choose to invalidate any files or reset the cache it will do this without reloading the page, so the search term you've entered, or the page to which you've navigated do not get reset.  If the real-time update is not on then the page will reload on any invalidation usage.
 
-## Releases
+# Releases
+
+**Version 3.3.1**\
+Just a few minor tweaks:
+* Added more of an explanation to the JIT value
+* Replaced date functions with \DateTime and related classes
+* Updated README with troubleshooting and sponsorship info (and refined header levels)
 
 **Version 3.3.0**\
 Mostly added JIT information for PHP 8:
@@ -250,7 +267,7 @@ Releases of the GUI are available at:
 
 https://github.com/amnuts/opcache-gui/releases/
 
-### Making is compatible with PHP 7.0
+# Making is compatible with PHP 7.0
 
 The script requires PHP 7.1 or above.  I'm not tempted to downgrade the code to make it compatible with version 7.0, and hopefully most people would have upgraded by now. But I really do appreciate that sometimes people just don't have the ability to change the version of PHP they use because it's out of their control.  So if you're one of the unlucky ones, you can make the following changes to `index.php` (or `Service.php` and run the build script).  For the lines:
 
@@ -264,6 +281,16 @@ public function resetCache(?string $file = null): bool
 
 It'll just be a case of removing the `?` from each of the params.
 
-# License
+# Troubleshooting
 
-MIT: http://acollington.mit-license.org/
+## Use of PHP-FPM
+
+A number of people have questioned whether the opcache-gui is working on their instance of PHP-FPM, as the files shown don't appear to be everything that's cached, and that's different to what Apache might show.
+
+Essentially, that's expected behaviour.  And thanks to a great comment from contributor [Michalng](https://github.com/amnuts/opcache-gui/issues/78#issuecomment-1008015099), this explanation should cover the difference:
+
+> The interface can only show what it knows about the OPcache usage of its own OPcache instance, hence when it's accessed through Apache with mod_php, then it can only see the OPcache usage of that Apache webserver OPcache instance.  When it's accessed with classic CGI, it can only see itself being cached as a new PHP and OPcache instance is created, in which case OPcache itself often doesn't make sense.
+> 
+> To be able to monitor and manage the OPcache for all web applications, all need to use the same FastCGI, i.e. PHP-FPM instance.
+> 
+> In case of Apache, one then often needs to actively configure it to not use it's internal mod_php but send PHP handler requests to the shared PHP-FPM server via mod_proxy_fcgi, which also requires using the event MPM.  That is generally seen as the preferred setup nowadays, especially for high traffic websites.  This is because every single incoming request with MPM prefork + mod_php creates an own child process taking additional time and memory, while with event MPM and dedicated PHP-FPM server a (usually) already waiting handler thread is used on Apache and on PHP end, consuming nearly no additional memory or time for process spawning.

@@ -337,7 +337,9 @@ function Directives(props) {
         return (
             <ul className="directive-list">{
                 directive.v.map((item, key) => {
-                    return <li key={key}>{item}</li>
+                    return Array.isArray(item)
+                        ? <li key={"sublist_" + key}>{directiveList({v:item})}</li>
+                        : <li key={key}>{item}</li>
                 })
             }</ul>
         );
