@@ -67,9 +67,9 @@ $opcache = (new Service($options))->handle();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>OPcache statistics on <?= $opcache->getData('version', 'host'); ?></title>
-    <script src="//unpkg.com/react/umd/react.production.min.js" crossorigin></script>
-    <script src="//unpkg.com/react-dom/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="//unpkg.com/axios/dist/axios.min.js" crossorigin></script>
+    <script src="//unpkg.com/react/umd/react.production.min.js"></script>
+    <script src="//unpkg.com/react-dom/umd/react-dom.production.min.js"></script>
+    <script src="//unpkg.com/axios/dist/axios.min.js"></script>
     <style type="text/css">
         {{CSS_OUTPUT}}
     </style>
