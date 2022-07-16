@@ -104,7 +104,7 @@ $opcache = (new Service([
 ]))->handle();
 ```
 
-## Changing the look
+## Building it yourself
 
 The interface has been split up to allow you to easily change the colours of the gui, or even the core components, should you wish.
 
@@ -124,6 +124,8 @@ The build script will only need to install the `node_modules` once, so on subseq
 The build process will create a compiled css file at `build/interface.css` and the javascript of the interface will be in `build/interface.js`.  You could probably use both of these within your own frameworks and templating systems, should you wish.
 
 The core PHP template used in the build process, and that acts to pass various bits of data to the ReactJS side of things, is located at `build/template.phps`.  If you wanted to update the version of ReactJS used, or how the wrapper html is structured, then this would be the file you'd want to update. 
+
+The template includes a few remote js files.  If you want to make those local (for example, you have CSP policies in place and the remote urls are not whitelisted), then you can use the `-l` or `--local-js` flags when building, such as `php ./build/build.php -l`.  This will fetch the remote script files and put them in the root of the repo, adjusting the links in the built `index.php` file to point to the local copies.  If you want to build it again with remote files, run the command again without the flag.
 
 ## The interface
 
@@ -176,6 +178,7 @@ Also, if you choose to invalidate any files or reset the cache it will do this w
 **Version 3.4.0**\
 * Added new `datetime_format` config option for flexible formatting of date/time values
 * Added the cached file's `modified` date/time to the output (when the file was either added or updated)
+* You can now build the `index.php` file with the js files local rather than remote urls
 * Added PR#83 from @Stevemoretz
 
 **Version 3.3.1**\

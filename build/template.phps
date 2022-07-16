@@ -62,7 +62,7 @@ $opcache = (new Service($options))->handle();
 
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -70,7 +70,7 @@ $opcache = (new Service($options))->handle();
     <script src="//unpkg.com/react/umd/react.production.min.js"></script>
     <script src="//unpkg.com/react-dom/umd/react-dom.production.min.js"></script>
     <script src="//unpkg.com/axios/dist/axios.min.js"></script>
-    <style type="text/css">
+    <style>
         {{CSS_OUTPUT}}
     </style>
 </head>
