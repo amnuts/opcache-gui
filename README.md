@@ -73,24 +73,25 @@ The default configuration for the interface looks like this:
 
 ```php
 $options = [
-   'allow_filelist'   => true,          // show/hide the files tab
-   'allow_invalidate' => true,          // give a link to invalidate files
-   'allow_reset'      => true,          // give option to reset the whole cache
-   'allow_realtime'   => true,          // give option to enable/disable real-time updates
-   'refresh_time'     => 5,             // how often the data will refresh, in seconds
-   'size_precision'   => 2,             // Digits after decimal point
-   'size_space'       => false,         // have '1MB' or '1 MB' when showing sizes
-   'charts'           => true,          // show gauge chart or just big numbers
-   'debounce_rate'    => 250,           // milliseconds after key press to send keyup event when filtering
-   'per_page'         => 200,           // How many results per page to show in the file list, false for no pagination
-   'cookie_name'      => 'opcachegui',  // name of cookie
-   'cookie_ttl'       => 365,           // days to store cookie
-   'highlight'        => [
-       'memory' => true,                // show the memory chart/big number
-       'hits'   => true,                // show the hit rate chart/big number
-       'keys'   => true,                // show the keys used chart/big number
-       'jit'    => true                 // show the jit buffer chart/big number
-   ]
+    'allow_filelist'   => true,                // show/hide the files tab
+    'allow_invalidate' => true,                // give a link to invalidate files
+    'allow_reset'      => true,                // give option to reset the whole cache
+    'allow_realtime'   => true,                // give option to enable/disable real-time updates
+    'refresh_time'     => 5,                   // how often the data will refresh, in seconds
+    'size_precision'   => 2,                   // Digits after decimal point
+    'size_space'       => false,               // have '1MB' or '1 MB' when showing sizes
+    'charts'           => true,                // show gauge chart or just big numbers
+    'debounce_rate'    => 250,                 // milliseconds after key press to send keyup event when filtering
+    'per_page'         => 200,                 // How many results per page to show in the file list, false for no pagination
+    'cookie_name'      => 'opcachegui',        // name of cookie
+    'cookie_ttl'       => 365,                 // days to store cookie
+    'datetime_format'  => 'D, d M Y H:i:s O',  // Show datetime in this format
+    'highlight'        => [
+        'memory' => true,                      // show the memory chart/big number
+        'hits'   => true,                      // show the hit rate chart/big number
+        'keys'   => true,                      // show the keys used chart/big number
+        'jit'    => true                       // show the jit buffer chart/big number
+    ]
 ];
 ```
 
@@ -171,6 +172,11 @@ When the real-time updates are active, the interface will automatically update a
 Also, if you choose to invalidate any files or reset the cache it will do this without reloading the page, so the search term you've entered, or the page to which you've navigated do not get reset.  If the real-time update is not on then the page will reload on any invalidation usage.
 
 # Releases
+
+**Version 3.4.0**\
+* Added new `datetime_format` config option for flexible formatting of date/time values
+* Added the cached file's `modified` date/time to the output (when the file was either added or updated)
+* Added PR#83 from @Stevemoretz
 
 **Version 3.3.1**\
 Just a few minor tweaks:

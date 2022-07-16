@@ -777,6 +777,7 @@ class CachedFiles extends React.Component {
                     <nav className="filter" aria-label="Sort order">
                         <select name="sortBy" onChange={this.changeSort} value={this.state.sortBy}>
                             <option value="last_used_timestamp">Last used</option>
+                            <option value="last_modified">Last modified</option>
                             <option value="full_path">Path</option>
                             <option value="hits">Number of hits</option>
                             <option value="memory_consumption">Memory consumption</option>
@@ -832,6 +833,7 @@ class CachedFile extends React.Component {
                     <span className="file-metainfo">
                         <b>hits: </b><span>{this.props.readable.hits}, </span>
                         <b>memory: </b><span>{this.props.readable.memory_consumption}, </span>
+                        { this.props.last_modified && <span><b>last modified: </b><span>{this.props.last_modified}, </span></span> }
                         <b>last used: </b><span>{this.props.last_used}</span>
                     </span>
                     { !this.props.timestamp && <span className="invalid file-metainfo"> - has been invalidated</span> }

@@ -10,27 +10,29 @@ class Service
 {
     public const VERSION = '3.4.0';
 
+    protected $tz;
     protected $data;
     protected $options;
     protected $optimizationLevels;
     protected $defaults = [
-        'allow_filelist'   => true,          // show/hide the files tab
-        'allow_invalidate' => true,          // give a link to invalidate files
-        'allow_reset'      => true,          // give option to reset the whole cache
-        'allow_realtime'   => true,          // give option to enable/disable real-time updates
-        'refresh_time'     => 5,             // how often the data will refresh, in seconds
-        'size_precision'   => 2,             // Digits after decimal point
-        'size_space'       => false,         // have '1MB' or '1 MB' when showing sizes
-        'charts'           => true,          // show gauge chart or just big numbers
-        'debounce_rate'    => 250,           // milliseconds after key press to send keyup event when filtering
-        'per_page'         => 200,           // How many results per page to show in the file list, false for no pagination
-        'cookie_name'      => 'opcachegui',  // name of cookie
-        'cookie_ttl'       => 365,           // days to store cookie
+        'allow_filelist'   => true,                // show/hide the files tab
+        'allow_invalidate' => true,                // give a link to invalidate files
+        'allow_reset'      => true,                // give option to reset the whole cache
+        'allow_realtime'   => true,                // give option to enable/disable real-time updates
+        'refresh_time'     => 5,                   // how often the data will refresh, in seconds
+        'size_precision'   => 2,                   // Digits after decimal point
+        'size_space'       => false,               // have '1MB' or '1 MB' when showing sizes
+        'charts'           => true,                // show gauge chart or just big numbers
+        'debounce_rate'    => 250,                 // milliseconds after key press to send keyup event when filtering
+        'per_page'         => 200,                 // How many results per page to show in the file list, false for no pagination
+        'cookie_name'      => 'opcachegui',        // name of cookie
+        'cookie_ttl'       => 365,                 // days to store cookie
+        'datetime_format'  => 'D, d M Y H:i:s O',  // Show datetime in this format
         'highlight'        => [
-            'memory' => true,                // show the memory chart/big number
-            'hits'   => true,                // show the hit rate chart/big number
-            'keys'   => true,                // show the keys used chart/big number
-            'jit'    => true                 // show the jit buffer chart/big number
+            'memory' => true,                      // show the memory chart/big number
+            'hits'   => true,                      // show the hit rate chart/big number
+            'keys'   => true,                      // show the keys used chart/big number
+            'jit'    => true                       // show the jit buffer chart/big number
         ]
     ];
     protected $jitModes = [
@@ -81,6 +83,7 @@ class Service
     /**
      * Service constructor.
      * @param array $options
+     * @throws Exception
      */
     public function __construct(array $options = [])
     {
@@ -103,6 +106,7 @@ class Service
             1 << 15 => 'Inline functions'
         ];
         $this->options = array_merge($this->defaults, $options);
+        $this->tz = new DateTimeZone(date_default_timezone_get());
         $this->data = $this->compileState();
     }
 
@@ -266,6 +270,15 @@ class Service
                     'hits' => number_format($file['hits']),
                     'memory_consumption' => $this->size($file['memory_consumption'])
                 ];
+                $file['last_used'] = (new DateTimeImmutable("@{$file['last_used_timestamp']}"))
+                    ->setTimezone($this->tz)
+                    ->format($this->getOption('datetime_format'));
+                $file['last_modified'] = "";
+                if (!empty($file['timestamp'])) {
+                    $file['last_modified'] = (new DateTimeImmutable("@{$file['timestamp']}"))
+                        ->setTimezone($this->tz)
+                        ->format($this->getOption('datetime_format'));
+                }
             }
             $files = array_values($status['scripts']);
         }
@@ -298,13 +311,13 @@ class Service
                         'max_cached_keys' => number_format($status['opcache_statistics']['max_cached_keys']),
                         'interned' => null,
                         'start_time' => (new DateTimeImmutable("@{$status['opcache_statistics']['start_time']}"))
-                            ->setTimezone(new DateTimeZone(date_default_timezone_get()))
-                            ->format('Y-m-d H:i:s'),
-                        'last_restart_time' => ($status['opcache_statistics']['last_restart_time'] == 0
+                            ->setTimezone($this->tz)
+                            ->format($this->getOption('datetime_format')),
+                        'last_restart_time' => ($status['opcache_statistics']['last_restart_time'] === 0
                             ? 'never'
                             : (new DateTimeImmutable("@{$status['opcache_statistics']['last_restart_time']}"))
-                                ->setTimezone(new DateTimeZone(date_default_timezone_get()))
-                                ->format('Y-m-d H:i:s')
+                                ->setTimezone($this->tz)
+                                ->format($this->getOption('datetime_format'))
                         )
                     ]
                 ]
@@ -379,7 +392,7 @@ class Service
         $version = array_merge(
             $config['version'],
             [
-                'php' => phpversion(),
+                'php' => PHP_VERSION,
                 'server' => $_SERVER['SERVER_SOFTWARE'] ?: '',
                 'host' => (function_exists('gethostname')
                     ? gethostname()
