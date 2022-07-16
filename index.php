@@ -8,7 +8,7 @@ namespace Amnuts\Opcache;
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.3.1
+ * @version 3.4.0
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, https://acollington.mit-license.org/
  */
@@ -62,7 +62,7 @@ use Exception;
 
 class Service
 {
-    public const VERSION = '3.3.1';
+    public const VERSION = '3.4.0';
 
     protected $data;
     protected $options;
@@ -135,6 +135,7 @@ class Service
     /**
      * Service constructor.
      * @param array $options
+     * @throws Exception
      */
     public function __construct(array $options = [])
     {
@@ -354,7 +355,7 @@ class Service
                         'start_time' => (new DateTimeImmutable("@{$status['opcache_statistics']['start_time']}"))
                             ->setTimezone(new DateTimeZone(date_default_timezone_get()))
                             ->format('Y-m-d H:i:s'),
-                        'last_restart_time' => ($status['opcache_statistics']['last_restart_time'] == 0
+                        'last_restart_time' => ($status['opcache_statistics']['last_restart_time'] === 0
                             ? 'never'
                             : (new DateTimeImmutable("@{$status['opcache_statistics']['last_restart_time']}"))
                                 ->setTimezone(new DateTimeZone(date_default_timezone_get()))
@@ -483,7 +484,7 @@ $opcache = (new Service($options))->handle();
 
     <script type="text/javascript">
 
-    function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+    function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
