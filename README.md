@@ -176,6 +176,7 @@ Also, if you choose to invalidate any files or reset the cache it will do this w
 # Releases
 
 **Version 3.4.0**\
+This version adds a little more info about the files in the cache, and allows a bit more configuration though the config and build script.
 * Added new `datetime_format` config option for flexible formatting of date/time values
 * Added the cached file's `modified` date/time to the output (when the file was either added or updated)
 * You can now build the `index.php` file with the js files local rather than remote urls
