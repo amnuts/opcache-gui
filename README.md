@@ -91,7 +91,9 @@ $options = [
         'hits'   => true,                      // show the hit rate chart/big number
         'keys'   => true,                      // show the keys used chart/big number
         'jit'    => true                       // show the jit buffer chart/big number
-    ]
+    ],
+    // json structure of all text strings used, or null for default
+    'language_pack'    => {{LANGUAGE_PACK}}
 ];
 ```
 
@@ -106,11 +108,11 @@ $opcache = (new Service([
 
 ## Building it yourself
 
-The interface has been split up to allow you to easily change the colours of the gui, or even the core components, should you wish.
+The interface has been split up to allow you to easily change the colours of the gui, the language shown, or even the core components, should you wish.
 
-The CSS for the interface is in the `build/_frontend/interface.scss` file.  If you want to change the interface itself, update the `build/_frontend/interface.jsx` file - it's basically a set of ReactJS components.
+### The build command
 
-If you update those files, you will want to build the interface again and have the new jsx/css put into use.  To do that, run the command `php ./build/build.php` from the repo root (you will need `nodejs` and `npm` installed).  Once running, you should see the output:
+To run the build process, run the command `php ./build/build.php` from the repo root (you will need `nodejs` and `npm` already installed).  Once running, you should see the output something like:
 
 ```
 🐢 Installing node modules
@@ -123,11 +125,31 @@ The build script will only need to install the `node_modules` once, so on subseq
 
 The build process will create a compiled css file at `build/interface.css` and the javascript of the interface will be in `build/interface.js`.  You could probably use both of these within your own frameworks and templating systems, should you wish.
 
-The core PHP template used in the build process, and that acts to pass various bits of data to the ReactJS side of things, is located at `build/template.phps`.  If you wanted to update the version of ReactJS used, or how the wrapper html is structured, then this would be the file you'd want to update. 
+### The style
 
-The template includes a few remote js files.  If you want to make those local (for example, you have CSP policies in place and the remote urls are not whitelisted), then you can use the `-l` or `--local-js` flags when building, such as `php ./build/build.php -l`.  This will fetch the remote script files and put them in the root of the repo, adjusting the links in the built `index.php` file to point to the local copies.  If you want to build it again with remote files, run the command again without the flag.
+The CSS for the interface is in the `build/_frontend/interface.scss` file.  Make changes there if you want to change the colours or formatting.
 
-## The interface
+If you make any changes to the scss file then you'll need to run the build script in order to see the changes.
+
+### The layout
+
+If you want to change the interface itself, update the `build/_frontend/interface.jsx` file - it's basically a set of ReactJS components.  This is where you can change the widget layout, how the file list works, pagination, etc.
+
+Run the build script again should you make changes here. 
+
+### The javascript
+
+The wrapper PHP template used in the build process, and that acts to pass various bits of data to the ReactJS side of things, is located at `build/template.phps`.  If you wanted to update the version of ReactJS used, or how the wrapper html is structured (such as wanting to pass additional things to the ReactJS side of things), then this would be the file you'd want to update. 
+
+The template includes a few remote js files.  If you want to make those local (for example, you have CSP policies in place and the remote urls are not whitelisted), then you can use the `-j` or `--local-js` flags when building, such as `php ./build/build.php -j`.  This will fetch the remote script files and put them in the root of the repo, adjusting the links in the built `index.php` file to point to the local copies.  If you want to build it again with remote files, run the command again without the flag.
+
+### The language
+
+There's an old saying that goes, "If you know more than one language you're multilingual, if you don't you're British."  Not only is that a damning indictment of the British mentality towards other languages, but also goes to explain why the UI has only so far been in English - because I am, for all my sins, British.
+
+However, thanks to contributions from other people it is possible to change the language used in the interface!
+
+If the language pack is in the `build/_languages/` directory then you can use that with the `-l` or `--lang` flag.  For example, if there is a `fr.json` language pack then you can use `php ./build/build.php -l fr` in order to build with that language.
 
 ### Overview
 
