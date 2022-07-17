@@ -4,27 +4,27 @@ A clean and responsive interface for Zend OPcache information, showing statistic
 
 This interface uses ReactJS and Axios and is for modern browsers and requires a minimum of PHP 7.1.
 
-# License
+## License
 
 MIT: http://acollington.mit-license.org/
 
-# Sponsoring this work
+## Sponsoring this work
 
-If you're able and would like to sponsor this work in some way, then feel free to do so through the [GitHub Sponsorship](https://github.com/sponsors/amnuts) page.
+If you're able and would like to sponsor this work in some way, then that would be super awesome :heart:, and you can do so through the [GitHub Sponsorship](https://github.com/sponsors/amnuts) page.
 
 Alternatively, if you'd just like to give me a [shout-out on Twitter](https://twitter.com/acollington) to say you use it, that'd be awesome, too!  (Any one else miss postcardware?)
 
-# Using the opcache-gui
+## Using the opcache-gui
 
-## Installing
+### Installing
 
 There are two ways to getting started using this gui:
 
-### Copy/clone this repo
+#### Copy/clone this repo
 
 The easiest way to start using the opcache-gui is to clone this repo, or simply copy/paste/download the `index.php` file to a location which your web server can load.  Then point your browser to that location, such as `https://www.example.com/opcache/index.php`.
 
-### Install via composer
+#### Install via composer
 
 You can include the files with [Composer](https://getcomposer.org/) by running the command `composer require amnuts/opcache-gui`.
 
@@ -67,7 +67,7 @@ ln -s /var/www/vendor/amnuts/opcache-gui/index.php /var/www/html/opcache.php
 
 Basically, there are plenty of ways to get the interface up and running - pick whichever suits your needs.
 
-## Configuration
+### Configuration
 
 The default configuration for the interface looks like this:
 
@@ -97,7 +97,9 @@ $options = [
 ];
 ```
 
-If you want to change any of the defaults, you can pass in just the ones you want to change if you're happy to keep the rest as-is.  Just alter the array at the top of the `index.php` script (or pass in the array differently to the `Service` class).  For example, the following would change only the `allow_reset` and `refresh_time` values but keep everything else as the default:
+If you want to change any of the defaults, you can pass in just the ones you want to change if you're happy to keep the rest as-is.  Just alter the array at the top of the `index.php` script (or pass in the array differently to the `Service` class).
+
+For example, the following would change only the `allow_reset` and `refresh_time` values but keep everything else as the default:
 
 ```php
 $opcache = (new Service([
@@ -106,11 +108,76 @@ $opcache = (new Service([
 ]))->handle();
 ```
 
-## Building it yourself
+Or this example to give the tabs a slightly more "piratey" feel:
+
+```php
+$opcache = (new Service([
+    'language_pack' => <<<EOJSON
+{
+    "Overview": "Crows nest",
+    "Cached": "Thar Booty",
+    "Ignored": "The Black Spot",
+    "Preloaded": "Ready an' waitin', Captain'",
+    "Reset cache": "Be gone, yer scurvy dogs!",
+    "Enable real-time update": "Keep a weathered eye",
+    "Disable real-time update": "Avert yer eyes, sea dog!"
+}
+EOJSON
+]))->handle();
+```
+
+
+### The interface
+
+#### Overview
+
+The overview will show you all the core information.  From here you'll be able to see what host and platform you're running on, what version of OPcache you're using, when it was last reset, the functions and directives available (with links to the php.net manual), and all the statistics associated with the OPcache (number of hits, memory used, free and wasted memory, and more).
+
+![Screenshot of the Overview tab](http://amnuts.com/images/opcache/screenshot/overview-v3.3.0.png)
+
+#### Cached files
+
+All the files currently in the cache are listed here with their associated statistics.
+
+You can filter the results to help find the particular scripts you're looking for and change the way cached files are sorted.  From here you can invalidate the cache for individual files or invalidate the cache for all the files matching your search.
+
+If you do not want to show the file list at all then you can use the `allow_filelist` configuration option; setting it to `false` will suppress the file list altogether.
+
+If you want to adjust the pagination length you can do so with the `per_page` configuration option.
+
+![Screenshot of the Cached files list showing filtered results and pagination](http://amnuts.com/images/opcache/screenshot/cached-v3.png)
+
+#### Ignored files
+
+If you have set up a list of files which you don't want cache by supplying an `opcache.blacklist_filename` value, then the list of files will be listed within this tab.
+
+If you have not supplied that configuration option in the `php.ini` file then this tab will not be displayed.  If you set the `allow_filelist` configuration option to `false` then this tab will not be displayed irrespective of your ini setting.
+
+#### Preloaded files
+
+PHP 7.4 introduced the ability to pre-load a set of files on server start by way of the `opcache.preload` setting in your `php.ini` file.  If you have set that up then the list of files specifically pre-loaded will be listed within this tab.
+
+As with the ignored file, if you have not supplied the ini setting, or the `allow_filelist` configuration option is `false`, then this tab will not be displayed.
+
+#### Reset the cache
+
+You can reset the whole cache as well as force individual files, or groups of files, to become invalidated so that they will be cached again.
+
+Resetting can be disabled with the use of the configuration options `allow_reset` and `allow_invalidate`.
+
+#### Real-time updates
+
+The interface can poll every so often to get a fresh look at the opcache.  You can change how often this happens with the configuration option `refresh_time`, which is in seconds.
+
+When the real-time updates are active, the interface will automatically update all the values as needed.
+
+Also, if you choose to invalidate any files or reset the cache it will do this without reloading the page, so the search term you've entered, or the page to which you've navigated do not get reset.  If the real-time update is not on then the page will reload on any invalidation usage.
+
+### Building it yourself
 
 The interface has been split up to allow you to easily change the colours of the gui, the language shown, or even the core components, should you wish.
 
-### The build command
+#### The build command
 
 To run the build process, run the command `php ./build/build.php` from the repo root (you will need `nodejs` and `npm` already installed).  Once running, you should see the output something like:
 
@@ -125,25 +192,25 @@ The build script will only need to install the `node_modules` once, so on subseq
 
 The build process will create a compiled css file at `build/interface.css` and the javascript of the interface will be in `build/interface.js`.  You could probably use both of these within your own frameworks and templating systems, should you wish.
 
-### The style
+#### The style
 
 The CSS for the interface is in the `build/_frontend/interface.scss` file.  Make changes there if you want to change the colours or formatting.
 
 If you make any changes to the scss file then you'll need to run the build script in order to see the changes.
 
-### The layout
+#### The layout
 
 If you want to change the interface itself, update the `build/_frontend/interface.jsx` file - it's basically a set of ReactJS components.  This is where you can change the widget layout, how the file list works, pagination, etc.
 
 Run the build script again should you make changes here. 
 
-### The javascript
+#### The javascript
 
 The wrapper PHP template used in the build process, and that acts to pass various bits of data to the ReactJS side of things, is located at `build/template.phps`.  If you wanted to update the version of ReactJS used, or how the wrapper html is structured (such as wanting to pass additional things to the ReactJS side of things), then this would be the file you'd want to update. 
 
 The template includes a few remote js files.  If you want to make those local (for example, you have CSP policies in place and the remote urls are not whitelisted), then you can use the `-j` or `--local-js` flags when building, such as `php ./build/build.php -j`.  This will fetch the remote script files and put them in the root of the repo, adjusting the links in the built `index.php` file to point to the local copies.  If you want to build it again with remote files, run the command again without the flag.
 
-### The language
+#### The language
 
 There's an old saying that goes, "If you know more than one language you're multilingual, if you don't you're British."  Not only is that a damning indictment of the British mentality towards other languages, but also goes to explain why the UI has only so far been in English - because I am, for all my sins, British.
 
@@ -151,51 +218,11 @@ However, thanks to contributions from other people it is possible to change the 
 
 If the language pack is in the `build/_languages/` directory then you can use that with the `-l` or `--lang` flag.  For example, if there is a `fr.json` language pack then you can use `php ./build/build.php -l fr` in order to build with that language.
 
-### Overview
+If you want to create a language file then `build/_languages/example.json` contains all you need.  It's a simple json structure with the key being the English version which matches what's in the UI, and the value is what you're converting it to - which in the example file is just blank.  If a value is empty or the index doesn't exist for a translation, then it'll just use the English version.  This gives you the ability to replace some or all of the interface strings as you see fit.
 
-The overview will show you all the core information.  From here you'll be able to see what host and platform you're running on, what version of OPcache you're using, when it was last reset, the functions and directives available (with links to the php.net manual), and all the statistics associated with the OPcache (number of hits, memory used, free and wasted memory, and more).
+So to get started with a new language, copy the `example.json` to the language you want that doesn't already exist - for example, `pt-br.json`.  Then fill in the translations into the value.  Once done, rebuild with `php ./build/build.php -l pt-br`.
 
-![Screenshot of the Overview tab](http://amnuts.com/images/opcache/screenshot/overview-v3.3.0.png)
-
-### Cached files
-
-All the files currently in the cache are listed here with their associated statistics.
-
-You can filter the results to help find the particular scripts you're looking for and change the way cached files are sorted.  From here you can invalidate the cache for individual files or invalidate the cache for all the files matching your search.
-
-If you do not want to show the file list at all then you can use the `allow_filelist` configuration option; setting it to `false` will suppress the file list altogether.
-
-If you want to adjust the pagination length you can do so with the `per_page` configuration option.
-
-![Screenshot of the Cached files list showing filtered results and pagination](http://amnuts.com/images/opcache/screenshot/cached-v3.png)
-
-### Ignored files
-
-If you have set up a list of files which you don't want cache by supplying an `opcache.blacklist_filename` value, then the list of files will be listed within this tab.
-
-If you have not supplied that configuration option in the `php.ini` file then this tab will not be displayed.  If you set the `allow_filelist` configuration option to `false` then this tab will not be displayed irrespective of your ini setting.
-
-### Preloaded files
-
-PHP 7.4 introduced the ability to pre-load a set of files on server start by way of the `opcache.preload` setting in your `php.ini` file.  If you have set that up then the list of files specifically pre-loaded will be listed within this tab.
-
-As with the ignored file, if you have not supplied the ini setting, or the `allow_filelist` configuration option is `false`, then this tab will not be displayed.
-
-### Reset the cache
-
-You can reset the whole cache as well as force individual files, or groups of files, to become invalidated so that they will be cached again.
-
-Resetting can be disabled with the use of the configuration options `allow_reset` and `allow_invalidate`.
-
-### Real-time updates
-
-The interface can poll every so often to get a fresh look at the opcache.  You can change how often this happens with the configuration option `refresh_time`, which is in seconds.
-
-When the real-time updates are active, the interface will automatically update all the values as needed.
-
-Also, if you choose to invalidate any files or reset the cache it will do this without reloading the page, so the search term you've entered, or the page to which you've navigated do not get reset.  If the real-time update is not on then the page will reload on any invalidation usage.
-
-# Releases
+## Releases
 
 **Version 3.4.0**\
 This version adds a little more info about the files in the cache, and allows a bit more configuration though the config and build script.
@@ -203,6 +230,7 @@ This version adds a little more info about the files in the cache, and allows a 
 * Added the cached file's `modified` date/time to the output (when the file was either added or updated)
 * You can now build the `index.php` file with the js files local rather than remote urls
 * Added PR#83 from @Stevemoretz
+* Added the ability to build the interface with a different language.  If there's a language you want, and it's not there, please make a PR!
 
 **Version 3.3.1**\
 Just a few minor tweaks:
@@ -299,7 +327,22 @@ Releases of the GUI are available at:
 
 https://github.com/amnuts/opcache-gui/releases/
 
-# Making is compatible with PHP 7.0
+## Troubleshooting
+
+### Use of PHP-FPM
+
+A number of people have questioned whether the opcache-gui is working on their instance of PHP-FPM, as the files shown don't appear to be everything that's cached, and that's different to what Apache might show.
+
+Essentially, that's expected behaviour.  And thanks to a great comment from contributor [Michalng](https://github.com/amnuts/opcache-gui/issues/78#issuecomment-1008015099), this explanation should cover the difference:
+
+> The interface can only show what it knows about the OPcache usage of its own OPcache instance, hence when it's accessed through Apache with mod_php, then it can only see the OPcache usage of that Apache webserver OPcache instance.  When it's accessed with classic CGI, it can only see itself being cached as a new PHP and OPcache instance is created, in which case OPcache itself often doesn't make sense.
+> 
+> To be able to monitor and manage the OPcache for all web applications, all need to use the same FastCGI, i.e. PHP-FPM instance.
+> 
+> In case of Apache, one then often needs to actively configure it to not use it's internal mod_php but send PHP handler requests to the shared PHP-FPM server via mod_proxy_fcgi, which also requires using the event MPM.  That is generally seen as the preferred setup nowadays, especially for high traffic websites.  This is because every single incoming request with MPM prefork + mod_php creates an own child process taking additional time and memory, while with event MPM and dedicated PHP-FPM server a (usually) already waiting handler thread is used on Apache and on PHP end, consuming nearly no additional memory or time for process spawning.
+
+
+### Making is compatible with PHP 7.0
 
 The script requires PHP 7.1 or above.  I'm not tempted to downgrade the code to make it compatible with version 7.0, and hopefully most people would have upgraded by now. But I really do appreciate that sometimes people just don't have the ability to change the version of PHP they use because it's out of their control.  So if you're one of the unlucky ones, you can make the following changes to `index.php` (or `Service.php` and run the build script).  For the lines:
 
@@ -312,17 +355,3 @@ public function resetCache(?string $file = null): bool
 ```
 
 It'll just be a case of removing the `?` from each of the params.
-
-# Troubleshooting
-
-## Use of PHP-FPM
-
-A number of people have questioned whether the opcache-gui is working on their instance of PHP-FPM, as the files shown don't appear to be everything that's cached, and that's different to what Apache might show.
-
-Essentially, that's expected behaviour.  And thanks to a great comment from contributor [Michalng](https://github.com/amnuts/opcache-gui/issues/78#issuecomment-1008015099), this explanation should cover the difference:
-
-> The interface can only show what it knows about the OPcache usage of its own OPcache instance, hence when it's accessed through Apache with mod_php, then it can only see the OPcache usage of that Apache webserver OPcache instance.  When it's accessed with classic CGI, it can only see itself being cached as a new PHP and OPcache instance is created, in which case OPcache itself often doesn't make sense.
-> 
-> To be able to monitor and manage the OPcache for all web applications, all need to use the same FastCGI, i.e. PHP-FPM instance.
-> 
-> In case of Apache, one then often needs to actively configure it to not use it's internal mod_php but send PHP handler requests to the shared PHP-FPM server via mod_proxy_fcgi, which also requires using the event MPM.  That is generally seen as the preferred setup nowadays, especially for high traffic websites.  This is because every single incoming request with MPM prefork + mod_php creates an own child process taking additional time and memory, while with event MPM and dedicated PHP-FPM server a (usually) already waiting handler thread is used on Apache and on PHP end, consuming nearly no additional memory or time for process spawning.
