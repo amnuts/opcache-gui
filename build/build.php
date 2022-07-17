@@ -9,8 +9,8 @@
  * @license MIT, https://acollington.mit-license.org/
  */
 
-$options = getopt('l', ['local-js']);
-$makeJsLocal = (isset($options['l']) || isset($options['local-js']));
+$options = getopt('j', ['local-js']);
+$makeJsLocal = (isset($options['j']) || isset($options['local-js']));
 $parentPath = dirname(__DIR__);
 
 if (!file_exists($parentPath . '/node_modules')) {
