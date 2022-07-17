@@ -833,7 +833,7 @@ class CachedFile extends React.Component {
                     <span className="file-metainfo">
                         <b>hits: </b><span>{this.props.readable.hits}, </span>
                         <b>memory: </b><span>{this.props.readable.memory_consumption}, </span>
-                        { this.props.last_modified && <span><b>last modified: </b><span>{this.props.last_modified}, </span></span> }
+                        { this.props.last_modified && <><b>last modified: </b><span>{this.props.last_modified}, </span></> }
                         <b>last used: </b><span>{this.props.last_used}</span>
                     </span>
                     { !this.props.timestamp && <span className="invalid file-metainfo"> - has been invalidated</span> }
