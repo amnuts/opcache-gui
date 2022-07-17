@@ -7,5 +7,5 @@
 !/build/template.phps
 !/build/build.php
 !/build/_frontend
-!/build/languages
+!/build/_languages
 /*.js
