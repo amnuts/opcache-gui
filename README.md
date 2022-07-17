@@ -93,7 +93,7 @@ $options = [
         'jit'    => true                       // show the jit buffer chart/big number
     ],
     // json structure of all text strings used, or null for default
-    'language_pack'    => {{LANGUAGE_PACK}}
+    'language_pack'    => null
 ];
 ```
 
