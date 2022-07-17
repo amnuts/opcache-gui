@@ -50,6 +50,12 @@ class Service
      */
     public function __construct(array $options = [])
     {
+        $this->options = array_merge($this->defaults, $options);
+        $this->tz = new DateTimeZone(date_default_timezone_get());
+        if (is_string($this->options['language_pack'])) {
+            $this->options['language_pack'] = json_decode($this->options['language_pack'], true);
+        }
+
         $this->optimizationLevels = [
             1 << 0  => $this->txt('CSE, STRING construction'),
             1 << 1  => $this->txt('Constant conversion and jumps'),
@@ -107,8 +113,6 @@ class Service
                 ]
             ]
         ];
-        $this->options = array_merge($this->defaults, $options);
-        $this->tz = new DateTimeZone(date_default_timezone_get());
 
         $this->data = $this->compileState();
     }
@@ -120,7 +124,7 @@ class Service
     {
         $args = func_get_args();
         $text = array_shift($args);
-        if ((($lang = $this->getOption('language')) !== null) && !empty($lang[$text])) {
+        if ((($lang = $this->getOption('language_pack')) !== null) && !empty($lang[$text])) {
             $text = $lang[$text];
         }
         foreach ($args as $i => $arg) {

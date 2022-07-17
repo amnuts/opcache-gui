@@ -29,8 +29,8 @@ $jsOutput = trim(file_get_contents(__DIR__ . '/interface.js'));
 $cssOutput = trim(file_get_contents(__DIR__ . '/interface.css'));
 $phpOutput = trim(implode('', array_slice(file($parentPath . '/src/Opcache/Service.php'), 3)));
 $output = str_replace(
-    ['{{JS_OUTPUT}}', '{{CSS_OUTPUT}}', '{{PHP_OUTPUT}}'],
-    [$jsOutput, $cssOutput, $phpOutput],
+    ['{{JS_OUTPUT}}', '{{CSS_OUTPUT}}', '{{PHP_OUTPUT}}', '{{LANGUAGE_PACK}}'],
+    [$jsOutput, $cssOutput, $phpOutput, 'null'],
     $template
 );
 if ($makeJsLocal) {

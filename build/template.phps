@@ -39,7 +39,8 @@ $options = [
         'keys'   => true,                      // show the keys used chart/big number
         'jit'    => true                       // show the jit buffer chart/big number
     ],
-    'language_pack'    => null                 // json structure of all text strings used, or null for default
+    // json structure of all text strings used, or null for default
+    'language_pack'    => {{LANGUAGE_PACK}}
 ];
 
 /*
@@ -101,7 +102,8 @@ $opcache = (new Service($options))->handle();
         highlight: <?= json_encode($opcache->getOption('highlight')); ?>,
         debounceRate: <?= $opcache->getOption('debounce_rate'); ?>,
         perPageLimit: <?= json_encode($opcache->getOption('per_page')); ?>,
-        realtimeRefresh: <?= json_encode($opcache->getOption('refresh_time')); ?>
+        realtimeRefresh: <?= json_encode($opcache->getOption('refresh_time')); ?>,
+        language: <?= json_encode($opcache->getOption('language_pack')); ?>,
     }), document.getElementById('interface'));
 
     </script>
