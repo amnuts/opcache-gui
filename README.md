@@ -117,7 +117,7 @@ $opcache = (new Service([
     "Overview": "Crows nest",
     "Cached": "Thar Booty",
     "Ignored": "The Black Spot",
-    "Preloaded": "Ready an' waitin', Captain'",
+    "Preloaded": "Ready an' waitin', Cap'n",
     "Reset cache": "Be gone, yer scurvy dogs!",
     "Enable real-time update": "Keep a weathered eye",
     "Disable real-time update": "Avert yer eyes, sea dog!"
