@@ -231,6 +231,7 @@ This version adds a little more info about the files in the cache, and allows a 
 * You can now build the `index.php` file with the js files local rather than remote urls
 * Added PR#83 from @Stevemoretz
 * Added the ability to build the interface with a different language.  If there's a language you want, and it's not there, please make a PR!
+* Added French language pack from @bbalet (PR#91)
 
 **Version 3.3.1**\
 Just a few minor tweaks:
