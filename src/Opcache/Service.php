@@ -337,7 +337,7 @@ class Service
                             ->setTimezone($this->tz)
                             ->format($this->getOption('datetime_format')),
                         'last_restart_time' => ($status['opcache_statistics']['last_restart_time'] === 0
-                            ? 'never'
+                            ? $this->txt('never')
                             : (new DateTimeImmutable("@{$status['opcache_statistics']['last_restart_time']}"))
                                 ->setTimezone($this->tz)
                                 ->format($this->getOption('datetime_format'))

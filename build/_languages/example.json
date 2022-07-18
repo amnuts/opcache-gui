@@ -98,7 +98,10 @@
   "wasted memory": "",
   "You have <i>opcache.file_cache_only<\/i> turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by <i>opcache_get_statistics()<\/i>.": "",
   "{0} files cached": "",
-  "{0} files cached`, {1} showing due to filter '{2}'": "",
+  "{0} files cached, {1} showing due to filter '{2}'": "",
   "{0} ignore file locations": "",
-  "{0} preloaded files": ""
+  "{0} preloaded files": "",
+  "Last reset": "",
+  "Start time": "",
+  "never": ""
 }
