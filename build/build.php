@@ -9,9 +9,21 @@
  * @license MIT, https://acollington.mit-license.org/
  */
 
-$options = getopt('j', ['local-js']);
+$options = getopt('jl:', ['local-js', 'lang:']);
 $makeJsLocal = (isset($options['j']) || isset($options['local-js']));
+$useLanguage = $options['l'] ?? $options['lang'] ?? null;
+$languagePack = 'null';
 $parentPath = dirname(__DIR__);
+
+if ($useLanguage !== null) {
+    $useLanguage = preg_replace('/[^a-z_-]/', '', $useLanguage);
+    $languageFile = __DIR__ . "/_languages/{$useLanguage}.json";
+    if (!file_exists($languageFile)) {
+        echo "The '{$useLanguage}' file does not exist - using default English\n\n";
+    } else {
+        $languagePack = "<<< EOJSON\n" . file_get_contents($languageFile) . "\nEOJSON";
+    }
+}
 
 if (!file_exists($parentPath . '/node_modules')) {
     echo "🐢 Installing node modules\n";
@@ -28,9 +40,10 @@ $template = trim(file_get_contents(__DIR__ . '/template.phps'));
 $jsOutput = trim(file_get_contents(__DIR__ . '/interface.js'));
 $cssOutput = trim(file_get_contents(__DIR__ . '/interface.css'));
 $phpOutput = trim(implode('', array_slice(file($parentPath . '/src/Opcache/Service.php'), 3)));
+
 $output = str_replace(
     ['{{JS_OUTPUT}}', '{{CSS_OUTPUT}}', '{{PHP_OUTPUT}}', '{{LANGUAGE_PACK}}'],
-    [$jsOutput, $cssOutput, $phpOutput, 'null'],
+    [$jsOutput, $cssOutput, $phpOutput, $languagePack],
     $template
 );
 if ($makeJsLocal) {
