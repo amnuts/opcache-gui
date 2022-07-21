@@ -38,7 +38,117 @@ $options = [
         'hits'   => true,                      // show the hit rate chart/big number
         'keys'   => true,                      // show the keys used chart/big number
         'jit'    => true                       // show the jit buffer chart/big number
-    ]
+    ],
+    // json structure of all text strings used, or null for default
+    'language_pack'    => <<< EOJSON
+{
+    "(unsafe) Collect constants": "(instable) Collecter les constantes",
+    "++, +=, series of jumps": "++, +=, séries de sauts",
+    "Adjust used stack": "Ajuster la pile utilisée",
+    "Ascending": "Croissant",
+    "Available functions": "Fonctions disponibles",
+    "blacklist misses": "Ratés mis sur liste noire",
+    "buffer size": "taille du tampon",
+    "Cached": "En cache",
+    "CALL GRAPH optimization": "Optimisation CALL GRAPH",
+    "CFG based optimization": "Optimisation basée sur CFG",
+    "Compile all functions on script load": "Compiler toutes les fonctions au chargement du script",
+    "Compile functions on first execution": "Compiler les fonctions à la première exécution",
+    "Constant conversion and jumps": "Conversion des constantes et sauts",
+    "CPU-specific optimization": "Optimisation spécifique au CPU",
+    "CSE, STRING construction": "Construction CSE, STRING",
+    "Currently unused": "Actuellement inutilisé",
+    "DCE (dead code elimination)": "DCE (élimination du code mort)",
+    "Descending": "Décroissant",
+    "DFA based optimization": "Optimisation basée sur DFA",
+    "Directives": "Directives",
+    "Disable CPU-specific optimization": "Désactiver l'optimisation spécifique au processeur",
+    "Disable real-time update": "Désactiver la mise à jour en temps réel",
+    "Do not perform register allocation": "Ne pas effectuer d'allocation de registre",
+    "Enable real-time update": "Activer la mise à jour en temps réel",
+    "Enable use of AVX, if the CPU supports it": "Activer l'utilisation d'AVX, si le CPU le prend en charge",
+    "false": "faux",
+    "File list pagination": "Pagination de la liste des fichiers",
+    "force file invalidation": "forcer l'invalidation du fichier",
+    "free memory": "mémoire libre",
+    "General info": "Informations générales",
+    "has been invalidated": "a été invalidé",
+    "hit rate": "taux de succès",
+    "hits": "accès",
+    "Host": "Hôte",
+    "Ignored": "Ignoré",
+    "INIT_FCALL_BY_NAME -> DO_FCALL": "INIT_FCALL_BY_NAME -> DO_FCALL",
+    "Inline functions": "Fonctions inline",
+    "Inline VM handlers": "Gestionnaires de VM inline",
+    "interned strings usage": "utilisation des chaînes internées",
+    "Invalidate all matching files": "Invalider tous les fichiers correspondants",
+    "jit buffer free": "tampon jit libre",
+    "jit buffer": "tampon jit",
+    "keys": "clés",
+    "Last modified": "Dernière modification",
+    "last modified": "dernière modification",
+    "Last used": "Dernière utilisation",
+    "last used": "dernière utilisation",
+    "max cached keys": "max de clés en cache",
+    "Memory consumption": "Consommation mémoire",
+    "memory usage": "utilisation de la mémoire",
+    "memory": "mémoire",
+    "Merge equal constants": "Fusionner les constantes égales",
+    "Minimal JIT (call standard VM handlers)": "JIT minimal (appel des gestionnaires de VM standard)",
+    "Next": "Suivant",
+    "No files have been cached or you have <i>opcache.file_cache_only<\/i> turned on": "Aucun fichier n'a été mis en cache ou vous avez <i>opcache.file_cache_only<\/i> activé",
+    "No files have been ignored via <i>opcache.blacklist_filename<\/i>": "Aucun fichier n'a été ignoré via <i>opcache.blacklist_filename<\/i>",
+    "No files have been preloaded <i>opcache.preload<\/i>": "Aucun fichier n'a été préchargé <i>opcache.preload<\/i>",
+    "No JIT": "Pas de JIT",
+    "no value": "pas de valeur",
+    "NOP removal": "Suppression de NOP",
+    "number of cached files": "nombre de fichiers en cache",
+    "number of cached keys": "nombre de clés en cache",
+    "Number of hits": "Nombre d'accès",
+    "number of hits": "nombre d'accès",
+    "number of misses": "nombre de ratés",
+    "number of strings": "nombre de chaînes",
+    "opcache statistics": "statistiques d'opcache",
+    "Optimization level": "Niveau d'optimisation",
+    "Optimize whole script": "Optimiser tout le script",
+    "Overview": "Vue d'ensemble",
+    "Path": "Chemin",
+    "Perform block-local register allocation": "Effectuer l'allocation de registre local de bloc",
+    "Perform global register allocation": "Effectuer une allocation de registre globale",
+    "preload memory": "précharger la mémoire",
+    "Preloaded": "Préchargé",
+    "Previous": "Précédent",
+    "Profile functions on first request and compile the hottest functions afterwards": "Profiling des fonctions à la première demande et compilation des fonctions les plus fréquentes par la suite",
+    "Profile on the fly and compile hot functions": "Profiling à la volée et compiler les fonctions les plus fréquentes",
+    "Register allocation": "Allocation de registre",
+    "Remove unused variables": "Supprimer les variables inutilisées",
+    "Reset cache": "Réinitialiser le cache",
+    "SCCP (constant propagation)": "SCCP (propagation des constantes)",
+    "Script": "Script",
+    "Server Software": "Logiciel serveur",
+    "Sort order": "Ordre de tri",
+    "Start typing to filter on script path": "Commencez à taper pour filtrer sur le chemin du script",
+    "TMP VAR usage": "Utilisation TMP VAR",
+    "total memory": "mémoire totale",
+    "Trigger": "Déclencheur",
+    "true": "vrai",
+    "Use call graph": "Utiliser le graphe des appels",
+    "Use tracing JIT. Profile on the fly and compile traces for hot code segments": "Utilisez le suivi JIT. Profiling à la volée et compilation des traces pour les segments de code les plus fréquents",
+    "Use type inference": "Utiliser l'inférence de type",
+    "used memory": "mémoire utilisée",
+    "View manual page": "Voir la page du manuel",
+    "View {0} manual entry": "Voir la page {0} du manuel",
+    "wasted memory": "mémoire perdue",
+    "You have <i>opcache.file_cache_only<\/i> turned on. As a result, the memory information is not available. Statistics and file list may also not be returned by <i>opcache_get_statistics()<\/i>.": "Vous avez <i>opcache.file_cache_only<\/i> activé. Par conséquent, les informations sur la mémoire ne sont pas disponibles. Les statistiques et la liste de fichiers peuvent également ne pas être renvoyées par <i>opcache_get_statistics()<\/i>.",
+    "{0} files cached": "{0} fichiers mis en cache",
+    "{0} files cached, {1} showing due to filter '{2}'": "{0} fichiers mis en cache, {1} s'affichent en raison du filtre '{2}'",
+    "{0} ignore file locations": "{0} ignore les fichiers en fonction de l'emplacement",
+    "{0} preloaded files": "{0} fichiers préchargés",
+    "Last reset": "",
+    "Start time": "",
+    "never": ""
+}
+EOJSON
 ];
 
 /*
@@ -69,6 +179,12 @@ class Service
     protected $data;
     protected $options;
     protected $optimizationLevels;
+    protected $jitModes;
+    protected $jitModeMapping = [
+        'tracing' => 1254,
+        'on' => 1254,
+        'function' => 1205
+    ];
     protected $defaults = [
         'allow_filelist'   => true,                // show/hide the files tab
         'allow_invalidate' => true,                // give a link to invalidate files
@@ -88,51 +204,8 @@ class Service
             'hits'   => true,                      // show the hit rate chart/big number
             'keys'   => true,                      // show the keys used chart/big number
             'jit'    => true                       // show the jit buffer chart/big number
-        ]
-    ];
-    protected $jitModes = [
-        [
-            'flag' => 'CPU-specific optimization',
-            'value' => [
-                'Disable CPU-specific optimization',
-                'Enable use of AVX, if the CPU supports it'
-            ]
         ],
-        [
-            'flag' => 'Register allocation',
-            'value' => [
-                'Do not perform register allocation',
-                'Perform block-local register allocation',
-                'Perform global register allocation'
-            ]
-        ],
-        [
-            'flag' => 'Trigger',
-            'value' => [
-                'Compile all functions on script load',
-                'Compile functions on first execution',
-                'Profile functions on first request and compile the hottest functions afterwards',
-                'Profile on the fly and compile hot functions',
-                'Currently unused',
-                'Use tracing JIT. Profile on the fly and compile traces for hot code segments'
-            ]
-        ],
-        [
-            'flag' => 'Optimization level',
-            'value' => [
-                'No JIT',
-                'Minimal JIT (call standard VM handlers)',
-                'Inline VM handlers',
-                'Use type inference',
-                'Use call graph',
-                'Optimize whole script'
-            ]
-        ]
-    ];
-    protected $jitModeMapping = [
-        'tracing' => 1254,
-        'on' => 1254,
-        'function' => 1205
+        'language_pack'    => null                 // json structure of all text strings used, or null for default
     ];
 
     /**
@@ -142,27 +215,87 @@ class Service
      */
     public function __construct(array $options = [])
     {
-        $this->optimizationLevels = [
-            1 << 0 => 'CSE, STRING construction',
-            1 << 1 => 'Constant conversion and jumps',
-            1 << 2 => '++, +=, series of jumps',
-            1 << 3 => 'INIT_FCALL_BY_NAME -> DO_FCALL',
-            1 << 4 => 'CFG based optimization',
-            1 << 5 => 'DFA based optimization',
-            1 << 6 => 'CALL GRAPH optimization',
-            1 << 7 => 'SCCP (constant propagation)',
-            1 << 8 => 'TMP VAR usage',
-            1 << 9 => 'NOP removal',
-            1 << 10 => 'Merge equal constants',
-            1 << 11 => 'Adjust used stack',
-            1 << 12 => 'Remove unused variables',
-            1 << 13 => 'DCE (dead code elimination)',
-            1 << 14 => '(unsafe) Collect constants',
-            1 << 15 => 'Inline functions'
-        ];
         $this->options = array_merge($this->defaults, $options);
         $this->tz = new DateTimeZone(date_default_timezone_get());
+        if (is_string($this->options['language_pack'])) {
+            $this->options['language_pack'] = json_decode($this->options['language_pack'], true);
+        }
+
+        $this->optimizationLevels = [
+            1 << 0  => $this->txt('CSE, STRING construction'),
+            1 << 1  => $this->txt('Constant conversion and jumps'),
+            1 << 2  => $this->txt('++, +=, series of jumps'),
+            1 << 3  => $this->txt('INIT_FCALL_BY_NAME -> DO_FCALL'),
+            1 << 4  => $this->txt('CFG based optimization'),
+            1 << 5  => $this->txt('DFA based optimization'),
+            1 << 6  => $this->txt('CALL GRAPH optimization'),
+            1 << 7  => $this->txt('SCCP (constant propagation)'),
+            1 << 8  => $this->txt('TMP VAR usage'),
+            1 << 9  => $this->txt('NOP removal'),
+            1 << 10 => $this->txt('Merge equal constants'),
+            1 << 11 => $this->txt('Adjust used stack'),
+            1 << 12 => $this->txt('Remove unused variables'),
+            1 << 13 => $this->txt('DCE (dead code elimination)'),
+            1 << 14 => $this->txt('(unsafe) Collect constants'),
+            1 << 15 => $this->txt('Inline functions'),
+        ];
+        $this->jitModes = [
+            [
+                'flag' => $this->txt('CPU-specific optimization'),
+                'value' => [
+                    $this->txt('Disable CPU-specific optimization'),
+                    $this->txt('Enable use of AVX, if the CPU supports it')
+                ]
+            ],
+            [
+                'flag' => $this->txt('Register allocation'),
+                'value' => [
+                    $this->txt('Do not perform register allocation'),
+                    $this->txt('Perform block-local register allocation'),
+                    $this->txt('Perform global register allocation')
+                ]
+            ],
+            [
+                'flag' => $this->txt('Trigger'),
+                'value' => [
+                    $this->txt('Compile all functions on script load'),
+                    $this->txt('Compile functions on first execution'),
+                    $this->txt('Profile functions on first request and compile the hottest functions afterwards'),
+                    $this->txt('Profile on the fly and compile hot functions'),
+                    $this->txt('Currently unused'),
+                    $this->txt('Use tracing JIT. Profile on the fly and compile traces for hot code segments')
+                ]
+            ],
+            [
+                'flag' => $this->txt('Optimization level'),
+                'value' => [
+                    $this->txt('No JIT'),
+                    $this->txt('Minimal JIT (call standard VM handlers)'),
+                    $this->txt('Inline VM handlers'),
+                    $this->txt('Use type inference'),
+                    $this->txt('Use call graph'),
+                    $this->txt('Optimize whole script')
+                ]
+            ]
+        ];
+
         $this->data = $this->compileState();
+    }
+
+    /**
+     * @return string
+     */
+    public function txt(): string
+    {
+        $args = func_get_args();
+        $text = array_shift($args);
+        if ((($lang = $this->getOption('language_pack')) !== null) && !empty($lang[$text])) {
+            $text = $lang[$text];
+        }
+        foreach ($args as $i => $arg) {
+            $text = str_replace('{' . $i . '}', $arg, $text);
+        }
+        return $text;
     }
 
     /**
@@ -369,7 +502,7 @@ class Service
                             ->setTimezone($this->tz)
                             ->format($this->getOption('datetime_format')),
                         'last_restart_time' => ($status['opcache_statistics']['last_restart_time'] === 0
-                            ? 'never'
+                            ? $this->txt('never')
                             : (new DateTimeImmutable("@{$status['opcache_statistics']['last_restart_time']}"))
                                 ->setTimezone($this->tz)
                                 ->format($this->getOption('datetime_format'))
@@ -497,7 +630,7 @@ $opcache = (new Service($options))->handle();
 
     <script type="text/javascript">
 
-    function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+    function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -576,6 +709,17 @@ class Interface extends React.Component {
       return v ? !!v[2] : false;
     });
 
+    _defineProperty(this, "txt", (text, ...args) => {
+      if (this.props.language !== null && this.props.language.hasOwnProperty(text) && this.props.language[text]) {
+        text = this.props.language[text];
+      }
+
+      args.forEach((arg, i) => {
+        text = text.replaceAll(`{${i}}`, arg);
+      });
+      return text;
+    });
+
     this.state = {
       realtime: this.getCookie(),
       resetting: false,
@@ -600,7 +744,8 @@ class Interface extends React.Component {
       realtime: this.state.realtime,
       resetting: this.state.resetting,
       realtimeHandler: this.realtimeHandler,
-      resetHandler: this.resetHandler
+      resetHandler: this.resetHandler,
+      txt: this.txt
     }))), /*#__PURE__*/React.createElement(Footer, {
       version: this.props.opstate.version.gui
     }));
@@ -612,26 +757,30 @@ function MainNavigation(props) {
   return /*#__PURE__*/React.createElement("nav", {
     className: "main-nav"
   }, /*#__PURE__*/React.createElement(Tabs, null, /*#__PURE__*/React.createElement("div", {
-    label: "Overview",
+    label: props.txt("Overview"),
     tabId: "overview",
     tabIndex: 1
   }, /*#__PURE__*/React.createElement(OverviewCounts, {
     overview: props.opstate.overview,
     highlight: props.highlight,
-    useCharts: props.useCharts
+    useCharts: props.useCharts,
+    txt: props.txt
   }), /*#__PURE__*/React.createElement("div", {
     id: "info",
     className: "tab-content-overview-info"
   }, /*#__PURE__*/React.createElement(GeneralInfo, {
     start: props.opstate.overview && props.opstate.overview.readable.start_time || null,
     reset: props.opstate.overview && props.opstate.overview.readable.last_restart_time || null,
-    version: props.opstate.version
+    version: props.opstate.version,
+    txt: props.txt
   }), /*#__PURE__*/React.createElement(Directives, {
-    directives: props.opstate.directives
+    directives: props.opstate.directives,
+    txt: props.txt
   }), /*#__PURE__*/React.createElement(Functions, {
-    functions: props.opstate.functions
+    functions: props.opstate.functions,
+    txt: props.txt
   }))), props.allow.filelist && /*#__PURE__*/React.createElement("div", {
-    label: "Cached",
+    label: props.txt("Cached"),
     tabId: "cached",
     tabIndex: 2
   }, /*#__PURE__*/React.createElement(CachedFiles, {
@@ -643,9 +792,10 @@ function MainNavigation(props) {
       fileList: props.allow.filelist,
       invalidate: props.allow.invalidate
     },
-    realtime: props.realtime
+    realtime: props.realtime,
+    txt: props.txt
   })), props.allow.filelist && props.opstate.blacklist.length && /*#__PURE__*/React.createElement("div", {
-    label: "Ignored",
+    label: props.txt("Ignored"),
     tabId: "ignored",
     tabIndex: 3
   }, /*#__PURE__*/React.createElement(IgnoredFiles, {
@@ -653,9 +803,10 @@ function MainNavigation(props) {
     allFiles: props.opstate.blacklist,
     allow: {
       fileList: props.allow.filelist
-    }
+    },
+    txt: props.txt
   })), props.allow.filelist && props.opstate.preload.length && /*#__PURE__*/React.createElement("div", {
-    label: "Preloaded",
+    label: props.txt("Preloaded"),
     tabId: "preloaded",
     tabIndex: 4
   }, /*#__PURE__*/React.createElement(PreloadedFiles, {
@@ -663,15 +814,16 @@ function MainNavigation(props) {
     allFiles: props.opstate.preload,
     allow: {
       fileList: props.allow.filelist
-    }
+    },
+    txt: props.txt
   })), props.allow.reset && /*#__PURE__*/React.createElement("div", {
-    label: "Reset cache",
+    label: props.txt("Reset cache"),
     tabId: "resetCache",
     className: `nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`,
     handler: props.resetHandler,
     tabIndex: 5
   }), props.allow.realtime && /*#__PURE__*/React.createElement("div", {
-    label: `${props.realtime ? 'Disable' : 'Enable'} real-time update`,
+    label: props.txt(`${props.realtime ? 'Disable' : 'Enable'} real-time update`),
     tabId: "toggleRealtime",
     className: `nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`,
     handler: props.realtimeHandler,
@@ -782,27 +934,27 @@ function OverviewCounts(props) {
   if (props.overview === false) {
     return /*#__PURE__*/React.createElement("p", {
       class: "file-cache-only"
-    }, "You have ", /*#__PURE__*/React.createElement("i", null, "opcache.file_cache_only"), " turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by ", /*#__PURE__*/React.createElement("i", null, "opcache_get_statistics()"), ".");
+    }, props.txt(`You have <i>opcache.file_cache_only</i> turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by <i>opcache_get_statistics()</i>.`));
   }
 
   const graphList = [{
     id: 'memoryUsageCanvas',
-    title: 'memory',
+    title: props.txt('memory'),
     show: props.highlight.memory,
     value: props.overview.used_memory_percentage
   }, {
     id: 'hitRateCanvas',
-    title: 'hit rate',
+    title: props.txt('hit rate'),
     show: props.highlight.hits,
     value: props.overview.hit_rate_percentage
   }, {
     id: 'keyUsageCanvas',
-    title: 'keys',
+    title: props.txt('keys'),
     show: props.highlight.keys,
     value: props.overview.used_key_percentage
   }, {
     id: 'jitUsageCanvas',
-    title: 'jit buffer',
+    title: props.txt('jit buffer'),
     show: props.highlight.jit,
     value: props.overview.jit_buffer_used_percentage
   }];
@@ -833,19 +985,22 @@ function OverviewCounts(props) {
     wastedPercent: props.overview.wasted_percentage,
     jitBuffer: props.overview.readable.jit_buffer_size || null,
     jitBufferFree: props.overview.readable.jit_buffer_free || null,
-    jitBufferFreePercentage: props.overview.jit_buffer_used_percentage || null
+    jitBufferFreePercentage: props.overview.jit_buffer_used_percentage || null,
+    txt: props.txt
   }), /*#__PURE__*/React.createElement(StatisticsPanel, {
     num_cached_scripts: props.overview.readable.num_cached_scripts,
     hits: props.overview.readable.hits,
     misses: props.overview.readable.misses,
     blacklist_miss: props.overview.readable.blacklist_miss,
     num_cached_keys: props.overview.readable.num_cached_keys,
-    max_cached_keys: props.overview.readable.max_cached_keys
+    max_cached_keys: props.overview.readable.max_cached_keys,
+    txt: props.txt
   }), props.overview.readable.interned && /*#__PURE__*/React.createElement(InternedStringsPanel, {
     buffer_size: props.overview.readable.interned.buffer_size,
     strings_used_memory: props.overview.readable.interned.strings_used_memory,
     strings_free_memory: props.overview.readable.interned.strings_free_memory,
-    number_of_strings: props.overview.readable.interned.number_of_strings
+    number_of_strings: props.overview.readable.interned.number_of_strings,
+    txt: props.txt
   }));
 }
 
@@ -854,7 +1009,7 @@ function GeneralInfo(props) {
     className: "tables general-info-table"
   }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
     colSpan: "2"
-  }, "General info"))), /*#__PURE__*/React.createElement("tbody", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Zend OPcache"), /*#__PURE__*/React.createElement("td", null, props.version.version)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "PHP"), /*#__PURE__*/React.createElement("td", null, props.version.php)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Host"), /*#__PURE__*/React.createElement("td", null, props.version.host)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Server Software"), /*#__PURE__*/React.createElement("td", null, props.version.server)), props.start ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Start time"), /*#__PURE__*/React.createElement("td", null, props.start)) : null, props.reset ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Last reset"), /*#__PURE__*/React.createElement("td", null, props.reset)) : null));
+  }, props.txt('General info')))), /*#__PURE__*/React.createElement("tbody", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Zend OPcache"), /*#__PURE__*/React.createElement("td", null, props.version.version)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "PHP"), /*#__PURE__*/React.createElement("td", null, props.version.php)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.txt('Host')), /*#__PURE__*/React.createElement("td", null, props.version.host)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.txt('Server Software')), /*#__PURE__*/React.createElement("td", null, props.version.server)), props.start ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.txt('Start time')), /*#__PURE__*/React.createElement("td", null, props.start)) : null, props.reset ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.txt('Last reset')), /*#__PURE__*/React.createElement("td", null, props.reset)) : null));
 }
 
 function Directives(props) {
@@ -883,9 +1038,9 @@ function Directives(props) {
     let vShow;
 
     if (directive.v === true || directive.v === false) {
-      vShow = React.createElement('i', {}, directive.v.toString());
+      vShow = React.createElement('i', {}, props.txt(directive.v.toString()));
     } else if (directive.v === '') {
-      vShow = React.createElement('i', {}, 'no value');
+      vShow = React.createElement('i', {}, props.txt('no value'));
     } else {
       if (Array.isArray(directive.v)) {
         vShow = directiveList(directive);
@@ -897,7 +1052,7 @@ function Directives(props) {
     return /*#__PURE__*/React.createElement("tr", {
       key: directive.k
     }, /*#__PURE__*/React.createElement("td", {
-      title: 'View ' + directive.k + ' manual entry'
+      title: props.txt('View {0} manual entry', directive.k)
     }, /*#__PURE__*/React.createElement("a", {
       href: 'https://php.net/manual/en/opcache.configuration.php#ini.' + directive.k.replace(/_/g, '-'),
       target: "_blank"
@@ -907,7 +1062,7 @@ function Directives(props) {
     className: "tables directives-table"
   }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
     colSpan: "2"
-  }, "Directives"))), /*#__PURE__*/React.createElement("tbody", null, directiveNodes));
+  }, props.txt('Directives')))), /*#__PURE__*/React.createElement("tbody", null, directiveNodes));
 }
 
 function Functions(props) {
@@ -915,11 +1070,11 @@ function Functions(props) {
     id: "functions"
   }, /*#__PURE__*/React.createElement("table", {
     className: "tables"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Available functions"))), /*#__PURE__*/React.createElement("tbody", null, props.functions.map(f => /*#__PURE__*/React.createElement("tr", {
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, props.txt('Available functions')))), /*#__PURE__*/React.createElement("tbody", null, props.functions.map(f => /*#__PURE__*/React.createElement("tr", {
     key: f
   }, /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("a", {
     href: "https://php.net/" + f,
-    title: "View manual page",
+    title: props.txt('View manual page'),
     target: "_blank"
   }, f)))))));
 }
@@ -1150,7 +1305,7 @@ function MemoryUsagePanel(props) {
     className: "widget-header"
   }, "memory usage"), /*#__PURE__*/React.createElement("div", {
     className: "widget-value widget-info"
-  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "total memory:"), " ", props.total), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "used memory:"), " ", props.used), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "free memory:"), " ", props.free), props.preload && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "preload memory:"), " ", props.preload), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "wasted memory:"), " ", props.wasted, " (", props.wastedPercent, "%)"), props.jitBuffer && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "jit buffer:"), " ", props.jitBuffer), props.jitBufferFree && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "jit buffer free:"), " ", props.jitBufferFree, " (", 100 - props.jitBufferFreePercentage, "%)")));
+  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('total memory'), ":"), " ", props.total), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('used memory'), ":"), " ", props.used), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('free memory'), ":"), " ", props.free), props.preload && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('preload memory'), ":"), " ", props.preload), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('wasted memory'), ":"), " ", props.wasted, " (", props.wastedPercent, "%)"), props.jitBuffer && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('jit buffer'), ":"), " ", props.jitBuffer), props.jitBufferFree && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('jit buffer free'), ":"), " ", props.jitBufferFree, " (", 100 - props.jitBufferFreePercentage, "%)")));
 }
 
 function StatisticsPanel(props) {
@@ -1158,9 +1313,9 @@ function StatisticsPanel(props) {
     className: "widget-panel"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "widget-header"
-  }, "opcache statistics"), /*#__PURE__*/React.createElement("div", {
+  }, props.txt('opcache statistics')), /*#__PURE__*/React.createElement("div", {
     className: "widget-value widget-info"
-  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of cached files:"), " ", props.num_cached_scripts), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of hits:"), " ", props.hits), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of misses:"), " ", props.misses), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "blacklist misses:"), " ", props.blacklist_miss), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of cached keys:"), " ", props.num_cached_keys), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "max cached keys:"), " ", props.max_cached_keys)));
+  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of cached'), " files:"), " ", props.num_cached_scripts), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of hits'), ":"), " ", props.hits), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of misses'), ":"), " ", props.misses), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('blacklist misses'), ":"), " ", props.blacklist_miss), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of cached keys'), ":"), " ", props.num_cached_keys), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('max cached keys'), ":"), " ", props.max_cached_keys)));
 }
 
 function InternedStringsPanel(props) {
@@ -1168,9 +1323,9 @@ function InternedStringsPanel(props) {
     className: "widget-panel"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "widget-header"
-  }, "interned strings usage"), /*#__PURE__*/React.createElement("div", {
+  }, props.txt('interned strings usage')), /*#__PURE__*/React.createElement("div", {
     className: "widget-value widget-info"
-  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "buffer size:"), " ", props.buffer_size), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "used memory:"), " ", props.strings_used_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "free memory:"), " ", props.strings_free_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of strings:"), " ", props.number_of_strings)));
+  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('buffer size'), ":"), " ", props.buffer_size), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('used memory'), ":"), " ", props.strings_used_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('free memory'), ":"), " ", props.strings_free_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of strings'), ":"), " ", props.number_of_strings)));
 }
 
 class CachedFiles extends React.Component {
@@ -1248,7 +1403,7 @@ class CachedFiles extends React.Component {
     }
 
     if (this.props.allFiles.length === 0) {
-      return /*#__PURE__*/React.createElement("p", null, "No files have been cached or you have ", /*#__PURE__*/React.createElement("i", null, "opcache.file_cache_only"), " turned on");
+      return /*#__PURE__*/React.createElement("p", null, this.props.txt('No files have been cached or you have <i>opcache.file_cache_only</i> turned on'));
     }
 
     const {
@@ -1263,11 +1418,12 @@ class CachedFiles extends React.Component {
     const filesInPage = this.doPagination ? filesInSearch.slice(offset, offset + this.props.perPageLimit) : filesInSearch;
     const allFilesTotal = this.props.allFiles.length;
     const showingTotal = filesInSearch.length;
+    const showing = showingTotal !== allFilesTotal ? ", {1} showing due to filter '{2}'" : "";
     return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("form", {
       action: "#"
     }, /*#__PURE__*/React.createElement("label", {
       htmlFor: "frmFilter"
-    }, "Start typing to filter on script path"), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("input", {
+    }, this.props.txt('Start typing to filter on script path')), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("input", {
       type: "text",
       name: "filter",
       id: "frmFilter",
@@ -1275,49 +1431,51 @@ class CachedFiles extends React.Component {
       onChange: e => {
         this.setSearchTerm(e.target.value);
       }
-    })), /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " files cached", showingTotal !== allFilesTotal && `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`), this.props.allow.invalidate && this.state.searchTerm && showingTotal !== allFilesTotal && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("a", {
+    })), /*#__PURE__*/React.createElement("h3", null, this.props.txt(`{0} files cached${showing}`, allFilesTotal, showingTotal, this.state.searchTerm)), this.props.allow.invalidate && this.state.searchTerm && showingTotal !== allFilesTotal && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("a", {
       href: `?invalidate_searched=${encodeURIComponent(this.state.searchTerm)}`,
       onClick: this.handleInvalidate
-    }, "Invalidate all matching files")), /*#__PURE__*/React.createElement("div", {
+    }, this.props.txt('Invalidate all matching files'))), /*#__PURE__*/React.createElement("div", {
       className: "paginate-filter"
     }, this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
       totalRecords: filesInSearch.length,
       pageLimit: this.props.perPageLimit,
       pageNeighbours: 2,
       onPageChanged: this.onPageChanged,
-      refresh: this.state.refreshPagination
+      refresh: this.state.refreshPagination,
+      txt: this.props.txt
     }), /*#__PURE__*/React.createElement("nav", {
       className: "filter",
-      "aria-label": "Sort order"
+      "aria-label": this.props.txt('Sort order')
     }, /*#__PURE__*/React.createElement("select", {
       name: "sortBy",
       onChange: this.changeSort,
       value: this.state.sortBy
     }, /*#__PURE__*/React.createElement("option", {
       value: "last_used_timestamp"
-    }, "Last used"), /*#__PURE__*/React.createElement("option", {
+    }, this.props.txt('Last used')), /*#__PURE__*/React.createElement("option", {
       value: "last_modified"
-    }, "Last modified"), /*#__PURE__*/React.createElement("option", {
+    }, this.props.txt('Last modified')), /*#__PURE__*/React.createElement("option", {
       value: "full_path"
-    }, "Path"), /*#__PURE__*/React.createElement("option", {
+    }, this.props.txt('Path')), /*#__PURE__*/React.createElement("option", {
       value: "hits"
-    }, "Number of hits"), /*#__PURE__*/React.createElement("option", {
+    }, this.props.txt('Number of hits')), /*#__PURE__*/React.createElement("option", {
       value: "memory_consumption"
-    }, "Memory consumption")), /*#__PURE__*/React.createElement("select", {
+    }, this.props.txt('Memory consumption'))), /*#__PURE__*/React.createElement("select", {
       name: "sortDir",
       onChange: this.changeSort,
       value: this.state.sortDir
     }, /*#__PURE__*/React.createElement("option", {
       value: "desc"
-    }, "Descending"), /*#__PURE__*/React.createElement("option", {
+    }, this.props.txt('Descending')), /*#__PURE__*/React.createElement("option", {
       value: "asc"
-    }, "Ascending")))), /*#__PURE__*/React.createElement("table", {
+    }, this.props.txt('Ascending'))))), /*#__PURE__*/React.createElement("table", {
       className: "tables cached-list-table"
-    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Script"))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, this.props.txt('Script')))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
       return /*#__PURE__*/React.createElement(CachedFile, _extends({
         key: file.full_path,
         canInvalidate: this.props.allow.invalidate,
-        realtime: this.props.realtime
+        realtime: this.props.realtime,
+        txt: this.props.txt
       }, file));
     }))));
   }
@@ -1352,14 +1510,14 @@ class CachedFile extends React.Component {
       className: "file-pathname"
     }, this.props.full_path), /*#__PURE__*/React.createElement("span", {
       className: "file-metainfo"
-    }, /*#__PURE__*/React.createElement("b", null, "hits: "), /*#__PURE__*/React.createElement("span", null, this.props.readable.hits, ", "), /*#__PURE__*/React.createElement("b", null, "memory: "), /*#__PURE__*/React.createElement("span", null, this.props.readable.memory_consumption, ", "), this.props.last_modified && /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("b", null, "last modified: "), /*#__PURE__*/React.createElement("span", null, this.props.last_modified, ", ")), /*#__PURE__*/React.createElement("b", null, "last used: "), /*#__PURE__*/React.createElement("span", null, this.props.last_used)), !this.props.timestamp && /*#__PURE__*/React.createElement("span", {
+    }, /*#__PURE__*/React.createElement("b", null, this.props.txt('hits'), ": "), /*#__PURE__*/React.createElement("span", null, this.props.readable.hits, ", "), /*#__PURE__*/React.createElement("b", null, this.props.txt('memory'), ": "), /*#__PURE__*/React.createElement("span", null, this.props.readable.memory_consumption, ", "), this.props.last_modified && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("b", null, this.props.txt('last modified'), ": "), /*#__PURE__*/React.createElement("span", null, this.props.last_modified, ", ")), /*#__PURE__*/React.createElement("b", null, this.props.txt('last used'), ": "), /*#__PURE__*/React.createElement("span", null, this.props.last_used)), !this.props.timestamp && /*#__PURE__*/React.createElement("span", {
       className: "invalid file-metainfo"
-    }, " - has been invalidated"), this.props.canInvalidate && /*#__PURE__*/React.createElement("span", null, ",\xA0", /*#__PURE__*/React.createElement("a", {
+    }, " - ", this.props.txt('has been invalidated')), this.props.canInvalidate && /*#__PURE__*/React.createElement("span", null, ",\xA0", /*#__PURE__*/React.createElement("a", {
       className: "file-metainfo",
       href: '?invalidate=' + this.props.full_path,
       "data-file": this.props.full_path,
       onClick: this.handleInvalidate
-    }, "force file invalidation"))));
+    }, this.props.txt('force file invalidation')))));
   }
 
 }
@@ -1387,7 +1545,7 @@ class IgnoredFiles extends React.Component {
     }
 
     if (this.props.allFiles.length === 0) {
-      return /*#__PURE__*/React.createElement("p", null, "No files have been ignored via ", /*#__PURE__*/React.createElement("i", null, "opcache.blacklist_filename"));
+      return /*#__PURE__*/React.createElement("p", null, this.props.txt('No files have been ignored via <i>opcache.blacklist_filename</i>'));
     }
 
     const {
@@ -1396,15 +1554,16 @@ class IgnoredFiles extends React.Component {
     const offset = (currentPage - 1) * this.props.perPageLimit;
     const filesInPage = this.doPagination ? this.props.allFiles.slice(offset, offset + this.props.perPageLimit) : this.props.allFiles;
     const allFilesTotal = this.props.allFiles.length;
-    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " ignore file locations"), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
+    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, this.props.txt('{0} ignore file locations', allFilesTotal)), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
       totalRecords: allFilesTotal,
       pageLimit: this.props.perPageLimit,
       pageNeighbours: 2,
       onPageChanged: this.onPageChanged,
-      refresh: this.state.refreshPagination
+      refresh: this.state.refreshPagination,
+      txt: this.props.txt
     }), /*#__PURE__*/React.createElement("table", {
       className: "tables ignored-list-table"
-    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Path"))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, this.props.txt('Path')))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
       return /*#__PURE__*/React.createElement("tr", {
         key: file
       }, /*#__PURE__*/React.createElement("td", null, file));
@@ -1436,7 +1595,7 @@ class PreloadedFiles extends React.Component {
     }
 
     if (this.props.allFiles.length === 0) {
-      return /*#__PURE__*/React.createElement("p", null, "No files have been preloaded ", /*#__PURE__*/React.createElement("i", null, "opcache.preload"));
+      return /*#__PURE__*/React.createElement("p", null, this.props.txt('No files have been preloaded <i>opcache.preload</i>'));
     }
 
     const {
@@ -1445,15 +1604,16 @@ class PreloadedFiles extends React.Component {
     const offset = (currentPage - 1) * this.props.perPageLimit;
     const filesInPage = this.doPagination ? this.props.allFiles.slice(offset, offset + this.props.perPageLimit) : this.props.allFiles;
     const allFilesTotal = this.props.allFiles.length;
-    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " preloaded files"), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
+    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, this.props.txt('{0} preloaded files', allFilesTotal)), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
       totalRecords: allFilesTotal,
       pageLimit: this.props.perPageLimit,
       pageNeighbours: 2,
       onPageChanged: this.onPageChanged,
-      refresh: this.state.refreshPagination
+      refresh: this.state.refreshPagination,
+      txt: this.props.txt
     }), /*#__PURE__*/React.createElement("table", {
       className: "tables preload-list-table"
-    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Path"))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, this.props.txt('Path')))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
       return /*#__PURE__*/React.createElement("tr", {
         key: file
       }, /*#__PURE__*/React.createElement("td", null, file));
@@ -1596,24 +1756,24 @@ class Pagination extends React.Component {
         }, /*#__PURE__*/React.createElement("a", {
           className: "page-link",
           href: "#",
-          "aria-label": "Previous",
+          "aria-label": this.props.txt('Previous'),
           onClick: this.handleJumpLeft
         }, /*#__PURE__*/React.createElement("span", {
           "aria-hidden": "true"
         }, "\u219E"), /*#__PURE__*/React.createElement("span", {
           className: "sr-only"
-        }, "Jump back"))), /*#__PURE__*/React.createElement("li", {
+        }, this.props.txt('Jump back')))), /*#__PURE__*/React.createElement("li", {
           className: "page-item arrow"
         }, /*#__PURE__*/React.createElement("a", {
           className: "page-link",
           href: "#",
-          "aria-label": "Previous",
+          "aria-label": this.props.txt('Previous'),
           onClick: this.handleMoveLeft
         }, /*#__PURE__*/React.createElement("span", {
           "aria-hidden": "true"
         }, "\u21E0"), /*#__PURE__*/React.createElement("span", {
           className: "sr-only"
-        }, "Previous page"))));
+        }, this.props.txt('Previous page')))));
       }
 
       if (page === "RIGHT") {
@@ -1624,24 +1784,24 @@ class Pagination extends React.Component {
         }, /*#__PURE__*/React.createElement("a", {
           className: "page-link",
           href: "#",
-          "aria-label": "Next",
+          "aria-label": this.props.txt('Next'),
           onClick: this.handleMoveRight
         }, /*#__PURE__*/React.createElement("span", {
           "aria-hidden": "true"
         }, "\u21E2"), /*#__PURE__*/React.createElement("span", {
           className: "sr-only"
-        }, "Next page"))), /*#__PURE__*/React.createElement("li", {
+        }, this.props.txt('Next page')))), /*#__PURE__*/React.createElement("li", {
           className: "page-item arrow"
         }, /*#__PURE__*/React.createElement("a", {
           className: "page-link",
           href: "#",
-          "aria-label": "Next",
+          "aria-label": this.props.txt('Next'),
           onClick: this.handleJumpRight
         }, /*#__PURE__*/React.createElement("span", {
           "aria-hidden": "true"
         }, "\u21A0"), /*#__PURE__*/React.createElement("span", {
           className: "sr-only"
-        }, "Jump forward"))));
+        }, this.props.txt('Jump forward')))));
       }
 
       return /*#__PURE__*/React.createElement("li", {
@@ -1709,7 +1869,8 @@ function debounce(func, wait, immediate) {
         highlight: <?= json_encode($opcache->getOption('highlight')); ?>,
         debounceRate: <?= $opcache->getOption('debounce_rate'); ?>,
         perPageLimit: <?= json_encode($opcache->getOption('per_page')); ?>,
-        realtimeRefresh: <?= json_encode($opcache->getOption('refresh_time')); ?>
+        realtimeRefresh: <?= json_encode($opcache->getOption('refresh_time')); ?>,
+        language: <?= json_encode($opcache->getOption('language_pack')); ?>,
     }), document.getElementById('interface'));
 
     </script>

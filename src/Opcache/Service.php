@@ -14,6 +14,12 @@ class Service
     protected $data;
     protected $options;
     protected $optimizationLevels;
+    protected $jitModes;
+    protected $jitModeMapping = [
+        'tracing' => 1254,
+        'on' => 1254,
+        'function' => 1205
+    ];
     protected $defaults = [
         'allow_filelist'   => true,                // show/hide the files tab
         'allow_invalidate' => true,                // give a link to invalidate files
@@ -33,51 +39,8 @@ class Service
             'hits'   => true,                      // show the hit rate chart/big number
             'keys'   => true,                      // show the keys used chart/big number
             'jit'    => true                       // show the jit buffer chart/big number
-        ]
-    ];
-    protected $jitModes = [
-        [
-            'flag' => 'CPU-specific optimization',
-            'value' => [
-                'Disable CPU-specific optimization',
-                'Enable use of AVX, if the CPU supports it'
-            ]
         ],
-        [
-            'flag' => 'Register allocation',
-            'value' => [
-                'Do not perform register allocation',
-                'Perform block-local register allocation',
-                'Perform global register allocation'
-            ]
-        ],
-        [
-            'flag' => 'Trigger',
-            'value' => [
-                'Compile all functions on script load',
-                'Compile functions on first execution',
-                'Profile functions on first request and compile the hottest functions afterwards',
-                'Profile on the fly and compile hot functions',
-                'Currently unused',
-                'Use tracing JIT. Profile on the fly and compile traces for hot code segments'
-            ]
-        ],
-        [
-            'flag' => 'Optimization level',
-            'value' => [
-                'No JIT',
-                'Minimal JIT (call standard VM handlers)',
-                'Inline VM handlers',
-                'Use type inference',
-                'Use call graph',
-                'Optimize whole script'
-            ]
-        ]
-    ];
-    protected $jitModeMapping = [
-        'tracing' => 1254,
-        'on' => 1254,
-        'function' => 1205
+        'language_pack'    => null                 // json structure of all text strings used, or null for default
     ];
 
     /**
@@ -87,27 +50,87 @@ class Service
      */
     public function __construct(array $options = [])
     {
-        $this->optimizationLevels = [
-            1 << 0 => 'CSE, STRING construction',
-            1 << 1 => 'Constant conversion and jumps',
-            1 << 2 => '++, +=, series of jumps',
-            1 << 3 => 'INIT_FCALL_BY_NAME -> DO_FCALL',
-            1 << 4 => 'CFG based optimization',
-            1 << 5 => 'DFA based optimization',
-            1 << 6 => 'CALL GRAPH optimization',
-            1 << 7 => 'SCCP (constant propagation)',
-            1 << 8 => 'TMP VAR usage',
-            1 << 9 => 'NOP removal',
-            1 << 10 => 'Merge equal constants',
-            1 << 11 => 'Adjust used stack',
-            1 << 12 => 'Remove unused variables',
-            1 << 13 => 'DCE (dead code elimination)',
-            1 << 14 => '(unsafe) Collect constants',
-            1 << 15 => 'Inline functions'
-        ];
         $this->options = array_merge($this->defaults, $options);
         $this->tz = new DateTimeZone(date_default_timezone_get());
+        if (is_string($this->options['language_pack'])) {
+            $this->options['language_pack'] = json_decode($this->options['language_pack'], true);
+        }
+
+        $this->optimizationLevels = [
+            1 << 0  => $this->txt('CSE, STRING construction'),
+            1 << 1  => $this->txt('Constant conversion and jumps'),
+            1 << 2  => $this->txt('++, +=, series of jumps'),
+            1 << 3  => $this->txt('INIT_FCALL_BY_NAME -> DO_FCALL'),
+            1 << 4  => $this->txt('CFG based optimization'),
+            1 << 5  => $this->txt('DFA based optimization'),
+            1 << 6  => $this->txt('CALL GRAPH optimization'),
+            1 << 7  => $this->txt('SCCP (constant propagation)'),
+            1 << 8  => $this->txt('TMP VAR usage'),
+            1 << 9  => $this->txt('NOP removal'),
+            1 << 10 => $this->txt('Merge equal constants'),
+            1 << 11 => $this->txt('Adjust used stack'),
+            1 << 12 => $this->txt('Remove unused variables'),
+            1 << 13 => $this->txt('DCE (dead code elimination)'),
+            1 << 14 => $this->txt('(unsafe) Collect constants'),
+            1 << 15 => $this->txt('Inline functions'),
+        ];
+        $this->jitModes = [
+            [
+                'flag' => $this->txt('CPU-specific optimization'),
+                'value' => [
+                    $this->txt('Disable CPU-specific optimization'),
+                    $this->txt('Enable use of AVX, if the CPU supports it')
+                ]
+            ],
+            [
+                'flag' => $this->txt('Register allocation'),
+                'value' => [
+                    $this->txt('Do not perform register allocation'),
+                    $this->txt('Perform block-local register allocation'),
+                    $this->txt('Perform global register allocation')
+                ]
+            ],
+            [
+                'flag' => $this->txt('Trigger'),
+                'value' => [
+                    $this->txt('Compile all functions on script load'),
+                    $this->txt('Compile functions on first execution'),
+                    $this->txt('Profile functions on first request and compile the hottest functions afterwards'),
+                    $this->txt('Profile on the fly and compile hot functions'),
+                    $this->txt('Currently unused'),
+                    $this->txt('Use tracing JIT. Profile on the fly and compile traces for hot code segments')
+                ]
+            ],
+            [
+                'flag' => $this->txt('Optimization level'),
+                'value' => [
+                    $this->txt('No JIT'),
+                    $this->txt('Minimal JIT (call standard VM handlers)'),
+                    $this->txt('Inline VM handlers'),
+                    $this->txt('Use type inference'),
+                    $this->txt('Use call graph'),
+                    $this->txt('Optimize whole script')
+                ]
+            ]
+        ];
+
         $this->data = $this->compileState();
+    }
+
+    /**
+     * @return string
+     */
+    public function txt(): string
+    {
+        $args = func_get_args();
+        $text = array_shift($args);
+        if ((($lang = $this->getOption('language_pack')) !== null) && !empty($lang[$text])) {
+            $text = $lang[$text];
+        }
+        foreach ($args as $i => $arg) {
+            $text = str_replace('{' . $i . '}', $arg, $text);
+        }
+        return $text;
     }
 
     /**
@@ -314,7 +337,7 @@ class Service
                             ->setTimezone($this->tz)
                             ->format($this->getOption('datetime_format')),
                         'last_restart_time' => ($status['opcache_statistics']['last_restart_time'] === 0
-                            ? 'never'
+                            ? $this->txt('never')
                             : (new DateTimeImmutable("@{$status['opcache_statistics']['last_restart_time']}"))
                                 ->setTimezone($this->tz)
                                 ->format($this->getOption('datetime_format'))
