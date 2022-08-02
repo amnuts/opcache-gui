@@ -214,13 +214,13 @@ The template includes a few remote js files.  If you want to make those local (f
 
 There's an old saying that goes, "If you know more than one language you're multilingual, if you don't you're British."  Not only is that a damning indictment of the British mentality towards other languages, but also goes to explain why the UI has only so far been in English - because I am, for all my sins, British.
 
-However, thanks to contributions from other people it is possible to change the language used in the interface!
+However, it is now possible to build the interface with a different language.  Currently, thanks to contributor, French is also support.  If anyone else wants to contribute additional language packs, please submit a PR! 
 
 If the language pack is in the `build/_languages/` directory then you can use that with the `-l` or `--lang` flag.  For example, if there is a `fr.json` language pack then you can use `php ./build/build.php -l fr` in order to build with that language.
 
 If you want to create a language file then `build/_languages/example.json` contains all you need.  It's a simple json structure with the key being the English version which matches what's in the UI, and the value is what you're converting it to - which in the example file is just blank.  If a value is empty or the index doesn't exist for a translation, then it'll just use the English version.  This gives you the ability to replace some or all of the interface strings as you see fit.
 
-So to get started with a new language, copy the `example.json` to the language you want that doesn't already exist - for example, `pt-br.json`.  Then fill in the translations into the value.  Once done, rebuild with `php ./build/build.php -l pt-br`.
+So to get started with a new language, copy the `example.json` to the language you want that doesn't already exist - for example, `pt-br.json`.  Then fill in the translations into the values.  Once done, rebuild with `php ./build/build.php -l pt-br`.
 
 ## Releases
 
