@@ -1,11 +1,11 @@
-/status.js
-/src/status.js
 /.idea
 /.module-cache
 /node_modules
+/vendor
 /package-lock.json
 /build/*
 !/build/template.phps
 !/build/build.php
 !/build/_frontend
-/vendor
+!/build/_languages
+/*.js

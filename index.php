@@ -8,7 +8,7 @@ namespace Amnuts\Opcache;
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.3.1
+ * @version 3.4.0
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, https://acollington.mit-license.org/
  */
@@ -20,24 +20,27 @@ namespace Amnuts\Opcache;
  */
 
 $options = [
-    'allow_filelist'   => true,          // show/hide the files tab
-    'allow_invalidate' => true,          // give a link to invalidate files
-    'allow_reset'      => true,          // give option to reset the whole cache
-    'allow_realtime'   => true,          // give option to enable/disable real-time updates
-    'refresh_time'     => 5,             // how often the data will refresh, in seconds
-    'size_precision'   => 2,             // Digits after decimal point
-    'size_space'       => false,         // have '1MB' or '1 MB' when showing sizes
-    'charts'           => true,          // show gauge chart or just big numbers
-    'debounce_rate'    => 250,           // milliseconds after key press to send keyup event when filtering
-    'per_page'         => 200,           // How many results per page to show in the file list, false for no pagination
-    'cookie_name'      => 'opcachegui',  // name of cookie
-    'cookie_ttl'       => 365,           // days to store cookie
+    'allow_filelist'   => true,                // show/hide the files tab
+    'allow_invalidate' => true,                // give a link to invalidate files
+    'allow_reset'      => true,                // give option to reset the whole cache
+    'allow_realtime'   => true,                // give option to enable/disable real-time updates
+    'refresh_time'     => 5,                   // how often the data will refresh, in seconds
+    'size_precision'   => 2,                   // Digits after decimal point
+    'size_space'       => false,               // have '1MB' or '1 MB' when showing sizes
+    'charts'           => true,                // show gauge chart or just big numbers
+    'debounce_rate'    => 250,                 // milliseconds after key press to send keyup event when filtering
+    'per_page'         => 200,                 // How many results per page to show in the file list, false for no pagination
+    'cookie_name'      => 'opcachegui',        // name of cookie
+    'cookie_ttl'       => 365,                 // days to store cookie
+    'datetime_format'  => 'D, d M Y H:i:s O',  // Show datetime in this format
     'highlight'        => [
-        'memory' => true,                // show the memory chart/big number
-        'hits'   => true,                // show the hit rate chart/big number
-        'keys'   => true,                // show the keys used chart/big number
-        'jit'    => true                 // show the jit buffer chart/big number
-    ]
+        'memory' => true,                      // show the memory chart/big number
+        'hits'   => true,                      // show the hit rate chart/big number
+        'keys'   => true,                      // show the keys used chart/big number
+        'jit'    => true                       // show the jit buffer chart/big number
+    ],
+    // json structure of all text strings used, or null for default
+    'language_pack'    => null
 ];
 
 /*
@@ -62,102 +65,129 @@ use Exception;
 
 class Service
 {
-    public const VERSION = '3.3.1';
+    public const VERSION = '3.4.0';
 
+    protected $tz;
     protected $data;
     protected $options;
     protected $optimizationLevels;
-    protected $defaults = [
-        'allow_filelist'   => true,          // show/hide the files tab
-        'allow_invalidate' => true,          // give a link to invalidate files
-        'allow_reset'      => true,          // give option to reset the whole cache
-        'allow_realtime'   => true,          // give option to enable/disable real-time updates
-        'refresh_time'     => 5,             // how often the data will refresh, in seconds
-        'size_precision'   => 2,             // Digits after decimal point
-        'size_space'       => false,         // have '1MB' or '1 MB' when showing sizes
-        'charts'           => true,          // show gauge chart or just big numbers
-        'debounce_rate'    => 250,           // milliseconds after key press to send keyup event when filtering
-        'per_page'         => 200,           // How many results per page to show in the file list, false for no pagination
-        'cookie_name'      => 'opcachegui',  // name of cookie
-        'cookie_ttl'       => 365,           // days to store cookie
-        'highlight'        => [
-            'memory' => true,                // show the memory chart/big number
-            'hits'   => true,                // show the hit rate chart/big number
-            'keys'   => true,                // show the keys used chart/big number
-            'jit'    => true                 // show the jit buffer chart/big number
-        ]
-    ];
-    protected $jitModes = [
-        [
-            'flag' => 'CPU-specific optimization',
-            'value' => [
-                'Disable CPU-specific optimization',
-                'Enable use of AVX, if the CPU supports it'
-            ]
-        ],
-        [
-            'flag' => 'Register allocation',
-            'value' => [
-                'Do not perform register allocation',
-                'Perform block-local register allocation',
-                'Perform global register allocation'
-            ]
-        ],
-        [
-            'flag' => 'Trigger',
-            'value' => [
-                'Compile all functions on script load',
-                'Compile functions on first execution',
-                'Profile functions on first request and compile the hottest functions afterwards',
-                'Profile on the fly and compile hot functions',
-                'Currently unused',
-                'Use tracing JIT. Profile on the fly and compile traces for hot code segments'
-            ]
-        ],
-        [
-            'flag' => 'Optimization level',
-            'value' => [
-                'No JIT',
-                'Minimal JIT (call standard VM handlers)',
-                'Inline VM handlers',
-                'Use type inference',
-                'Use call graph',
-                'Optimize whole script'
-            ]
-        ]
-    ];
+    protected $jitModes;
     protected $jitModeMapping = [
         'tracing' => 1254,
         'on' => 1254,
         'function' => 1205
     ];
+    protected $defaults = [
+        'allow_filelist'   => true,                // show/hide the files tab
+        'allow_invalidate' => true,                // give a link to invalidate files
+        'allow_reset'      => true,                // give option to reset the whole cache
+        'allow_realtime'   => true,                // give option to enable/disable real-time updates
+        'refresh_time'     => 5,                   // how often the data will refresh, in seconds
+        'size_precision'   => 2,                   // Digits after decimal point
+        'size_space'       => false,               // have '1MB' or '1 MB' when showing sizes
+        'charts'           => true,                // show gauge chart or just big numbers
+        'debounce_rate'    => 250,                 // milliseconds after key press to send keyup event when filtering
+        'per_page'         => 200,                 // How many results per page to show in the file list, false for no pagination
+        'cookie_name'      => 'opcachegui',        // name of cookie
+        'cookie_ttl'       => 365,                 // days to store cookie
+        'datetime_format'  => 'D, d M Y H:i:s O',  // Show datetime in this format
+        'highlight'        => [
+            'memory' => true,                      // show the memory chart/big number
+            'hits'   => true,                      // show the hit rate chart/big number
+            'keys'   => true,                      // show the keys used chart/big number
+            'jit'    => true                       // show the jit buffer chart/big number
+        ],
+        'language_pack'    => null                 // json structure of all text strings used, or null for default
+    ];
 
     /**
      * Service constructor.
      * @param array $options
+     * @throws Exception
      */
     public function __construct(array $options = [])
     {
-        $this->optimizationLevels = [
-            1 << 0 => 'CSE, STRING construction',
-            1 << 1 => 'Constant conversion and jumps',
-            1 << 2 => '++, +=, series of jumps',
-            1 << 3 => 'INIT_FCALL_BY_NAME -> DO_FCALL',
-            1 << 4 => 'CFG based optimization',
-            1 << 5 => 'DFA based optimization',
-            1 << 6 => 'CALL GRAPH optimization',
-            1 << 7 => 'SCCP (constant propagation)',
-            1 << 8 => 'TMP VAR usage',
-            1 << 9 => 'NOP removal',
-            1 << 10 => 'Merge equal constants',
-            1 << 11 => 'Adjust used stack',
-            1 << 12 => 'Remove unused variables',
-            1 << 13 => 'DCE (dead code elimination)',
-            1 << 14 => '(unsafe) Collect constants',
-            1 << 15 => 'Inline functions'
-        ];
         $this->options = array_merge($this->defaults, $options);
+        $this->tz = new DateTimeZone(date_default_timezone_get());
+        if (is_string($this->options['language_pack'])) {
+            $this->options['language_pack'] = json_decode($this->options['language_pack'], true);
+        }
+
+        $this->optimizationLevels = [
+            1 << 0  => $this->txt('CSE, STRING construction'),
+            1 << 1  => $this->txt('Constant conversion and jumps'),
+            1 << 2  => $this->txt('++, +=, series of jumps'),
+            1 << 3  => $this->txt('INIT_FCALL_BY_NAME -> DO_FCALL'),
+            1 << 4  => $this->txt('CFG based optimization'),
+            1 << 5  => $this->txt('DFA based optimization'),
+            1 << 6  => $this->txt('CALL GRAPH optimization'),
+            1 << 7  => $this->txt('SCCP (constant propagation)'),
+            1 << 8  => $this->txt('TMP VAR usage'),
+            1 << 9  => $this->txt('NOP removal'),
+            1 << 10 => $this->txt('Merge equal constants'),
+            1 << 11 => $this->txt('Adjust used stack'),
+            1 << 12 => $this->txt('Remove unused variables'),
+            1 << 13 => $this->txt('DCE (dead code elimination)'),
+            1 << 14 => $this->txt('(unsafe) Collect constants'),
+            1 << 15 => $this->txt('Inline functions'),
+        ];
+        $this->jitModes = [
+            [
+                'flag' => $this->txt('CPU-specific optimization'),
+                'value' => [
+                    $this->txt('Disable CPU-specific optimization'),
+                    $this->txt('Enable use of AVX, if the CPU supports it')
+                ]
+            ],
+            [
+                'flag' => $this->txt('Register allocation'),
+                'value' => [
+                    $this->txt('Do not perform register allocation'),
+                    $this->txt('Perform block-local register allocation'),
+                    $this->txt('Perform global register allocation')
+                ]
+            ],
+            [
+                'flag' => $this->txt('Trigger'),
+                'value' => [
+                    $this->txt('Compile all functions on script load'),
+                    $this->txt('Compile functions on first execution'),
+                    $this->txt('Profile functions on first request and compile the hottest functions afterwards'),
+                    $this->txt('Profile on the fly and compile hot functions'),
+                    $this->txt('Currently unused'),
+                    $this->txt('Use tracing JIT. Profile on the fly and compile traces for hot code segments')
+                ]
+            ],
+            [
+                'flag' => $this->txt('Optimization level'),
+                'value' => [
+                    $this->txt('No JIT'),
+                    $this->txt('Minimal JIT (call standard VM handlers)'),
+                    $this->txt('Inline VM handlers'),
+                    $this->txt('Use type inference'),
+                    $this->txt('Use call graph'),
+                    $this->txt('Optimize whole script')
+                ]
+            ]
+        ];
+
         $this->data = $this->compileState();
+    }
+
+    /**
+     * @return string
+     */
+    public function txt(): string
+    {
+        $args = func_get_args();
+        $text = array_shift($args);
+        if ((($lang = $this->getOption('language_pack')) !== null) && !empty($lang[$text])) {
+            $text = $lang[$text];
+        }
+        foreach ($args as $i => $arg) {
+            $text = str_replace('{' . $i . '}', $arg, $text);
+        }
+        return $text;
     }
 
     /**
@@ -320,6 +350,15 @@ class Service
                     'hits' => number_format($file['hits']),
                     'memory_consumption' => $this->size($file['memory_consumption'])
                 ];
+                $file['last_used'] = (new DateTimeImmutable("@{$file['last_used_timestamp']}"))
+                    ->setTimezone($this->tz)
+                    ->format($this->getOption('datetime_format'));
+                $file['last_modified'] = "";
+                if (!empty($file['timestamp'])) {
+                    $file['last_modified'] = (new DateTimeImmutable("@{$file['timestamp']}"))
+                        ->setTimezone($this->tz)
+                        ->format($this->getOption('datetime_format'));
+                }
             }
             $files = array_values($status['scripts']);
         }
@@ -352,13 +391,13 @@ class Service
                         'max_cached_keys' => number_format($status['opcache_statistics']['max_cached_keys']),
                         'interned' => null,
                         'start_time' => (new DateTimeImmutable("@{$status['opcache_statistics']['start_time']}"))
-                            ->setTimezone(new DateTimeZone(date_default_timezone_get()))
-                            ->format('Y-m-d H:i:s'),
-                        'last_restart_time' => ($status['opcache_statistics']['last_restart_time'] == 0
-                            ? 'never'
+                            ->setTimezone($this->tz)
+                            ->format($this->getOption('datetime_format')),
+                        'last_restart_time' => ($status['opcache_statistics']['last_restart_time'] === 0
+                            ? $this->txt('never')
                             : (new DateTimeImmutable("@{$status['opcache_statistics']['last_restart_time']}"))
-                                ->setTimezone(new DateTimeZone(date_default_timezone_get()))
-                                ->format('Y-m-d H:i:s')
+                                ->setTimezone($this->tz)
+                                ->format($this->getOption('datetime_format'))
                         )
                     ]
                 ]
@@ -433,7 +472,7 @@ class Service
         $version = array_merge(
             $config['version'],
             [
-                'php' => phpversion(),
+                'php' => PHP_VERSION,
                 'server' => $_SERVER['SERVER_SOFTWARE'] ?: '',
                 'host' => (function_exists('gethostname')
                     ? gethostname()
@@ -464,15 +503,15 @@ $opcache = (new Service($options))->handle();
 
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>OPcache statistics on <?= $opcache->getData('version', 'host'); ?></title>
-    <script src="//unpkg.com/react/umd/react.production.min.js" crossorigin></script>
-    <script src="//unpkg.com/react-dom/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="//unpkg.com/axios/dist/axios.min.js" crossorigin></script>
-    <style type="text/css">
+    <script src="//unpkg.com/react/umd/react.production.min.js"></script>
+    <script src="//unpkg.com/react-dom/umd/react-dom.production.min.js"></script>
+    <script src="//unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
         :root{--opcache-gui-graph-track-fill-color: #6CA6EF;--opcache-gui-graph-track-background-color: rgba(229,231,231,0.905882)}.opcache-gui{font-family:sans-serif;font-size:90%;padding:0;margin:0}.opcache-gui .hide{display:none}.opcache-gui .sr-only{border:0 !important;clip:rect(1px, 1px, 1px, 1px) !important;-webkit-clip-path:inset(50%) !important;clip-path:inset(50%) !important;height:1px !important;margin:-1px !important;overflow:hidden !important;padding:0 !important;position:absolute !important;width:1px !important;white-space:nowrap !important}.opcache-gui .main-nav{padding-top:20px}.opcache-gui .nav-tab-list{list-style-type:none;padding-left:8px;margin:0;border-bottom:1px solid #CCC}.opcache-gui .nav-tab{display:inline-block;margin:0 0 -1px 0;padding:15px 30px;border:1px solid transparent;border-bottom-color:#CCC;text-decoration:none;background-color:#fff;cursor:pointer;user-select:none}.opcache-gui .nav-tab:hover{background-color:#F4F4F4;text-decoration:underline}.opcache-gui .nav-tab.active{border:1px solid #CCC;border-bottom-color:#fff;border-top:3px solid #6CA6EF}.opcache-gui .nav-tab.active:hover{background-color:initial}.opcache-gui .nav-tab:focus{outline:0;text-decoration:underline}.opcache-gui .nav-tab-link-reset{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .nav-tab-link-reset.is-resetting{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgb(0, 186, 0)"/></svg>')}.opcache-gui .nav-tab-link-realtime{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="rgb(98, 98, 98)"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .nav-tab-link-realtime.live-update{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="rgb(0, 186, 0)"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="rgb(0, 186, 0)"/></svg>')}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime{position:relative;padding-left:50px}.opcache-gui .nav-tab-link-reset.pulse::before,.opcache-gui .nav-tab-link-realtime.pulse::before{content:"";position:absolute;top:12px;left:25px;width:18px;height:18px;z-index:10;opacity:0;background-color:transparent;border:2px solid #00ba00;border-radius:100%;animation:pulse 2s linear infinite}.opcache-gui .tab-content{padding:2em}.opcache-gui .tab-content-overview-counts{width:270px;float:right}.opcache-gui .tab-content-overview-info{margin-right:280px}.opcache-gui .graph-widget{max-width:100%;height:auto;margin:0 auto;display:flex;position:relative}.opcache-gui .graph-widget .widget-value{display:flex;align-items:center;justify-content:center;text-align:center;position:absolute;top:0;width:100%;height:100%;margin:0 auto;font-size:3.2em;font-weight:100;color:#6CA6EF;user-select:none}.opcache-gui .widget-panel{background-color:#EDEDED;margin-bottom:10px}.opcache-gui .widget-header{background-color:#CDCDCD;padding:4px 6px;margin:0;text-align:center;font-size:1rem;font-weight:bold}.opcache-gui .widget-value{margin:0;text-align:center}.opcache-gui .widget-value span.large{color:#6CA6EF;font-size:80pt;margin:0;padding:0;text-align:center}.opcache-gui .widget-value span.large+span{font-size:20pt;margin:0;color:#6CA6EF}.opcache-gui .widget-info{margin:0;padding:10px}.opcache-gui .widget-info *{margin:0;line-height:1.75em;text-align:left}.opcache-gui .tables{margin:0 0 1em 0;border-collapse:collapse;width:100%;table-layout:fixed}.opcache-gui .tables tr:nth-child(odd){background-color:#EFFEFF}.opcache-gui .tables tr:nth-child(even){background-color:#E0ECEF}.opcache-gui .tables th{text-align:left;padding:6px;background-color:#6CA6EF;color:#fff;border-color:#fff;font-weight:normal}.opcache-gui .tables td{padding:4px 6px;line-height:1.4em;vertical-align:top;border-color:#fff;overflow:hidden;overflow-wrap:break-word;text-overflow:ellipsis}.opcache-gui .directive-list{list-style-type:none;padding:0;margin:0}.opcache-gui .directive-list li{margin-bottom:0.5em}.opcache-gui .directive-list li:last-child{margin-bottom:0}.opcache-gui .directive-list li ul{margin-top:1.5em}.opcache-gui .file-filter{width:520px}.opcache-gui .file-metainfo{font-size:80%}.opcache-gui .file-metainfo.invalid{font-style:italic}.opcache-gui .file-pathname{width:70%;display:block}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime,.opcache-gui .github-link{background-repeat:no-repeat;background-color:transparent}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime{background-position:24px 50%}.opcache-gui .github-link{background-position:5px 50%}.opcache-gui .main-footer{border-top:1px solid #CCC;padding:1em 2em}.opcache-gui .github-link{background-position:0 50%;padding:2em 0 2em 2.3em;text-decoration:none;opacity:0.7;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.19em" height="1em" viewBox="0 0 1664 1408"><path d="M640 960q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm640 0q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm160 0q0-120-69-204t-187-84q-41 0-195 21q-71 11-157 11t-157-11q-152-21-195-21q-118 0-187 84t-69 204q0 88 32 153.5t81 103t122 60t140 29.5t149 7h168q82 0 149-7t140-29.5t122-60t81-103t32-153.5zm224-176q0 207-61 331q-38 77-105.5 133t-141 86t-170 47.5t-171.5 22t-167 4.5q-78 0-142-3t-147.5-12.5t-152.5-30t-137-51.5t-121-81t-86-115Q0 992 0 784q0-237 136-396q-27-82-27-170q0-116 51-218q108 0 190 39.5T539 163q147-35 309-35q148 0 280 32q105-82 187-121t189-39q51 102 51 218q0 87-27 168q136 160 136 398z" fill="rgb(98, 98, 98)"/></svg>');font-size:80%}.opcache-gui .github-link:hover{opacity:1}.opcache-gui .file-cache-only{margin-top:0}.opcache-gui .paginate-filter{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap}.opcache-gui .paginate-filter .filter>*{padding:3px;margin:3px 3px 10px 0}.opcache-gui .pagination{margin:10px 0;padding:0}.opcache-gui .pagination li{display:inline-block}.opcache-gui .pagination li a{display:inline-flex;align-items:center;white-space:nowrap;line-height:1;padding:0.5rem 0.75rem;border-radius:3px;text-decoration:none;height:100%}.opcache-gui .pagination li a.arrow{font-size:1.1rem}.opcache-gui .pagination li a:active{transform:translateY(2px)}.opcache-gui .pagination li a.active{background-color:#4d75af;color:#fff}.opcache-gui .pagination li a:hover:not(.active){background-color:#FF7400;color:#fff}@media screen and (max-width: 750px){.opcache-gui .nav-tab-list{border-bottom:0}.opcache-gui .nav-tab{display:block;margin:0}.opcache-gui .nav-tab-link{display:block;margin:0 10px;padding:10px 0 10px 30px;border:0}.opcache-gui .nav-tab-link[data-for].active{border-bottom-color:#CCC}.opcache-gui .tab-content-overview-info{margin-right:auto;clear:both}.opcache-gui .tab-content-overview-counts{position:relative;display:block;width:100%}}@media screen and (max-width: 550px){.opcache-gui .file-filter{width:100%}}@keyframes pulse{0%{transform:scale(1);opacity:1}50%,100%{transform:scale(2);opacity:0}}
     </style>
 </head>
@@ -562,6 +601,17 @@ class Interface extends React.Component {
       return v ? !!v[2] : false;
     });
 
+    _defineProperty(this, "txt", (text, ...args) => {
+      if (this.props.language !== null && this.props.language.hasOwnProperty(text) && this.props.language[text]) {
+        text = this.props.language[text];
+      }
+
+      args.forEach((arg, i) => {
+        text = text.replaceAll(`{${i}}`, arg);
+      });
+      return text;
+    });
+
     this.state = {
       realtime: this.getCookie(),
       resetting: false,
@@ -586,7 +636,8 @@ class Interface extends React.Component {
       realtime: this.state.realtime,
       resetting: this.state.resetting,
       realtimeHandler: this.realtimeHandler,
-      resetHandler: this.resetHandler
+      resetHandler: this.resetHandler,
+      txt: this.txt
     }))), /*#__PURE__*/React.createElement(Footer, {
       version: this.props.opstate.version.gui
     }));
@@ -598,26 +649,30 @@ function MainNavigation(props) {
   return /*#__PURE__*/React.createElement("nav", {
     className: "main-nav"
   }, /*#__PURE__*/React.createElement(Tabs, null, /*#__PURE__*/React.createElement("div", {
-    label: "Overview",
+    label: props.txt("Overview"),
     tabId: "overview",
     tabIndex: 1
   }, /*#__PURE__*/React.createElement(OverviewCounts, {
     overview: props.opstate.overview,
     highlight: props.highlight,
-    useCharts: props.useCharts
+    useCharts: props.useCharts,
+    txt: props.txt
   }), /*#__PURE__*/React.createElement("div", {
     id: "info",
     className: "tab-content-overview-info"
   }, /*#__PURE__*/React.createElement(GeneralInfo, {
     start: props.opstate.overview && props.opstate.overview.readable.start_time || null,
     reset: props.opstate.overview && props.opstate.overview.readable.last_restart_time || null,
-    version: props.opstate.version
+    version: props.opstate.version,
+    txt: props.txt
   }), /*#__PURE__*/React.createElement(Directives, {
-    directives: props.opstate.directives
+    directives: props.opstate.directives,
+    txt: props.txt
   }), /*#__PURE__*/React.createElement(Functions, {
-    functions: props.opstate.functions
+    functions: props.opstate.functions,
+    txt: props.txt
   }))), props.allow.filelist && /*#__PURE__*/React.createElement("div", {
-    label: "Cached",
+    label: props.txt("Cached"),
     tabId: "cached",
     tabIndex: 2
   }, /*#__PURE__*/React.createElement(CachedFiles, {
@@ -629,9 +684,10 @@ function MainNavigation(props) {
       fileList: props.allow.filelist,
       invalidate: props.allow.invalidate
     },
-    realtime: props.realtime
+    realtime: props.realtime,
+    txt: props.txt
   })), props.allow.filelist && props.opstate.blacklist.length && /*#__PURE__*/React.createElement("div", {
-    label: "Ignored",
+    label: props.txt("Ignored"),
     tabId: "ignored",
     tabIndex: 3
   }, /*#__PURE__*/React.createElement(IgnoredFiles, {
@@ -639,9 +695,10 @@ function MainNavigation(props) {
     allFiles: props.opstate.blacklist,
     allow: {
       fileList: props.allow.filelist
-    }
+    },
+    txt: props.txt
   })), props.allow.filelist && props.opstate.preload.length && /*#__PURE__*/React.createElement("div", {
-    label: "Preloaded",
+    label: props.txt("Preloaded"),
     tabId: "preloaded",
     tabIndex: 4
   }, /*#__PURE__*/React.createElement(PreloadedFiles, {
@@ -649,15 +706,16 @@ function MainNavigation(props) {
     allFiles: props.opstate.preload,
     allow: {
       fileList: props.allow.filelist
-    }
+    },
+    txt: props.txt
   })), props.allow.reset && /*#__PURE__*/React.createElement("div", {
-    label: "Reset cache",
+    label: props.txt("Reset cache"),
     tabId: "resetCache",
     className: `nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`,
     handler: props.resetHandler,
     tabIndex: 5
   }), props.allow.realtime && /*#__PURE__*/React.createElement("div", {
-    label: `${props.realtime ? 'Disable' : 'Enable'} real-time update`,
+    label: props.txt(`${props.realtime ? 'Disable' : 'Enable'} real-time update`),
     tabId: "toggleRealtime",
     className: `nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`,
     handler: props.realtimeHandler,
@@ -768,27 +826,27 @@ function OverviewCounts(props) {
   if (props.overview === false) {
     return /*#__PURE__*/React.createElement("p", {
       class: "file-cache-only"
-    }, "You have ", /*#__PURE__*/React.createElement("i", null, "opcache.file_cache_only"), " turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by ", /*#__PURE__*/React.createElement("i", null, "opcache_get_statistics()"), ".");
+    }, props.txt(`You have <i>opcache.file_cache_only</i> turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by <i>opcache_get_statistics()</i>.`));
   }
 
   const graphList = [{
     id: 'memoryUsageCanvas',
-    title: 'memory',
+    title: props.txt('memory'),
     show: props.highlight.memory,
     value: props.overview.used_memory_percentage
   }, {
     id: 'hitRateCanvas',
-    title: 'hit rate',
+    title: props.txt('hit rate'),
     show: props.highlight.hits,
     value: props.overview.hit_rate_percentage
   }, {
     id: 'keyUsageCanvas',
-    title: 'keys',
+    title: props.txt('keys'),
     show: props.highlight.keys,
     value: props.overview.used_key_percentage
   }, {
     id: 'jitUsageCanvas',
-    title: 'jit buffer',
+    title: props.txt('jit buffer'),
     show: props.highlight.jit,
     value: props.overview.jit_buffer_used_percentage
   }];
@@ -819,19 +877,22 @@ function OverviewCounts(props) {
     wastedPercent: props.overview.wasted_percentage,
     jitBuffer: props.overview.readable.jit_buffer_size || null,
     jitBufferFree: props.overview.readable.jit_buffer_free || null,
-    jitBufferFreePercentage: props.overview.jit_buffer_used_percentage || null
+    jitBufferFreePercentage: props.overview.jit_buffer_used_percentage || null,
+    txt: props.txt
   }), /*#__PURE__*/React.createElement(StatisticsPanel, {
     num_cached_scripts: props.overview.readable.num_cached_scripts,
     hits: props.overview.readable.hits,
     misses: props.overview.readable.misses,
     blacklist_miss: props.overview.readable.blacklist_miss,
     num_cached_keys: props.overview.readable.num_cached_keys,
-    max_cached_keys: props.overview.readable.max_cached_keys
+    max_cached_keys: props.overview.readable.max_cached_keys,
+    txt: props.txt
   }), props.overview.readable.interned && /*#__PURE__*/React.createElement(InternedStringsPanel, {
     buffer_size: props.overview.readable.interned.buffer_size,
     strings_used_memory: props.overview.readable.interned.strings_used_memory,
     strings_free_memory: props.overview.readable.interned.strings_free_memory,
-    number_of_strings: props.overview.readable.interned.number_of_strings
+    number_of_strings: props.overview.readable.interned.number_of_strings,
+    txt: props.txt
   }));
 }
 
@@ -840,7 +901,7 @@ function GeneralInfo(props) {
     className: "tables general-info-table"
   }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
     colSpan: "2"
-  }, "General info"))), /*#__PURE__*/React.createElement("tbody", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Zend OPcache"), /*#__PURE__*/React.createElement("td", null, props.version.version)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "PHP"), /*#__PURE__*/React.createElement("td", null, props.version.php)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Host"), /*#__PURE__*/React.createElement("td", null, props.version.host)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Server Software"), /*#__PURE__*/React.createElement("td", null, props.version.server)), props.start ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Start time"), /*#__PURE__*/React.createElement("td", null, props.start)) : null, props.reset ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Last reset"), /*#__PURE__*/React.createElement("td", null, props.reset)) : null));
+  }, props.txt('General info')))), /*#__PURE__*/React.createElement("tbody", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Zend OPcache"), /*#__PURE__*/React.createElement("td", null, props.version.version)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "PHP"), /*#__PURE__*/React.createElement("td", null, props.version.php)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.txt('Host')), /*#__PURE__*/React.createElement("td", null, props.version.host)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.txt('Server Software')), /*#__PURE__*/React.createElement("td", null, props.version.server)), props.start ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.txt('Start time')), /*#__PURE__*/React.createElement("td", null, props.start)) : null, props.reset ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.txt('Last reset')), /*#__PURE__*/React.createElement("td", null, props.reset)) : null));
 }
 
 function Directives(props) {
@@ -869,9 +930,9 @@ function Directives(props) {
     let vShow;
 
     if (directive.v === true || directive.v === false) {
-      vShow = React.createElement('i', {}, directive.v.toString());
+      vShow = React.createElement('i', {}, props.txt(directive.v.toString()));
     } else if (directive.v === '') {
-      vShow = React.createElement('i', {}, 'no value');
+      vShow = React.createElement('i', {}, props.txt('no value'));
     } else {
       if (Array.isArray(directive.v)) {
         vShow = directiveList(directive);
@@ -883,7 +944,7 @@ function Directives(props) {
     return /*#__PURE__*/React.createElement("tr", {
       key: directive.k
     }, /*#__PURE__*/React.createElement("td", {
-      title: 'View ' + directive.k + ' manual entry'
+      title: props.txt('View {0} manual entry', directive.k)
     }, /*#__PURE__*/React.createElement("a", {
       href: 'https://php.net/manual/en/opcache.configuration.php#ini.' + directive.k.replace(/_/g, '-'),
       target: "_blank"
@@ -893,7 +954,7 @@ function Directives(props) {
     className: "tables directives-table"
   }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
     colSpan: "2"
-  }, "Directives"))), /*#__PURE__*/React.createElement("tbody", null, directiveNodes));
+  }, props.txt('Directives')))), /*#__PURE__*/React.createElement("tbody", null, directiveNodes));
 }
 
 function Functions(props) {
@@ -901,11 +962,11 @@ function Functions(props) {
     id: "functions"
   }, /*#__PURE__*/React.createElement("table", {
     className: "tables"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Available functions"))), /*#__PURE__*/React.createElement("tbody", null, props.functions.map(f => /*#__PURE__*/React.createElement("tr", {
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, props.txt('Available functions')))), /*#__PURE__*/React.createElement("tbody", null, props.functions.map(f => /*#__PURE__*/React.createElement("tr", {
     key: f
   }, /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("a", {
     href: "https://php.net/" + f,
-    title: "View manual page",
+    title: props.txt('View manual page'),
     target: "_blank"
   }, f)))))));
 }
@@ -1136,7 +1197,7 @@ function MemoryUsagePanel(props) {
     className: "widget-header"
   }, "memory usage"), /*#__PURE__*/React.createElement("div", {
     className: "widget-value widget-info"
-  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "total memory:"), " ", props.total), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "used memory:"), " ", props.used), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "free memory:"), " ", props.free), props.preload && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "preload memory:"), " ", props.preload), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "wasted memory:"), " ", props.wasted, " (", props.wastedPercent, "%)"), props.jitBuffer && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "jit buffer:"), " ", props.jitBuffer), props.jitBufferFree && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "jit buffer free:"), " ", props.jitBufferFree, " (", 100 - props.jitBufferFreePercentage, "%)")));
+  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('total memory'), ":"), " ", props.total), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('used memory'), ":"), " ", props.used), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('free memory'), ":"), " ", props.free), props.preload && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('preload memory'), ":"), " ", props.preload), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('wasted memory'), ":"), " ", props.wasted, " (", props.wastedPercent, "%)"), props.jitBuffer && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('jit buffer'), ":"), " ", props.jitBuffer), props.jitBufferFree && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('jit buffer free'), ":"), " ", props.jitBufferFree, " (", 100 - props.jitBufferFreePercentage, "%)")));
 }
 
 function StatisticsPanel(props) {
@@ -1144,9 +1205,9 @@ function StatisticsPanel(props) {
     className: "widget-panel"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "widget-header"
-  }, "opcache statistics"), /*#__PURE__*/React.createElement("div", {
+  }, props.txt('opcache statistics')), /*#__PURE__*/React.createElement("div", {
     className: "widget-value widget-info"
-  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of cached files:"), " ", props.num_cached_scripts), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of hits:"), " ", props.hits), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of misses:"), " ", props.misses), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "blacklist misses:"), " ", props.blacklist_miss), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of cached keys:"), " ", props.num_cached_keys), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "max cached keys:"), " ", props.max_cached_keys)));
+  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of cached'), " files:"), " ", props.num_cached_scripts), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of hits'), ":"), " ", props.hits), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of misses'), ":"), " ", props.misses), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('blacklist misses'), ":"), " ", props.blacklist_miss), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of cached keys'), ":"), " ", props.num_cached_keys), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('max cached keys'), ":"), " ", props.max_cached_keys)));
 }
 
 function InternedStringsPanel(props) {
@@ -1154,9 +1215,9 @@ function InternedStringsPanel(props) {
     className: "widget-panel"
   }, /*#__PURE__*/React.createElement("h3", {
     className: "widget-header"
-  }, "interned strings usage"), /*#__PURE__*/React.createElement("div", {
+  }, props.txt('interned strings usage')), /*#__PURE__*/React.createElement("div", {
     className: "widget-value widget-info"
-  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "buffer size:"), " ", props.buffer_size), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "used memory:"), " ", props.strings_used_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "free memory:"), " ", props.strings_free_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, "number of strings:"), " ", props.number_of_strings)));
+  }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('buffer size'), ":"), " ", props.buffer_size), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('used memory'), ":"), " ", props.strings_used_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('free memory'), ":"), " ", props.strings_free_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of strings'), ":"), " ", props.number_of_strings)));
 }
 
 class CachedFiles extends React.Component {
@@ -1234,7 +1295,7 @@ class CachedFiles extends React.Component {
     }
 
     if (this.props.allFiles.length === 0) {
-      return /*#__PURE__*/React.createElement("p", null, "No files have been cached or you have ", /*#__PURE__*/React.createElement("i", null, "opcache.file_cache_only"), " turned on");
+      return /*#__PURE__*/React.createElement("p", null, this.props.txt('No files have been cached or you have <i>opcache.file_cache_only</i> turned on'));
     }
 
     const {
@@ -1249,11 +1310,12 @@ class CachedFiles extends React.Component {
     const filesInPage = this.doPagination ? filesInSearch.slice(offset, offset + this.props.perPageLimit) : filesInSearch;
     const allFilesTotal = this.props.allFiles.length;
     const showingTotal = filesInSearch.length;
+    const showing = showingTotal !== allFilesTotal ? ", {1} showing due to filter '{2}'" : "";
     return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("form", {
       action: "#"
     }, /*#__PURE__*/React.createElement("label", {
       htmlFor: "frmFilter"
-    }, "Start typing to filter on script path"), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("input", {
+    }, this.props.txt('Start typing to filter on script path')), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("input", {
       type: "text",
       name: "filter",
       id: "frmFilter",
@@ -1261,47 +1323,51 @@ class CachedFiles extends React.Component {
       onChange: e => {
         this.setSearchTerm(e.target.value);
       }
-    })), /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " files cached", showingTotal !== allFilesTotal && `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`), this.props.allow.invalidate && this.state.searchTerm && showingTotal !== allFilesTotal && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("a", {
+    })), /*#__PURE__*/React.createElement("h3", null, this.props.txt(`{0} files cached${showing}`, allFilesTotal, showingTotal, this.state.searchTerm)), this.props.allow.invalidate && this.state.searchTerm && showingTotal !== allFilesTotal && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("a", {
       href: `?invalidate_searched=${encodeURIComponent(this.state.searchTerm)}`,
       onClick: this.handleInvalidate
-    }, "Invalidate all matching files")), /*#__PURE__*/React.createElement("div", {
+    }, this.props.txt('Invalidate all matching files'))), /*#__PURE__*/React.createElement("div", {
       className: "paginate-filter"
     }, this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
       totalRecords: filesInSearch.length,
       pageLimit: this.props.perPageLimit,
       pageNeighbours: 2,
       onPageChanged: this.onPageChanged,
-      refresh: this.state.refreshPagination
+      refresh: this.state.refreshPagination,
+      txt: this.props.txt
     }), /*#__PURE__*/React.createElement("nav", {
       className: "filter",
-      "aria-label": "Sort order"
+      "aria-label": this.props.txt('Sort order')
     }, /*#__PURE__*/React.createElement("select", {
       name: "sortBy",
       onChange: this.changeSort,
       value: this.state.sortBy
     }, /*#__PURE__*/React.createElement("option", {
       value: "last_used_timestamp"
-    }, "Last used"), /*#__PURE__*/React.createElement("option", {
+    }, this.props.txt('Last used')), /*#__PURE__*/React.createElement("option", {
+      value: "last_modified"
+    }, this.props.txt('Last modified')), /*#__PURE__*/React.createElement("option", {
       value: "full_path"
-    }, "Path"), /*#__PURE__*/React.createElement("option", {
+    }, this.props.txt('Path')), /*#__PURE__*/React.createElement("option", {
       value: "hits"
-    }, "Number of hits"), /*#__PURE__*/React.createElement("option", {
+    }, this.props.txt('Number of hits')), /*#__PURE__*/React.createElement("option", {
       value: "memory_consumption"
-    }, "Memory consumption")), /*#__PURE__*/React.createElement("select", {
+    }, this.props.txt('Memory consumption'))), /*#__PURE__*/React.createElement("select", {
       name: "sortDir",
       onChange: this.changeSort,
       value: this.state.sortDir
     }, /*#__PURE__*/React.createElement("option", {
       value: "desc"
-    }, "Descending"), /*#__PURE__*/React.createElement("option", {
+    }, this.props.txt('Descending')), /*#__PURE__*/React.createElement("option", {
       value: "asc"
-    }, "Ascending")))), /*#__PURE__*/React.createElement("table", {
+    }, this.props.txt('Ascending'))))), /*#__PURE__*/React.createElement("table", {
       className: "tables cached-list-table"
-    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Script"))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, this.props.txt('Script')))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
       return /*#__PURE__*/React.createElement(CachedFile, _extends({
         key: file.full_path,
         canInvalidate: this.props.allow.invalidate,
-        realtime: this.props.realtime
+        realtime: this.props.realtime,
+        txt: this.props.txt
       }, file));
     }))));
   }
@@ -1336,14 +1402,14 @@ class CachedFile extends React.Component {
       className: "file-pathname"
     }, this.props.full_path), /*#__PURE__*/React.createElement("span", {
       className: "file-metainfo"
-    }, /*#__PURE__*/React.createElement("b", null, "hits: "), /*#__PURE__*/React.createElement("span", null, this.props.readable.hits, ", "), /*#__PURE__*/React.createElement("b", null, "memory: "), /*#__PURE__*/React.createElement("span", null, this.props.readable.memory_consumption, ", "), /*#__PURE__*/React.createElement("b", null, "last used: "), /*#__PURE__*/React.createElement("span", null, this.props.last_used)), !this.props.timestamp && /*#__PURE__*/React.createElement("span", {
+    }, /*#__PURE__*/React.createElement("b", null, this.props.txt('hits'), ": "), /*#__PURE__*/React.createElement("span", null, this.props.readable.hits, ", "), /*#__PURE__*/React.createElement("b", null, this.props.txt('memory'), ": "), /*#__PURE__*/React.createElement("span", null, this.props.readable.memory_consumption, ", "), this.props.last_modified && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("b", null, this.props.txt('last modified'), ": "), /*#__PURE__*/React.createElement("span", null, this.props.last_modified, ", ")), /*#__PURE__*/React.createElement("b", null, this.props.txt('last used'), ": "), /*#__PURE__*/React.createElement("span", null, this.props.last_used)), !this.props.timestamp && /*#__PURE__*/React.createElement("span", {
       className: "invalid file-metainfo"
-    }, " - has been invalidated"), this.props.canInvalidate && /*#__PURE__*/React.createElement("span", null, ",\xA0", /*#__PURE__*/React.createElement("a", {
+    }, " - ", this.props.txt('has been invalidated')), this.props.canInvalidate && /*#__PURE__*/React.createElement("span", null, ",\xA0", /*#__PURE__*/React.createElement("a", {
       className: "file-metainfo",
       href: '?invalidate=' + this.props.full_path,
       "data-file": this.props.full_path,
       onClick: this.handleInvalidate
-    }, "force file invalidation"))));
+    }, this.props.txt('force file invalidation')))));
   }
 
 }
@@ -1371,7 +1437,7 @@ class IgnoredFiles extends React.Component {
     }
 
     if (this.props.allFiles.length === 0) {
-      return /*#__PURE__*/React.createElement("p", null, "No files have been ignored via ", /*#__PURE__*/React.createElement("i", null, "opcache.blacklist_filename"));
+      return /*#__PURE__*/React.createElement("p", null, this.props.txt('No files have been ignored via <i>opcache.blacklist_filename</i>'));
     }
 
     const {
@@ -1380,15 +1446,16 @@ class IgnoredFiles extends React.Component {
     const offset = (currentPage - 1) * this.props.perPageLimit;
     const filesInPage = this.doPagination ? this.props.allFiles.slice(offset, offset + this.props.perPageLimit) : this.props.allFiles;
     const allFilesTotal = this.props.allFiles.length;
-    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " ignore file locations"), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
+    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, this.props.txt('{0} ignore file locations', allFilesTotal)), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
       totalRecords: allFilesTotal,
       pageLimit: this.props.perPageLimit,
       pageNeighbours: 2,
       onPageChanged: this.onPageChanged,
-      refresh: this.state.refreshPagination
+      refresh: this.state.refreshPagination,
+      txt: this.props.txt
     }), /*#__PURE__*/React.createElement("table", {
       className: "tables ignored-list-table"
-    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Path"))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, this.props.txt('Path')))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
       return /*#__PURE__*/React.createElement("tr", {
         key: file
       }, /*#__PURE__*/React.createElement("td", null, file));
@@ -1420,7 +1487,7 @@ class PreloadedFiles extends React.Component {
     }
 
     if (this.props.allFiles.length === 0) {
-      return /*#__PURE__*/React.createElement("p", null, "No files have been preloaded ", /*#__PURE__*/React.createElement("i", null, "opcache.preload"));
+      return /*#__PURE__*/React.createElement("p", null, this.props.txt('No files have been preloaded <i>opcache.preload</i>'));
     }
 
     const {
@@ -1429,15 +1496,16 @@ class PreloadedFiles extends React.Component {
     const offset = (currentPage - 1) * this.props.perPageLimit;
     const filesInPage = this.doPagination ? this.props.allFiles.slice(offset, offset + this.props.perPageLimit) : this.props.allFiles;
     const allFilesTotal = this.props.allFiles.length;
-    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, allFilesTotal, " preloaded files"), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
+    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", null, this.props.txt('{0} preloaded files', allFilesTotal)), this.doPagination && /*#__PURE__*/React.createElement(Pagination, {
       totalRecords: allFilesTotal,
       pageLimit: this.props.perPageLimit,
       pageNeighbours: 2,
       onPageChanged: this.onPageChanged,
-      refresh: this.state.refreshPagination
+      refresh: this.state.refreshPagination,
+      txt: this.props.txt
     }), /*#__PURE__*/React.createElement("table", {
       className: "tables preload-list-table"
-    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Path"))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, this.props.txt('Path')))), /*#__PURE__*/React.createElement("tbody", null, filesInPage.map((file, index) => {
       return /*#__PURE__*/React.createElement("tr", {
         key: file
       }, /*#__PURE__*/React.createElement("td", null, file));
@@ -1580,24 +1648,24 @@ class Pagination extends React.Component {
         }, /*#__PURE__*/React.createElement("a", {
           className: "page-link",
           href: "#",
-          "aria-label": "Previous",
+          "aria-label": this.props.txt('Previous'),
           onClick: this.handleJumpLeft
         }, /*#__PURE__*/React.createElement("span", {
           "aria-hidden": "true"
         }, "\u219E"), /*#__PURE__*/React.createElement("span", {
           className: "sr-only"
-        }, "Jump back"))), /*#__PURE__*/React.createElement("li", {
+        }, this.props.txt('Jump back')))), /*#__PURE__*/React.createElement("li", {
           className: "page-item arrow"
         }, /*#__PURE__*/React.createElement("a", {
           className: "page-link",
           href: "#",
-          "aria-label": "Previous",
+          "aria-label": this.props.txt('Previous'),
           onClick: this.handleMoveLeft
         }, /*#__PURE__*/React.createElement("span", {
           "aria-hidden": "true"
         }, "\u21E0"), /*#__PURE__*/React.createElement("span", {
           className: "sr-only"
-        }, "Previous page"))));
+        }, this.props.txt('Previous page')))));
       }
 
       if (page === "RIGHT") {
@@ -1608,24 +1676,24 @@ class Pagination extends React.Component {
         }, /*#__PURE__*/React.createElement("a", {
           className: "page-link",
           href: "#",
-          "aria-label": "Next",
+          "aria-label": this.props.txt('Next'),
           onClick: this.handleMoveRight
         }, /*#__PURE__*/React.createElement("span", {
           "aria-hidden": "true"
         }, "\u21E2"), /*#__PURE__*/React.createElement("span", {
           className: "sr-only"
-        }, "Next page"))), /*#__PURE__*/React.createElement("li", {
+        }, this.props.txt('Next page')))), /*#__PURE__*/React.createElement("li", {
           className: "page-item arrow"
         }, /*#__PURE__*/React.createElement("a", {
           className: "page-link",
           href: "#",
-          "aria-label": "Next",
+          "aria-label": this.props.txt('Next'),
           onClick: this.handleJumpRight
         }, /*#__PURE__*/React.createElement("span", {
           "aria-hidden": "true"
         }, "\u21A0"), /*#__PURE__*/React.createElement("span", {
           className: "sr-only"
-        }, "Jump forward"))));
+        }, this.props.txt('Jump forward')))));
       }
 
       return /*#__PURE__*/React.createElement("li", {
@@ -1693,7 +1761,8 @@ function debounce(func, wait, immediate) {
         highlight: <?= json_encode($opcache->getOption('highlight')); ?>,
         debounceRate: <?= $opcache->getOption('debounce_rate'); ?>,
         perPageLimit: <?= json_encode($opcache->getOption('per_page')); ?>,
-        realtimeRefresh: <?= json_encode($opcache->getOption('refresh_time')); ?>
+        realtimeRefresh: <?= json_encode($opcache->getOption('refresh_time')); ?>,
+        language: <?= json_encode($opcache->getOption('language_pack')); ?>,
     }), document.getElementById('interface'));
 
     </script>

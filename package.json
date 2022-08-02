@@ -1,13 +1,13 @@
 {
   "name": "opcache-gui",
   "description": "A clean and responsive interface for Zend OPcache information, showing statistics, settings and cached files, and providing a real-time update for the information (using jQuery and React).",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "main": "index.js",
   "devDependencies": {
     "@babel/cli": "^7.12.8",
     "@babel/core": "^7.12.9",
     "@babel/preset-react": "^7.12.7",
-    "node-sass": "^4.14.1"
+    "node-sass": ">=7.0.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

@@ -67,6 +67,16 @@ class Interface extends React.Component {
         return v ? !!v[2] : false;
     };
 
+    txt = (text, ...args) => {
+        if (this.props.language !== null && this.props.language.hasOwnProperty(text) && this.props.language[text]) {
+            text = this.props.language[text];
+        }
+        args.forEach((arg, i) => {
+            text = text.replaceAll(`{${i}}`, arg);
+        });
+        return text;
+    };
+
     render() {
         const { opstate, realtimeRefresh, ...otherProps } = this.props;
         return (
@@ -78,6 +88,7 @@ class Interface extends React.Component {
                         resetting={this.state.resetting}
                         realtimeHandler={this.realtimeHandler}
                         resetHandler={this.resetHandler}
+                        txt={this.txt}
                     />
                 </header>
                 <Footer version={this.props.opstate.version.gui} />
@@ -91,29 +102,33 @@ function MainNavigation(props) {
     return (
         <nav className="main-nav">
             <Tabs>
-                <div label="Overview" tabId="overview" tabIndex={1}>
+                <div label={props.txt("Overview")} tabId="overview" tabIndex={1}>
                     <OverviewCounts
                         overview={props.opstate.overview}
                         highlight={props.highlight}
                         useCharts={props.useCharts}
+                        txt={props.txt}
                     />
                     <div id="info" className="tab-content-overview-info">
                         <GeneralInfo
                             start={props.opstate.overview && props.opstate.overview.readable.start_time || null}
                             reset={props.opstate.overview && props.opstate.overview.readable.last_restart_time || null}
                             version={props.opstate.version}
+                            txt={props.txt}
                         />
                         <Directives
                             directives={props.opstate.directives}
+                            txt={props.txt}
                         />
                         <Functions
                             functions={props.opstate.functions}
+                            txt={props.txt}
                         />
                     </div>
                 </div>
                 {
                     props.allow.filelist &&
-                        <div label="Cached" tabId="cached" tabIndex={2}>
+                        <div label={props.txt("Cached")} tabId="cached" tabIndex={2}>
                             <CachedFiles
                                 perPageLimit={props.perPageLimit}
                                 allFiles={props.opstate.files}
@@ -121,32 +136,35 @@ function MainNavigation(props) {
                                 debounceRate={props.debounceRate}
                                 allow={{fileList: props.allow.filelist, invalidate: props.allow.invalidate}}
                                 realtime={props.realtime}
+                                txt={props.txt}
                             />
                         </div>
                 }
                 {
                     (props.allow.filelist && props.opstate.blacklist.length &&
-                        <div label="Ignored" tabId="ignored" tabIndex={3}>
+                        <div label={props.txt("Ignored")} tabId="ignored" tabIndex={3}>
                             <IgnoredFiles
                                 perPageLimit={props.perPageLimit}
                                 allFiles={props.opstate.blacklist}
                                 allow={{fileList: props.allow.filelist }}
+                                txt={props.txt}
                             />
                         </div>)
                 }
                 {
                     (props.allow.filelist && props.opstate.preload.length &&
-                        <div label="Preloaded" tabId="preloaded" tabIndex={4}>
+                        <div label={props.txt("Preloaded")} tabId="preloaded" tabIndex={4}>
                             <PreloadedFiles
                                 perPageLimit={props.perPageLimit}
                                 allFiles={props.opstate.preload}
                                 allow={{fileList: props.allow.filelist }}
+                                txt={props.txt}
                             />
                         </div>)
                 }
                 {
                     props.allow.reset &&
-                        <div label="Reset cache" tabId="resetCache"
+                        <div label={props.txt("Reset cache")} tabId="resetCache"
                            className={`nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`}
                            handler={props.resetHandler}
                            tabIndex={5}
@@ -154,7 +172,7 @@ function MainNavigation(props) {
                 }
                 {
                     props.allow.realtime &&
-                        <div label={`${props.realtime ? 'Disable' : 'Enable'} real-time update`} tabId="toggleRealtime"
+                        <div label={props.txt(`${props.realtime ? 'Disable' : 'Enable'} real-time update`)} tabId="toggleRealtime"
                             className={`nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`}
                             handler={props.realtimeHandler}
                             tabIndex={6}
@@ -256,16 +274,16 @@ function OverviewCounts(props) {
     if (props.overview === false) {
         return (
             <p class="file-cache-only">
-                You have <i>opcache.file_cache_only</i> turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by <i>opcache_get_statistics()</i>.
+                {props.txt(`You have <i>opcache.file_cache_only</i> turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by <i>opcache_get_statistics()</i>.`)}
             </p>
         );
     }
 
     const graphList = [
-        {id: 'memoryUsageCanvas', title: 'memory', show: props.highlight.memory, value: props.overview.used_memory_percentage},
-        {id: 'hitRateCanvas', title: 'hit rate', show: props.highlight.hits, value: props.overview.hit_rate_percentage},
-        {id: 'keyUsageCanvas', title: 'keys', show: props.highlight.keys, value: props.overview.used_key_percentage},
-        {id: 'jitUsageCanvas', title: 'jit buffer', show: props.highlight.jit, value: props.overview.jit_buffer_used_percentage}
+        {id: 'memoryUsageCanvas', title: props.txt('memory'), show: props.highlight.memory, value: props.overview.used_memory_percentage},
+        {id: 'hitRateCanvas', title: props.txt('hit rate'), show: props.highlight.hits, value: props.overview.hit_rate_percentage},
+        {id: 'keyUsageCanvas', title: props.txt('keys'), show: props.highlight.keys, value: props.overview.used_key_percentage},
+        {id: 'jitUsageCanvas', title: props.txt('jit buffer'), show: props.highlight.jit, value: props.overview.jit_buffer_used_percentage}
     ];
 
     return (
@@ -291,6 +309,7 @@ function OverviewCounts(props) {
                 jitBuffer={props.overview.readable.jit_buffer_size || null}
                 jitBufferFree={props.overview.readable.jit_buffer_free || null}
                 jitBufferFreePercentage={props.overview.jit_buffer_used_percentage || null}
+                txt={props.txt}
             />
             <StatisticsPanel
                 num_cached_scripts={props.overview.readable.num_cached_scripts}
@@ -299,6 +318,7 @@ function OverviewCounts(props) {
                 blacklist_miss={props.overview.readable.blacklist_miss}
                 num_cached_keys={props.overview.readable.num_cached_keys}
                 max_cached_keys={props.overview.readable.max_cached_keys}
+                txt={props.txt}
             />
             {props.overview.readable.interned &&
                 <InternedStringsPanel
@@ -306,6 +326,7 @@ function OverviewCounts(props) {
                     strings_used_memory={props.overview.readable.interned.strings_used_memory}
                     strings_free_memory={props.overview.readable.interned.strings_free_memory}
                     number_of_strings={props.overview.readable.interned.number_of_strings}
+                    txt={props.txt}
                 />
             }
         </div>
@@ -317,15 +338,15 @@ function GeneralInfo(props) {
     return (
         <table className="tables general-info-table">
             <thead>
-                <tr><th colSpan="2">General info</th></tr>
+                <tr><th colSpan="2">{props.txt('General info')}</th></tr>
             </thead>
             <tbody>
                 <tr><td>Zend OPcache</td><td>{props.version.version}</td></tr>
                 <tr><td>PHP</td><td>{props.version.php}</td></tr>
-                <tr><td>Host</td><td>{props.version.host}</td></tr>
-                <tr><td>Server Software</td><td>{props.version.server}</td></tr>
-                { props.start ? <tr><td>Start time</td><td>{props.start}</td></tr> : null }
-                { props.reset ? <tr><td>Last reset</td><td>{props.reset}</td></tr> : null }
+                <tr><td>{props.txt('Host')}</td><td>{props.version.host}</td></tr>
+                <tr><td>{props.txt('Server Software')}</td><td>{props.version.server}</td></tr>
+                { props.start ? <tr><td>{props.txt('Start time')}</td><td>{props.start}</td></tr> : null }
+                { props.reset ? <tr><td>{props.txt('Last reset')}</td><td>{props.reset}</td></tr> : null }
             </tbody>
         </table>
     );
@@ -352,9 +373,9 @@ function Directives(props) {
         });
         let vShow;
         if (directive.v === true || directive.v === false) {
-            vShow = React.createElement('i', {}, directive.v.toString());
+            vShow = React.createElement('i', {}, props.txt(directive.v.toString()));
         } else if (directive.v === '') {
-            vShow = React.createElement('i', {}, 'no value');
+            vShow = React.createElement('i', {}, props.txt('no value'));
         } else {
             if (Array.isArray(directive.v)) {
                 vShow = directiveList(directive);
@@ -364,7 +385,7 @@ function Directives(props) {
         }
         return (
             <tr key={directive.k}>
-                <td title={'View ' + directive.k + ' manual entry'}><a href={'https://php.net/manual/en/opcache.configuration.php#ini.'
+                <td title={props.txt('View {0} manual entry', directive.k)}><a href={'https://php.net/manual/en/opcache.configuration.php#ini.'
                 + (directive.k).replace(/_/g,'-')} target="_blank">{dShow}</a></td>
                 <td>{vShow}</td>
             </tr>
@@ -373,7 +394,7 @@ function Directives(props) {
 
     return (
         <table className="tables directives-table">
-            <thead><tr><th colSpan="2">Directives</th></tr></thead>
+            <thead><tr><th colSpan="2">{props.txt('Directives')}</th></tr></thead>
             <tbody>{directiveNodes}</tbody>
         </table>
     );
@@ -383,10 +404,10 @@ function Functions(props) {
     return (
         <div id="functions">
             <table className="tables">
-                <thead><tr><th>Available functions</th></tr></thead>
+                <thead><tr><th>{props.txt('Available functions')}</th></tr></thead>
                 <tbody>
                 {props.functions.map(f =>
-                    <tr key={f}><td><a href={"https://php.net/"+f} title="View manual page" target="_blank">{f}</a></td></tr>
+                    <tr key={f}><td><a href={"https://php.net/"+f} title={props.txt('View manual page')} target="_blank">{f}</a></td></tr>
                 )}
                 </tbody>
             </table>
@@ -619,13 +640,13 @@ function MemoryUsagePanel(props) {
         <div className="widget-panel">
             <h3 className="widget-header">memory usage</h3>
             <div className="widget-value widget-info">
-                <p><b>total memory:</b> {props.total}</p>
-                <p><b>used memory:</b> {props.used}</p>
-                <p><b>free memory:</b> {props.free}</p>
-                { props.preload && <p><b>preload memory:</b> {props.preload}</p> }
-                <p><b>wasted memory:</b> {props.wasted} ({props.wastedPercent}%)</p>
-                { props.jitBuffer && <p><b>jit buffer:</b> {props.jitBuffer}</p> }
-                { props.jitBufferFree && <p><b>jit buffer free:</b> {props.jitBufferFree} ({100 - props.jitBufferFreePercentage}%)</p> }
+                <p><b>{props.txt('total memory')}:</b> {props.total}</p>
+                <p><b>{props.txt('used memory')}:</b> {props.used}</p>
+                <p><b>{props.txt('free memory')}:</b> {props.free}</p>
+                { props.preload && <p><b>{props.txt('preload memory')}:</b> {props.preload}</p> }
+                <p><b>{props.txt('wasted memory')}:</b> {props.wasted} ({props.wastedPercent}%)</p>
+                { props.jitBuffer && <p><b>{props.txt('jit buffer')}:</b> {props.jitBuffer}</p> }
+                { props.jitBufferFree && <p><b>{props.txt('jit buffer free')}:</b> {props.jitBufferFree} ({100 - props.jitBufferFreePercentage}%)</p> }
             </div>
         </div>
     );
@@ -635,14 +656,14 @@ function MemoryUsagePanel(props) {
 function StatisticsPanel(props) {
     return (
         <div className="widget-panel">
-            <h3 className="widget-header">opcache statistics</h3>
+            <h3 className="widget-header">{props.txt('opcache statistics')}</h3>
             <div className="widget-value widget-info">
-                <p><b>number of cached files:</b> {props.num_cached_scripts}</p>
-                <p><b>number of hits:</b> {props.hits}</p>
-                <p><b>number of misses:</b> {props.misses}</p>
-                <p><b>blacklist misses:</b> {props.blacklist_miss}</p>
-                <p><b>number of cached keys:</b> {props.num_cached_keys}</p>
-                <p><b>max cached keys:</b> {props.max_cached_keys}</p>
+                <p><b>{props.txt('number of cached')} files:</b> {props.num_cached_scripts}</p>
+                <p><b>{props.txt('number of hits')}:</b> {props.hits}</p>
+                <p><b>{props.txt('number of misses')}:</b> {props.misses}</p>
+                <p><b>{props.txt('blacklist misses')}:</b> {props.blacklist_miss}</p>
+                <p><b>{props.txt('number of cached keys')}:</b> {props.num_cached_keys}</p>
+                <p><b>{props.txt('max cached keys')}:</b> {props.max_cached_keys}</p>
             </div>
         </div>
     );
@@ -652,12 +673,12 @@ function StatisticsPanel(props) {
 function InternedStringsPanel(props) {
     return (
         <div className="widget-panel">
-            <h3 className="widget-header">interned strings usage</h3>
+            <h3 className="widget-header">{props.txt('interned strings usage')}</h3>
             <div className="widget-value widget-info">
-                <p><b>buffer size:</b> {props.buffer_size}</p>
-                <p><b>used memory:</b> {props.strings_used_memory}</p>
-                <p><b>free memory:</b> {props.strings_free_memory}</p>
-                <p><b>number of strings:</b> {props.number_of_strings}</p>
+                <p><b>{props.txt('buffer size')}:</b> {props.buffer_size}</p>
+                <p><b>{props.txt('used memory')}:</b> {props.strings_used_memory}</p>
+                <p><b>{props.txt('free memory')}:</b> {props.strings_free_memory}</p>
+                <p><b>{props.txt('number of strings')}:</b> {props.number_of_strings}</p>
             </div>
         </div>
     );
@@ -732,7 +753,7 @@ class CachedFiles extends React.Component {
         }
 
         if (this.props.allFiles.length === 0) {
-            return <p>No files have been cached or you have <i>opcache.file_cache_only</i> turned on</p>;
+            return <p>{this.props.txt('No files have been cached or you have <i>opcache.file_cache_only</i> turned on')}</p>;
         }
 
         const { searchTerm, currentPage } = this.state;
@@ -752,18 +773,19 @@ class CachedFiles extends React.Component {
         );
         const allFilesTotal = this.props.allFiles.length;
         const showingTotal = filesInSearch.length;
+        const showing = showingTotal !== allFilesTotal ? ", {1} showing due to filter '{2}'" : "";
 
         return (
             <div>
                 <form action="#">
-                    <label htmlFor="frmFilter">Start typing to filter on script path</label><br/>
+                    <label htmlFor="frmFilter">{this.props.txt('Start typing to filter on script path')}</label><br/>
                     <input type="text" name="filter" id="frmFilter" className="file-filter" onChange={e => {this.setSearchTerm(e.target.value)}} />
                 </form>
 
-                <h3>{allFilesTotal} files cached{showingTotal !== allFilesTotal && `, ${showingTotal} showing due to filter '${this.state.searchTerm}'`}</h3>
+                <h3>{this.props.txt(`{0} files cached${showing}`, allFilesTotal, showingTotal, this.state.searchTerm)}</h3>
 
                 { this.props.allow.invalidate && this.state.searchTerm && showingTotal !== allFilesTotal &&
-                    <p><a href={`?invalidate_searched=${encodeURIComponent(this.state.searchTerm)}`} onClick={this.handleInvalidate}>Invalidate all matching files</a></p>
+                    <p><a href={`?invalidate_searched=${encodeURIComponent(this.state.searchTerm)}`} onClick={this.handleInvalidate}>{this.props.txt('Invalidate all matching files')}</a></p>
                 }
 
                 <div className="paginate-filter">
@@ -773,17 +795,19 @@ class CachedFiles extends React.Component {
                         pageNeighbours={2}
                         onPageChanged={this.onPageChanged}
                         refresh={this.state.refreshPagination}
+                        txt={this.props.txt}
                     />}
-                    <nav className="filter" aria-label="Sort order">
+                    <nav className="filter" aria-label={this.props.txt('Sort order')}>
                         <select name="sortBy" onChange={this.changeSort} value={this.state.sortBy}>
-                            <option value="last_used_timestamp">Last used</option>
-                            <option value="full_path">Path</option>
-                            <option value="hits">Number of hits</option>
-                            <option value="memory_consumption">Memory consumption</option>
+                            <option value="last_used_timestamp">{this.props.txt('Last used')}</option>
+                            <option value="last_modified">{this.props.txt('Last modified')}</option>
+                            <option value="full_path">{this.props.txt('Path')}</option>
+                            <option value="hits">{this.props.txt('Number of hits')}</option>
+                            <option value="memory_consumption">{this.props.txt('Memory consumption')}</option>
                         </select>
                         <select name="sortDir" onChange={this.changeSort} value={this.state.sortDir}>
-                            <option value="desc">Descending</option>
-                            <option value="asc">Ascending</option>
+                            <option value="desc">{this.props.txt('Descending')}</option>
+                            <option value="asc">{this.props.txt('Ascending')}</option>
                         </select>
                     </nav>
                 </div>
@@ -791,7 +815,7 @@ class CachedFiles extends React.Component {
                 <table className="tables cached-list-table">
                     <thead>
                     <tr>
-                        <th>Script</th>
+                        <th>{this.props.txt('Script')}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -800,6 +824,7 @@ class CachedFiles extends React.Component {
                             key={file.full_path}
                             canInvalidate={this.props.allow.invalidate}
                             realtime={this.props.realtime}
+                            txt={this.props.txt}
                             {...file}
                         />
                     })}
@@ -830,14 +855,15 @@ class CachedFile extends React.Component {
                 <td>
                     <span className="file-pathname">{this.props.full_path}</span>
                     <span className="file-metainfo">
-                        <b>hits: </b><span>{this.props.readable.hits}, </span>
-                        <b>memory: </b><span>{this.props.readable.memory_consumption}, </span>
-                        <b>last used: </b><span>{this.props.last_used}</span>
+                        <b>{this.props.txt('hits')}: </b><span>{this.props.readable.hits}, </span>
+                        <b>{this.props.txt('memory')}: </b><span>{this.props.readable.memory_consumption}, </span>
+                        { this.props.last_modified && <><b>{this.props.txt('last modified')}: </b><span>{this.props.last_modified}, </span></> }
+                        <b>{this.props.txt('last used')}: </b><span>{this.props.last_used}</span>
                     </span>
-                    { !this.props.timestamp && <span className="invalid file-metainfo"> - has been invalidated</span> }
+                    { !this.props.timestamp && <span className="invalid file-metainfo"> - {this.props.txt('has been invalidated')}</span> }
                     { this.props.canInvalidate && <span>,&nbsp;<a className="file-metainfo"
                           href={'?invalidate=' + this.props.full_path} data-file={this.props.full_path}
-                          onClick={this.handleInvalidate}>force file invalidation</a></span> }
+                          onClick={this.handleInvalidate}>{this.props.txt('force file invalidation')}</a></span> }
                 </td>
             </tr>
         );
@@ -867,7 +893,7 @@ class IgnoredFiles extends React.Component {
         }
 
         if (this.props.allFiles.length === 0) {
-            return <p>No files have been ignored via <i>opcache.blacklist_filename</i></p>;
+            return <p>{this.props.txt('No files have been ignored via <i>opcache.blacklist_filename</i>')}</p>;
         }
 
         const { currentPage } = this.state;
@@ -880,7 +906,7 @@ class IgnoredFiles extends React.Component {
 
         return (
             <div>
-                <h3>{allFilesTotal} ignore file locations</h3>
+                <h3>{this.props.txt('{0} ignore file locations', allFilesTotal)}</h3>
 
                 {this.doPagination && <Pagination
                     totalRecords={allFilesTotal}
@@ -888,10 +914,11 @@ class IgnoredFiles extends React.Component {
                     pageNeighbours={2}
                     onPageChanged={this.onPageChanged}
                     refresh={this.state.refreshPagination}
+                    txt={this.props.txt}
                 />}
 
                 <table className="tables ignored-list-table">
-                    <thead><tr><th>Path</th></tr></thead>
+                    <thead><tr><th>{this.props.txt('Path')}</th></tr></thead>
                     <tbody>
                         {filesInPage.map((file, index) => {
                             return <tr key={file}><td>{file}</td></tr>
@@ -926,7 +953,7 @@ class PreloadedFiles extends React.Component {
         }
 
         if (this.props.allFiles.length === 0) {
-            return <p>No files have been preloaded <i>opcache.preload</i></p>;
+            return <p>{this.props.txt('No files have been preloaded <i>opcache.preload</i>')}</p>;
         }
 
         const { currentPage } = this.state;
@@ -939,7 +966,7 @@ class PreloadedFiles extends React.Component {
 
         return (
             <div>
-                <h3>{allFilesTotal} preloaded files</h3>
+                <h3>{this.props.txt('{0} preloaded files', allFilesTotal)}</h3>
 
                 {this.doPagination && <Pagination
                     totalRecords={allFilesTotal}
@@ -947,10 +974,11 @@ class PreloadedFiles extends React.Component {
                     pageNeighbours={2}
                     onPageChanged={this.onPageChanged}
                     refresh={this.state.refreshPagination}
+                    txt={this.props.txt}
                 />}
 
                 <table className="tables preload-list-table">
-                    <thead><tr><th>Path</th></tr></thead>
+                    <thead><tr><th>{this.props.txt('Path')}</th></tr></thead>
                     <tbody>
                         {filesInPage.map((file, index) => {
                             return <tr key={file}><td>{file}</td></tr>
@@ -1084,15 +1112,15 @@ class Pagination extends React.Component {
                             return (
                                 <React.Fragment key={index}>
                                     <li className="page-item arrow">
-                                        <a className="page-link" href="#" aria-label="Previous" onClick={this.handleJumpLeft}>
+                                        <a className="page-link" href="#" aria-label={this.props.txt('Previous')} onClick={this.handleJumpLeft}>
                                             <span aria-hidden="true">↞</span>
-                                            <span className="sr-only">Jump back</span>
+                                            <span className="sr-only">{this.props.txt('Jump back')}</span>
                                         </a>
                                     </li>
                                     <li className="page-item arrow">
-                                        <a className="page-link" href="#" aria-label="Previous" onClick={this.handleMoveLeft}>
+                                        <a className="page-link" href="#" aria-label={this.props.txt('Previous')} onClick={this.handleMoveLeft}>
                                             <span aria-hidden="true">⇠</span>
-                                            <span className="sr-only">Previous page</span>
+                                            <span className="sr-only">{this.props.txt('Previous page')}</span>
                                         </a>
                                     </li>
                                 </React.Fragment>
@@ -1102,15 +1130,15 @@ class Pagination extends React.Component {
                             return (
                                 <React.Fragment key={index}>
                                     <li className="page-item arrow">
-                                        <a className="page-link" href="#" aria-label="Next" onClick={this.handleMoveRight}>
+                                        <a className="page-link" href="#" aria-label={this.props.txt('Next')} onClick={this.handleMoveRight}>
                                             <span aria-hidden="true">⇢</span>
-                                            <span className="sr-only">Next page</span>
+                                            <span className="sr-only">{this.props.txt('Next page')}</span>
                                         </a>
                                     </li>
                                     <li className="page-item arrow">
-                                        <a className="page-link" href="#" aria-label="Next" onClick={this.handleJumpRight}>
+                                        <a className="page-link" href="#" aria-label={this.props.txt('Next')} onClick={this.handleJumpRight}>
                                             <span aria-hidden="true">↠</span>
-                                            <span className="sr-only">Jump forward</span>
+                                            <span className="sr-only">{this.props.txt('Jump forward')}</span>
                                         </a>
                                     </li>
                                 </React.Fragment>
