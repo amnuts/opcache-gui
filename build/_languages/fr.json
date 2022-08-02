@@ -101,7 +101,7 @@
     "{0} files cached, {1} showing due to filter '{2}'": "{0} fichiers mis en cache, {1} s'affichent en raison du filtre '{2}'",
     "{0} ignore file locations": "{0} ignore les fichiers en fonction de l'emplacement",
     "{0} preloaded files": "{0} fichiers préchargés",
-    "Last reset": "",
-    "Start time": "",
-    "never": ""
+    "Last reset": "Dernière réinitialisation",
+    "Start time": "Heure de début",
+    "never": "jamais"
 }
