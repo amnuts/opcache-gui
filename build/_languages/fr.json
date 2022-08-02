@@ -44,6 +44,7 @@
     "keys": "clés",
     "Last modified": "Dernière modification",
     "last modified": "dernière modification",
+    "Last reset": "Dernière réinitialisation",
     "Last used": "Dernière utilisation",
     "last used": "dernière utilisation",
     "max cached keys": "max de clés en cache",
@@ -52,6 +53,7 @@
     "memory": "mémoire",
     "Merge equal constants": "Fusionner les constantes égales",
     "Minimal JIT (call standard VM handlers)": "JIT minimal (appel des gestionnaires de VM standard)",
+    "never": "jamais",
     "Next": "Suivant",
     "No files have been cached or you have <i>opcache.file_cache_only<\/i> turned on": "Aucun fichier n'a été mis en cache ou vous avez <i>opcache.file_cache_only<\/i> activé",
     "No files have been ignored via <i>opcache.blacklist_filename<\/i>": "Aucun fichier n'a été ignoré via <i>opcache.blacklist_filename<\/i>",
@@ -84,6 +86,7 @@
     "Script": "Script",
     "Server Software": "Logiciel serveur",
     "Sort order": "Ordre de tri",
+    "Start time": "Heure de début",
     "Start typing to filter on script path": "Commencez à taper pour filtrer sur le chemin du script",
     "TMP VAR usage": "Utilisation TMP VAR",
     "total memory": "mémoire totale",
@@ -100,8 +103,5 @@
     "{0} files cached": "{0} fichiers mis en cache",
     "{0} files cached, {1} showing due to filter '{2}'": "{0} fichiers mis en cache, {1} s'affichent en raison du filtre '{2}'",
     "{0} ignore file locations": "{0} ignore les fichiers en fonction de l'emplacement",
-    "{0} preloaded files": "{0} fichiers préchargés",
-    "Last reset": "Dernière réinitialisation",
-    "Start time": "Heure de début",
-    "never": "jamais"
+    "{0} preloaded files": "{0} fichiers préchargés"
 }

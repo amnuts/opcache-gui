@@ -44,6 +44,7 @@
   "keys": "",
   "Last modified": "",
   "last modified": "",
+  "Last reset": "",
   "Last used": "",
   "last used": "",
   "max cached keys": "",
@@ -52,6 +53,7 @@
   "memory": "",
   "Merge equal constants": "",
   "Minimal JIT (call standard VM handlers)": "",
+  "never": "",
   "Next": "",
   "No files have been cached or you have <i>opcache.file_cache_only<\/i> turned on": "",
   "No files have been ignored via <i>opcache.blacklist_filename<\/i>": "",
@@ -84,6 +86,7 @@
   "Script": "",
   "Server Software": "",
   "Sort order": "",
+  "Start time": "",
   "Start typing to filter on script path": "",
   "TMP VAR usage": "",
   "total memory": "",
@@ -100,8 +103,5 @@
   "{0} files cached": "",
   "{0} files cached, {1} showing due to filter '{2}'": "",
   "{0} ignore file locations": "",
-  "{0} preloaded files": "",
-  "Last reset": "",
-  "Start time": "",
-  "never": ""
+  "{0} preloaded files": ""
 }
