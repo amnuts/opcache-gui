@@ -507,6 +507,7 @@ $opcache = (new Service($options))->handle();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name='robots' content='noindex, nofollow' />
     <title>OPcache statistics on <?= $opcache->getData('version', 'host'); ?></title>
     <script src="//cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
