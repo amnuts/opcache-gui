@@ -1166,6 +1166,11 @@ function Footer(props) {
                target="_blank"
                title="opcache-gui (currently version {props.version}) on GitHub"
             >https://github.com/amnuts/opcache-gui - version {props.version}</a>
+
+            <a className="sponsor-link" href="https://github.com/sponsors/amnuts"
+               target="_blank"
+               title="Sponsor this project and author on GitHub"
+            >Sponsor this project</a>
         </footer>
     );
 }
