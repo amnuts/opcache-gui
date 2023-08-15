@@ -2,7 +2,7 @@
 
 A clean and responsive interface for Zend OPcache information, showing statistics, settings and cached files, and providing a real-time update for the information.
 
-This interface uses ReactJS and Axios and is for modern browsers and requires a minimum of PHP 7.1.
+This interface uses ReactJS and Axios and is for modern browsers, and requires a minimum of PHP 7.1.
 
 ## License
 
@@ -10,9 +10,9 @@ MIT: http://acollington.mit-license.org/
 
 ## Sponsoring this work
 
-If you're able and would like to sponsor this work in some way, then that would be super awesome :heart:, and you can do so through the [GitHub Sponsorship](https://github.com/sponsors/amnuts) page.
+If you're able and would like to sponsor this work in some way, then that would be super awesome :heart:.  You can do that through the [GitHub Sponsorship](https://github.com/sponsors/amnuts) page.
 
-Alternatively, if you'd just like to give me a [shout-out on Twitter](https://twitter.com/acollington) to say you use it, that'd be awesome, too!  (Any one else miss postcardware?)
+Alternatively, if you'd just like to give me a [shout-out on X (aka, Twitter)](https://twitter.com/acollington) to say you use it, then that'd be awesome, too!  (Any one else miss postcardware?)
 
 ## Using the opcache-gui
 
@@ -175,7 +175,9 @@ Also, if you choose to invalidate any files or reset the cache it will do this w
 
 ### Building it yourself
 
-The interface has been split up to allow you to easily change the colours of the gui, the language shown, or even the core components, should you wish.
+The interface has been designed around the principle of having just one file that anyone needs in order to get up and running.  To fulfil this, there's a template file, language files, jsx and css, which are all used in order to create the interface and they're brought together in the build process.
+
+This build process will allow you to change the language used, how the required 3rd-party javascript libraries are included, the look and feel, or even the core components, should you wish.
 
 #### The build command
 
@@ -185,6 +187,7 @@ To run the build process, run the command `php ./build/build.php` from the repo 
 🐢 Installing node modules
 🏗️ Building js and css
 🚀 Creating single build file
+🔗 Using remote js links from 'cloudflare'
 💯 Done!
 ```
 
@@ -208,13 +211,17 @@ Run the build script again should you make changes here.
 
 The wrapper PHP template used in the build process, and that acts to pass various bits of data to the ReactJS side of things, is located at `build/template.phps`.  If you wanted to update the version of ReactJS used, or how the wrapper html is structured (such as wanting to pass additional things to the ReactJS side of things), then this would be the file you'd want to update. 
 
-The template includes a few remote js files.  If you want to make those local (for example, you have CSP policies in place and the remote urls are not whitelisted), then you can use the `-j` or `--local-js` flags when building, such as `php ./build/build.php -j`.  This will fetch the remote script files and put them in the root of the repo, adjusting the links in the built `index.php` file to point to the local copies.  If you want to build it again with remote files, run the command again without the flag.
+The interface requires a few 3rd-party js files to function correctly.  You have the option of being able to change where these are fetched (between CloudFare, JSDelivr, and Unpkg), or you can have js js completely local and in-line (for example, you have CSP policies in place and the remote urls are not whitelisted).
+
+In order to change the location of the 3rd-party resources, use the `-r` or `--remote-js` option followed by either `cloudflare`, `jsdelivr`, or `unpkg`.  For example, if you wanted to use _jsdelivr_ then you'd run the build command like this: `php ./build/build.php -r jsdelivr`.  This defaults to `cloudflare`.
+
+If you wanted to have the js in-line, then you can use the `-j` or `--local-js` flag when building, such as `php ./build/build.php -j`.  This will fetch the remote script files and embed the js into main `index.php` file.  If you want to build it again with remote files, run the command again without the flag.  Fetching the files will take your `-r` option into consideration if you provide it.
 
 #### The language
 
 There's an old saying that goes, "If you know more than one language you're multilingual, if you don't you're British."  Not only is that a damning indictment of the British mentality towards other languages, but also goes to explain why the UI has only so far been in English - because I am, for all my sins, British.
 
-However, it is now possible to build the interface with a different language.  Currently, thanks to contributor, French is also support.  If anyone else wants to contribute additional language packs, please submit a PR! 
+However, it is now possible to build the interface with a different language.  Currently, thanks to a contributor, French is also supported.  If anyone else wants to contribute additional language packs, please submit a PR! 
 
 If the language pack is in the `build/_languages/` directory then you can use that with the `-l` or `--lang` flag.  For example, if there is a `fr.json` language pack then you can use `php ./build/build.php -l fr` in order to build with that language.
 
@@ -223,6 +230,14 @@ If you want to create a language file then `build/_languages/example.json` conta
 So to get started with a new language, copy the `example.json` to the language you want that doesn't already exist - for example, `pt-br.json`.  Then fill in the translations into the values.  Once done, rebuild with `php ./build/build.php -l pt-br`.
 
 ## Releases
+
+**Version 3.5.0**\
+This version changes how the build process includes the javascript.
+* The `-j`/`--local-js` flag now embeds the javascript into the `index.php` file rather than having them as a separate files
+* The `-r`/`--remote-js` option has been added to allow you to decide where you get the 3rd-party files from (either when fetched locally or when added as remote script links), with `cloudflare`, `jsdelivr`, or `unpkg` being available options
+* CloudFlare has been set as the default for the remote js links
+* Added PR#94 from @M-Falken
+* Added PR#95 from @firassziedan
 
 **Version 3.4.0**\
 This version adds a little more info about the files in the cache, and allows a bit more configuration though the config and build script.
