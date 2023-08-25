@@ -231,6 +231,9 @@ So to get started with a new language, copy the `example.json` to the language y
 
 ## Releases
 
+**Version 3.5.1**\
+This is just 3.5.0 but with corrected version tags to make Packagist happy and correct my mistake. :facepalm:
+
 **Version 3.5.0**\
 This version changes how the build process includes the javascript.
 * The `-j`/`--local-js` flag now embeds the javascript into the `index.php` file rather than having them as a separate files

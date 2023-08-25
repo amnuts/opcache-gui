@@ -4,7 +4,7 @@
   "keywords": ["opcache", "cache", "gui", "opcodes", "interface"],
   "minimum-stability": "stable",
   "license": "MIT",
-  "version": "3.4.0",
+  "version": "3.5.1",
   "authors": [
     {
       "name": "Andrew Collington",
