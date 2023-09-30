@@ -1,14 +1,12 @@
 <?php
 
-namespace Amnuts\Opcache;
-
 /**
  * OPcache GUI
  *
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.5.1
+ * @version 3.5.2
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, https://acollington.mit-license.org/
  */
@@ -59,13 +57,9 @@ if (empty($ocEnabled)) {
 header('Cache-Control: no-cache, must-revalidate');
 header('Pragma: no-cache');
 
-use DateTimeImmutable;
-use DateTimeZone;
-use Exception;
-
 class Service
 {
-    public const VERSION = '3.5.1';
+    public const VERSION = '3.5.2';
 
     protected $tz;
     protected $data;

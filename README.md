@@ -231,6 +231,9 @@ So to get started with a new language, copy the `example.json` to the language y
 
 ## Releases
 
+**Version 3.5.2**\
+Removed some warnings for PHP 8.2 by dropping the `namespace` and `use` statements in the bundled `index.php` file.
+
 **Version 3.5.1**\
 This is just 3.5.0 but with corrected version tags to make Packagist happy and correct my mistake. :facepalm:
 

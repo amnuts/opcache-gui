@@ -4,7 +4,7 @@
  * OPcache GUI - build script
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.5.1
+ * @version 3.5.2
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, https://acollington.mit-license.org/
  */
@@ -65,7 +65,7 @@ echo "🚀 Creating single build file\n";
 $template = trim(file_get_contents(__DIR__ . '/template.phps'));
 $jsOutput = trim(file_get_contents(__DIR__ . '/interface.js'));
 $cssOutput = trim(file_get_contents(__DIR__ . '/interface.css'));
-$phpOutput = trim(implode('', array_slice(file($parentPath . '/src/Opcache/Service.php'), 3)));
+$phpOutput = trim(implode('', array_slice(file($parentPath . '/src/Opcache/Service.php'), 7)));
 
 $output = str_replace(
     ['{{JS_OUTPUT}}', '{{CSS_OUTPUT}}', '{{PHP_OUTPUT}}', '{{LANGUAGE_PACK}}'],
