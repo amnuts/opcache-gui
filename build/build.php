@@ -4,7 +4,7 @@
  * OPcache GUI - build script
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.5.2
+ * @version 3.5.3
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, https://acollington.mit-license.org/
  */
