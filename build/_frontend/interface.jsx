@@ -383,10 +383,25 @@ function Directives(props) {
                 vShow = directive.v;
             }
         }
+        let directiveLink = (name) => {
+            if (name === 'opcache.jit_max_recursive_returns') {
+                return 'opcache.jit-max-recursive-return';
+            }
+            return (
+                [
+                    'opcache.file_update_protection',
+                    'opcache.huge_code_pages',
+                    'opcache.lockfile_path',
+                    'opcache.opt_debug_level',
+                ].includes(name)
+                ? name
+                : name.replace(/_/g,'-')
+            );
+        }
         return (
             <tr key={directive.k}>
                 <td title={props.txt('View {0} manual entry', directive.k)}><a href={'https://php.net/manual/en/opcache.configuration.php#ini.'
-                + (directive.k).replace(/_/g,'-')} target="_blank">{dShow}</a></td>
+                + directiveLink(directive.k)} target="_blank">{dShow}</a></td>
                 <td>{vShow}</td>
             </tr>
         );

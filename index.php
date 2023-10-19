@@ -6,7 +6,7 @@
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.5.2
+ * @version 3.5.3
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, https://acollington.mit-license.org/
  */
@@ -59,7 +59,7 @@ header('Pragma: no-cache');
 
 class Service
 {
-    public const VERSION = '3.5.2';
+    public const VERSION = '3.5.3';
 
     protected $tz;
     protected $data;
@@ -936,12 +936,20 @@ function Directives(props) {
       }
     }
 
+    let directiveLink = name => {
+      if (name === 'opcache.jit_max_recursive_returns') {
+        return 'opcache.jit-max-recursive-return';
+      }
+
+      return ['opcache.file_update_protection', 'opcache.huge_code_pages', 'opcache.lockfile_path', 'opcache.opt_debug_level'].includes(name) ? name : name.replace(/_/g, '-');
+    };
+
     return /*#__PURE__*/React.createElement("tr", {
       key: directive.k
     }, /*#__PURE__*/React.createElement("td", {
       title: props.txt('View {0} manual entry', directive.k)
     }, /*#__PURE__*/React.createElement("a", {
-      href: 'https://php.net/manual/en/opcache.configuration.php#ini.' + directive.k.replace(/_/g, '-'),
+      href: 'https://php.net/manual/en/opcache.configuration.php#ini.' + directiveLink(directive.k),
       target: "_blank"
     }, dShow)), /*#__PURE__*/React.createElement("td", null, vShow));
   });
