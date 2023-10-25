@@ -6,7 +6,7 @@
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.5.3
+ * @version 3.5.4
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, https://acollington.mit-license.org/
  */
@@ -59,7 +59,7 @@ header('Pragma: no-cache');
 
 class Service
 {
-    public const VERSION = '3.5.3';
+    public const VERSION = '3.5.4';
 
     protected $tz;
     protected $data;
@@ -417,7 +417,7 @@ class Service
             ];
         }
 
-        if ($overview && !empty($status['jit'])) {
+        if ($overview && !empty($status['jit']['enabled'])) {
             $overview['jit_buffer_used_percentage'] = ($status['jit']['buffer_size']
                 ? round(100 * (($status['jit']['buffer_size'] - $status['jit']['buffer_free']) / $status['jit']['buffer_size']))
                 : 0
@@ -488,8 +488,29 @@ class Service
             'preload' => $preload,
             'directives' => $directives,
             'blacklist' => $config['blacklist'],
-            'functions' => get_extension_funcs('Zend OPcache')
+            'functions' => get_extension_funcs('Zend OPcache'),
+            'jitState' => $this->jitState($status, $config['directives']),
         ];
+    }
+
+    protected function jitState(array $status, array $directives): array
+    {
+        $state = [
+            'enabled' => $status['jit']['enabled'],
+            'reason' => ''
+        ];
+
+        if (!$state['enabled']) {
+            if (empty($directives['opcache.jit']) || $directives['opcache.jit'] === 'disable') {
+                $state['reason'] = $this->txt('disabled due to <i>opcache.jit</i> setting');
+            } elseif (!$directives['opcache.jit_buffer_size']) {
+                $state['reason'] = $this->txt('the <i>opcache.jit_buffer_size</i> must be set to fully enable JIT');
+            } else {
+                $state['reason'] = $this->txt('incompatible with extensions that override <i>zend_execute_ex()</i>, such as <i>xdebug</i>');
+            }
+        }
+
+        return $state;
     }
 }
 
@@ -659,6 +680,7 @@ function MainNavigation(props) {
     start: props.opstate.overview && props.opstate.overview.readable.start_time || null,
     reset: props.opstate.overview && props.opstate.overview.readable.last_restart_time || null,
     version: props.opstate.version,
+    jit: props.opstate.jitState,
     txt: props.txt
   }), /*#__PURE__*/React.createElement(Directives, {
     directives: props.opstate.directives,
@@ -896,7 +918,11 @@ function GeneralInfo(props) {
     className: "tables general-info-table"
   }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
     colSpan: "2"
-  }, props.txt('General info')))), /*#__PURE__*/React.createElement("tbody", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Zend OPcache"), /*#__PURE__*/React.createElement("td", null, props.version.version)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "PHP"), /*#__PURE__*/React.createElement("td", null, props.version.php)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.txt('Host')), /*#__PURE__*/React.createElement("td", null, props.version.host)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.txt('Server Software')), /*#__PURE__*/React.createElement("td", null, props.version.server)), props.start ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.txt('Start time')), /*#__PURE__*/React.createElement("td", null, props.start)) : null, props.reset ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.txt('Last reset')), /*#__PURE__*/React.createElement("td", null, props.reset)) : null));
+  }, props.txt('General info')))), /*#__PURE__*/React.createElement("tbody", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "Zend OPcache"), /*#__PURE__*/React.createElement("td", null, props.version.version)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, "PHP"), /*#__PURE__*/React.createElement("td", null, props.version.php)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.txt('Host')), /*#__PURE__*/React.createElement("td", null, props.version.host)), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.txt('Server Software')), /*#__PURE__*/React.createElement("td", null, props.version.server)), props.start ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.txt('Start time')), /*#__PURE__*/React.createElement("td", null, props.start)) : null, props.reset ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.txt('Last reset')), /*#__PURE__*/React.createElement("td", null, props.reset)) : null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, props.txt('JIT enabled')), /*#__PURE__*/React.createElement("td", null, props.txt(props.jit.enabled ? "Yes" : "No"), props.jit.reason && /*#__PURE__*/React.createElement("span", {
+    dangerouslySetInnerHTML: {
+      __html: ` (${props.jit.reason})`
+    }
+  })))));
 }
 
 function Directives(props) {
