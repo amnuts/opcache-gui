@@ -8,7 +8,7 @@ use Exception;
 
 class Service
 {
-    public const VERSION = '3.5.3';
+    public const VERSION = '3.5.4';
 
     protected $tz;
     protected $data;
@@ -366,7 +366,7 @@ class Service
             ];
         }
 
-        if ($overview && !empty($status['jit'])) {
+        if ($overview && !empty($status['jit']['enabled'])) {
             $overview['jit_buffer_used_percentage'] = ($status['jit']['buffer_size']
                 ? round(100 * (($status['jit']['buffer_size'] - $status['jit']['buffer_free']) / $status['jit']['buffer_size']))
                 : 0
@@ -437,7 +437,28 @@ class Service
             'preload' => $preload,
             'directives' => $directives,
             'blacklist' => $config['blacklist'],
-            'functions' => get_extension_funcs('Zend OPcache')
+            'functions' => get_extension_funcs('Zend OPcache'),
+            'jitState' => $this->jitState($status, $config['directives']),
         ];
+    }
+
+    protected function jitState(array $status, array $directives): array
+    {
+        $state = [
+            'enabled' => $status['jit']['enabled'],
+            'reason' => ''
+        ];
+
+        if (!$state['enabled']) {
+            if (empty($directives['opcache.jit']) || $directives['opcache.jit'] === 'disable') {
+                $state['reason'] = $this->txt('disabled due to <i>opcache.jit</i> setting');
+            } elseif (!$directives['opcache.jit_buffer_size']) {
+                $state['reason'] = $this->txt('the <i>opcache.jit_buffer_size</i> must be set to fully enable JIT');
+            } else {
+                $state['reason'] = $this->txt('incompatible with extensions that override <i>zend_execute_ex()</i>, such as <i>xdebug</i>');
+            }
+        }
+
+        return $state;
     }
 }

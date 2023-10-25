@@ -114,6 +114,7 @@ function MainNavigation(props) {
                             start={props.opstate.overview && props.opstate.overview.readable.start_time || null}
                             reset={props.opstate.overview && props.opstate.overview.readable.last_restart_time || null}
                             version={props.opstate.version}
+                            jit={props.opstate.jitState}
                             txt={props.txt}
                         />
                         <Directives
@@ -347,6 +348,13 @@ function GeneralInfo(props) {
                 <tr><td>{props.txt('Server Software')}</td><td>{props.version.server}</td></tr>
                 { props.start ? <tr><td>{props.txt('Start time')}</td><td>{props.start}</td></tr> : null }
                 { props.reset ? <tr><td>{props.txt('Last reset')}</td><td>{props.reset}</td></tr> : null }
+                <tr>
+                    <td>{props.txt('JIT enabled')}</td>
+                    <td>
+                        {props.txt(props.jit.enabled ? "Yes" : "No")}
+                        {props.jit.reason && (<span dangerouslySetInnerHTML={{__html: ` (${props.jit.reason})` }} />)}
+                    </td>
+                </tr>
             </tbody>
         </table>
     );

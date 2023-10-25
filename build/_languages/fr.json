@@ -103,5 +103,11 @@
     "{0} files cached": "{0} fichiers mis en cache",
     "{0} files cached, {1} showing due to filter '{2}'": "{0} fichiers mis en cache, {1} s'affichent en raison du filtre '{2}'",
     "{0} ignore file locations": "{0} ignore les fichiers en fonction de l'emplacement",
-    "{0} preloaded files": "{0} fichiers préchargés"
+    "{0} preloaded files": "{0} fichiers préchargés",
+    "JIT enabled": "JIT activé",
+    "disabled due to <i>opcache.jit</i> setting": "désactivé en raison du paramètre <i>opcache.jit</i>",
+    "the <i>opcache.jit_buffer_size</i> must be set to fully enable JIT": "le <i>opcache.jit_buffer_size</i> doit être défini pour activer complètement JIT",
+    "incompatible with extensions that override <i>zend_execute_ex()</i>, such as <i>xdebug</i>": "incompatible avec les extensions qui remplacent <i>zend_execute_ex()</i>, telles que <i>xdebug</i>",
+    "Yes": "Oui",
+    "No": "Non"
 }

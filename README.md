@@ -231,6 +231,9 @@ So to get started with a new language, copy the `example.json` to the language y
 
 ## Releases
 
+**Version 3.5.4**\
+Better handling of whether JIT is enabled or disabled.  Now also shows _why_ it might be disabled even if you have the setting turned on.  The interface also disables the graph and memory stats correctly for JIT if it's disabled for any reason.
+
 **Version 3.5.3**\
 Worked around some inconsistencies with links in the opcache documentation on php.net.
 
