@@ -13,7 +13,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "compile-jsx": "node_modules/.bin/babel --presets @babel/preset-react build/_frontend/interface.jsx --plugins @babel/plugin-proposal-class-properties -o build/interface.js",
-    "compile-scss": "node_modules/.bin/sass -xi build/_frontend/interface.scss -o build/ --output-style=compressed"
+    "compile-scss": "node_modules/.bin/sass --no-source-map --style=compressed -q build/_frontend/interface.scss build/interface.css"
   },
   "repository": {
     "type": "git",
