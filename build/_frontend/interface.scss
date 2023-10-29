@@ -173,12 +173,27 @@ body.opcache-gui {
 
   .nav-tab-link-reset, .nav-tab-link-realtime {
     >svg {
-      width: 1.5em;
-      height: 1.5em;
+      width: 1.1rem;
+      height: 1.1rem;
       margin-right: 0.5em;
       overflow: visible;
       >path {
         fill: var(--nav-icon-color);
+      }
+    }
+    &.activated {
+      >svg>path {
+        fill: var(--nav-icon-active-color);
+        transform-origin: 50% 50%;
+        display: inline-block;
+      }
+    }
+  }
+
+  .nav-tab-link-reset {
+    &.activated {
+      >svg>path {
+        animation: spin-all 2s linear infinite;
       }
     }
     &.is-resetting {
@@ -186,9 +201,12 @@ body.opcache-gui {
         fill: var(--nav-icon-active-color);
       }
     }
-    &.pulse {
+  }
+
+  .nav-tab-link-realtime {
+    &.activated {
       >svg>path {
-        animation: pulse 2s linear infinite;
+        animation: spin-pause 2s ease-in infinite;
       }
     }
   }
@@ -459,13 +477,20 @@ body.opcache-gui {
   }
 }
 
-@keyframes pulse {
+@keyframes spin-pause {
   0% {
-    transform: scale(1);
-    opacity: 1;
+    transform: rotate(0deg);
   }
-  50%,100% {
-    transform: scale(2);
-    opacity: 0;
+  50%, 100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-all {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
