@@ -166,9 +166,14 @@ function MainNavigation(props) {
                 {
                     props.allow.reset &&
                         <div label={props.txt("Reset cache")} tabId="resetCache"
-                           className={`nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`}
-                           handler={props.resetHandler}
-                           tabIndex={5}
+                            className={`nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`}
+                            handler={props.resetHandler}
+                            tabIndex={5}
+                            icon={(
+                                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+                                    <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                                </svg>
+                            )}
                         ></div>
                 }
                 {
@@ -177,6 +182,12 @@ function MainNavigation(props) {
                             className={`nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`}
                             handler={props.realtimeHandler}
                             tabIndex={6}
+                            icon={(
+                                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+                                    <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z"/>
+                                    <path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z"/>
+                                </svg>
+                            )}
                         ></div>
                 }
             </Tabs>
@@ -209,7 +220,7 @@ class Tabs extends React.Component {
             <>
                 <ul className="nav-tab-list">
                     {children.map((child) => {
-                        const { tabId, label, className, handler, tabIndex } = child.props;
+                        const { tabId, label, className, handler, tabIndex, icon } = child.props;
                         return (
                             <Tab
                                 activeTab={activeTab}
@@ -219,6 +230,7 @@ class Tabs extends React.Component {
                                 className={className}
                                 tabIndex={tabIndex}
                                 tabId={tabId}
+                                icon={icon}
                             />
                         );
                     })}
@@ -248,7 +260,7 @@ class Tab extends React.Component {
     render() {
         const {
             onClick,
-            props: { activeTab, label, tabIndex, tabId },
+            props: { activeTab, label, tabIndex, tabId, icon },
         } = this;
 
         let className = 'nav-tab';
@@ -265,7 +277,7 @@ class Tab extends React.Component {
                 tabIndex={tabIndex}
                 role="tab"
                 aria-controls={`${tabId}-content`}
-            >{label}</li>
+            >{icon}{label}</li>
         );
     }
 }
@@ -1188,12 +1200,16 @@ function Footer(props) {
             <a className="github-link" href="https://github.com/amnuts/opcache-gui"
                target="_blank"
                title="opcache-gui (currently version {props.version}) on GitHub"
-            >https://github.com/amnuts/opcache-gui - version {props.version}</a>
+            ><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" width="1.19em" height="1em" viewBox="0 0 1664 1408">
+                <path d="M640 960q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm640 0q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm160 0q0-120-69-204t-187-84q-41 0-195 21q-71 11-157 11t-157-11q-152-21-195-21q-118 0-187 84t-69 204q0 88 32 153.5t81 103t122 60t140 29.5t149 7h168q82 0 149-7t140-29.5t122-60t81-103t32-153.5zm224-176q0 207-61 331q-38 77-105.5 133t-141 86t-170 47.5t-171.5 22t-167 4.5q-78 0-142-3t-147.5-12.5t-152.5-30t-137-51.5t-121-81t-86-115Q0 992 0 784q0-237 136-396q-27-82-27-170q0-116 51-218q108 0 190 39.5T539 163q147-35 309-35q148 0 280 32q105-82 187-121t189-39q51 102 51 218q0 87-27 168q136 160 136 398z"/>
+            </svg> https://github.com/amnuts/opcache-gui - version {props.version}</a>
 
             <a className="sponsor-link" href="https://github.com/sponsors/amnuts"
                target="_blank"
                title="Sponsor this project and author on GitHub"
-            >Sponsor this project</a>
+            ><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                <path fill="crimson" d="M12 21.35l-1.45-1.32c-5.15-4.67-8.55-7.75-8.55-11.53 0-3.08 2.42-5.5 5.5-5.5 1.74 0 3.41.81 4.5 2.09 1.09-1.28 2.76-2.09 4.5-2.09 3.08 0 5.5 2.42 5.5 5.5 0 3.78-3.4 6.86-8.55 11.54l-1.45 1.31z"/>
+            </svg>Sponsor this project</a>
         </footer>
     );
 }
