@@ -136,6 +136,8 @@ body.opcache-gui {
     padding-left: 8px;
     margin: 0;
     border-bottom: 1px solid var(--nav-border-color);
+    display: flex;
+    align-items: end;
   }
 
   .nav-tab {
@@ -176,7 +178,6 @@ body.opcache-gui {
       width: 1.1rem;
       height: 1.1rem;
       margin-right: 0.5em;
-      overflow: visible;
       >path {
         fill: var(--nav-icon-color);
       }
