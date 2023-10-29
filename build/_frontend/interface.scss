@@ -175,6 +175,7 @@ body.opcache-gui {
 
   .nav-tab-link-reset, .nav-tab-link-realtime {
     >svg {
+      overflow: visible;
       width: 1.1rem;
       height: 1.1rem;
       margin-right: 0.5em;
@@ -366,18 +367,26 @@ body.opcache-gui {
   .main-footer {
     border-top: 1px solid var(--footer-border-color);
     padding: 1em 2em;
+    display: flex;
+    align-items: center;
   }
 
   .github-link,
   .sponsor-link {
-    background-position: 0 50%;
-    padding: 2em 0 2em 2.3em;
     text-decoration: none;
     opacity: 0.7;
     font-size: 80%;
+    display: flex;
+    align-items: center;
 
     &:hover {
       opacity: 1;
+    }
+
+    >svg {
+      height: 1rem;
+      width: 1rem;
+      margin-right: 0.25rem;
     }
   }
 
