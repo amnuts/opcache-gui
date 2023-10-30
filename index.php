@@ -528,24 +528,23 @@ $opcache = (new Service($options))->handle();
     <script src="//cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/axios/1.3.6/axios.min.js"></script>
     <style>
-        :root{--opcache-gui-graph-track-fill-color: #6CA6EF;--opcache-gui-graph-track-background-color: rgba(229,231,231,0.905882)}.opcache-gui{font-family:sans-serif;font-size:90%;padding:0;margin:0}.opcache-gui .hide{display:none}.opcache-gui .sr-only{border:0 !important;clip:rect(1px, 1px, 1px, 1px) !important;-webkit-clip-path:inset(50%) !important;clip-path:inset(50%) !important;height:1px !important;margin:-1px !important;overflow:hidden !important;padding:0 !important;position:absolute !important;width:1px !important;white-space:nowrap !important}.opcache-gui .main-nav{padding-top:20px}.opcache-gui .nav-tab-list{list-style-type:none;padding-left:8px;margin:0;border-bottom:1px solid #CCC}.opcache-gui .nav-tab{display:inline-block;margin:0 0 -1px 0;padding:15px 30px;border:1px solid transparent;border-bottom-color:#CCC;text-decoration:none;background-color:#fff;cursor:pointer;user-select:none}.opcache-gui .nav-tab:hover{background-color:#F4F4F4;text-decoration:underline}.opcache-gui .nav-tab.active{border:1px solid #CCC;border-bottom-color:#fff;border-top:3px solid #6CA6EF}.opcache-gui .nav-tab.active:hover{background-color:initial}.opcache-gui .nav-tab:focus{outline:0;text-decoration:underline}.opcache-gui .nav-tab-link-reset{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .nav-tab-link-reset.is-resetting{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgb(0, 186, 0)"/></svg>')}.opcache-gui .nav-tab-link-realtime{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="rgb(98, 98, 98)"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .nav-tab-link-realtime.live-update{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="rgb(0, 186, 0)"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="rgb(0, 186, 0)"/></svg>')}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime{position:relative;padding-left:50px}.opcache-gui .nav-tab-link-reset.pulse::before,.opcache-gui .nav-tab-link-realtime.pulse::before{content:"";position:absolute;top:12px;left:25px;width:18px;height:18px;z-index:10;opacity:0;background-color:transparent;border:2px solid #00ba00;border-radius:100%;animation:pulse 2s linear infinite}.opcache-gui .tab-content{padding:2em}.opcache-gui .tab-content-overview-counts{width:270px;float:right}.opcache-gui .tab-content-overview-info{margin-right:280px}.opcache-gui .graph-widget{max-width:100%;height:auto;margin:0 auto;display:flex;position:relative}.opcache-gui .graph-widget .widget-value{display:flex;align-items:center;justify-content:center;text-align:center;position:absolute;top:0;width:100%;height:100%;margin:0 auto;font-size:3.2em;font-weight:100;color:#6CA6EF;user-select:none}.opcache-gui .widget-panel{background-color:#EDEDED;margin-bottom:10px}.opcache-gui .widget-header{background-color:#CDCDCD;padding:4px 6px;margin:0;text-align:center;font-size:1rem;font-weight:bold}.opcache-gui .widget-value{margin:0;text-align:center}.opcache-gui .widget-value span.large{color:#6CA6EF;font-size:80pt;margin:0;padding:0;text-align:center}.opcache-gui .widget-value span.large+span{font-size:20pt;margin:0;color:#6CA6EF}.opcache-gui .widget-info{margin:0;padding:10px}.opcache-gui .widget-info *{margin:0;line-height:1.75em;text-align:left}.opcache-gui .tables{margin:0 0 1em 0;border-collapse:collapse;width:100%;table-layout:fixed}.opcache-gui .tables tr:nth-child(odd){background-color:#EFFEFF}.opcache-gui .tables tr:nth-child(even){background-color:#E0ECEF}.opcache-gui .tables th{text-align:left;padding:6px;background-color:#6CA6EF;color:#fff;border-color:#fff;font-weight:normal}.opcache-gui .tables td{padding:4px 6px;line-height:1.4em;vertical-align:top;border-color:#fff;overflow:hidden;overflow-wrap:break-word;text-overflow:ellipsis}.opcache-gui .directive-list{list-style-type:none;padding:0;margin:0}.opcache-gui .directive-list li{margin-bottom:0.5em}.opcache-gui .directive-list li:last-child{margin-bottom:0}.opcache-gui .directive-list li ul{margin-top:1.5em}.opcache-gui .file-filter{width:520px}.opcache-gui .file-metainfo{font-size:80%}.opcache-gui .file-metainfo.invalid{font-style:italic}.opcache-gui .file-pathname{width:70%;display:block}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime,.opcache-gui .github-link,.opcache-gui .sponsor-link{background-repeat:no-repeat;background-color:transparent}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime{background-position:24px 50%}.opcache-gui .main-footer{border-top:1px solid #CCC;padding:1em 2em}.opcache-gui .github-link,.opcache-gui .sponsor-link{background-position:0 50%;padding:2em 0 2em 2.3em;text-decoration:none;opacity:0.7;font-size:80%}.opcache-gui .github-link:hover,.opcache-gui .sponsor-link:hover{opacity:1}.opcache-gui .github-link{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.19em" height="1em" viewBox="0 0 1664 1408"><path d="M640 960q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm640 0q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm160 0q0-120-69-204t-187-84q-41 0-195 21q-71 11-157 11t-157-11q-152-21-195-21q-118 0-187 84t-69 204q0 88 32 153.5t81 103t122 60t140 29.5t149 7h168q82 0 149-7t140-29.5t122-60t81-103t32-153.5zm224-176q0 207-61 331q-38 77-105.5 133t-141 86t-170 47.5t-171.5 22t-167 4.5q-78 0-142-3t-147.5-12.5t-152.5-30t-137-51.5t-121-81t-86-115Q0 992 0 784q0-237 136-396q-27-82-27-170q0-116 51-218q108 0 190 39.5T539 163q147-35 309-35q148 0 280 32q105-82 187-121t189-39q51 102 51 218q0 87-27 168q136 160 136 398z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .sponsor-link{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24"><path fill="crimson" d="M12 21.35l-1.45-1.32c-5.15-4.67-8.55-7.75-8.55-11.53 0-3.08 2.42-5.5 5.5-5.5 1.74 0 3.41.81 4.5 2.09 1.09-1.28 2.76-2.09 4.5-2.09 3.08 0 5.5 2.42 5.5 5.5 0 3.78-3.4 6.86-8.55 11.54l-1.45 1.31z"/></svg>');margin-left:2em}.opcache-gui .file-cache-only{margin-top:0}.opcache-gui .paginate-filter{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap}.opcache-gui .paginate-filter .filter>*{padding:3px;margin:3px 3px 10px 0}.opcache-gui .pagination{margin:10px 0;padding:0}.opcache-gui .pagination li{display:inline-block}.opcache-gui .pagination li a{display:inline-flex;align-items:center;white-space:nowrap;line-height:1;padding:0.5rem 0.75rem;border-radius:3px;text-decoration:none;height:100%}.opcache-gui .pagination li a.arrow{font-size:1.1rem}.opcache-gui .pagination li a:active{transform:translateY(2px)}.opcache-gui .pagination li a.active{background-color:#4d75af;color:#fff}.opcache-gui .pagination li a:hover:not(.active){background-color:#FF7400;color:#fff}@media screen and (max-width: 750px){.opcache-gui .nav-tab-list{border-bottom:0}.opcache-gui .nav-tab{display:block;margin:0}.opcache-gui .nav-tab-link{display:block;margin:0 10px;padding:10px 0 10px 30px;border:0}.opcache-gui .nav-tab-link[data-for].active{border-bottom-color:#CCC}.opcache-gui .tab-content-overview-info{margin-right:auto;clear:both}.opcache-gui .tab-content-overview-counts{position:relative;display:block;width:100%}}@media screen and (max-width: 550px){.opcache-gui .file-filter{width:100%}}@keyframes pulse{0%{transform:scale(1);opacity:1}50%,100%{transform:scale(2);opacity:0}}
+        :root{--opcache-gui-graph-track-fill-color: #6CA6EF;--opcache-gui-graph-track-background-color: rgba(229, 231, 231, 0.9058823529)}body.opcache-gui{--page-background: #FFF;--font-color: #000;--nav-header-color: #6CA6EF;--nav-hover-color: #F4F4F4;--nav-border-color: #CCC;--nav-background-color: #FFF;--nav-icon-color: #626262;--nav-icon-active-color: #00ba00;--table-header-color: #6CA6EF;--table-row-color: #EFFEFF;--table-row-color-alternative: #E0ECEF;--table-row-border-color: #FFF;--table-header-font-color: #FFF;--table-header-border-color: #FFF;--widget-header-color: #CDCDCD;--widget-background-color: #EDEDED;--widget-graph-fill-color: #6CA6EF;--widget-graph-background-color: rgba(229, 231, 231, 0.9058823529);--pagination-active-color: #4d75af;--pagination-active-font-color: #FFF;--pagination-hover-color: #FF7400;--pagination-hover-font-color: #FFF;--footer-border-color: #CCC;background-color:var(--page-background);font-family:sans-serif;font-size:90%;color:var(--font-color);padding:0;margin:0}body.opcache-gui.dark-mode{--page-background: #282A36;--font-color: #EAEAEA;--nav-header-color: #6272A4;--nav-hover-color: #282A36;--nav-border-color: #44475A;--nav-background-color: #282A36;--nav-icon-color: #BD93F9;--nav-icon-active-color: #50FA7B;--table-header-color: #6272A4;--table-row-color: #282A36;--table-row-color-alternative: #44475A;--table-row-border-color: #282A36;--table-header-font-color: #BD93F9;--table-header-border-color: #BD93F9;--widget-header-color: #44475A;--widget-background-color: #282A36;--widget-graph-fill-color: #6272A4;--widget-graph-background-color: #44475A;--pagination-active-color: #FF79C6;--pagination-active-font-color: #282A36;--pagination-hover-color: #FF6E6E;--pagination-hover-font-color: #282A36;--footer-border-color: #44475A}body.opcache-gui .hide{display:none}body.opcache-gui .sr-only{border:0 !important;clip:rect(1px, 1px, 1px, 1px) !important;-webkit-clip-path:inset(50%) !important;clip-path:inset(50%) !important;height:1px !important;margin:-1px !important;overflow:hidden !important;padding:0 !important;position:absolute !important;width:1px !important;white-space:nowrap !important}body.opcache-gui .main-nav{padding-top:20px}body.opcache-gui .nav-tab-list{list-style-type:none;padding-left:8px;margin:0;border-bottom:1px solid var(--nav-border-color);display:flex;align-items:end}body.opcache-gui .nav-tab{display:inline-flex;margin:0 0 -1px 0;padding:15px 30px;border:1px solid rgba(0,0,0,0);border-bottom-color:var(--nav-border-color);text-decoration:none;background-color:var(--nav-background-color);cursor:pointer;user-select:none;align-items:center}body.opcache-gui .nav-tab:hover{background-color:var(--nav-hover-color);text-decoration:underline}body.opcache-gui .nav-tab.active{border:1px solid var(--nav-border-color);border-bottom-color:var(--nav-background-color);border-top:3px solid var(--nav-header-color)}body.opcache-gui .nav-tab.active:hover{background-color:initial}body.opcache-gui .nav-tab:focus{outline:0;text-decoration:underline}body.opcache-gui .nav-tab:last-child{flex:1;justify-content:end;padding:0 1rem 0 0;align-self:center;border:0}body.opcache-gui .nav-tab:last-child:hover{background-color:initial;text-decoration:initial}body.opcache-gui .nav-tab-link-reset>svg,body.opcache-gui .nav-tab-link-realtime>svg{overflow:visible;width:1.1rem;height:1.1rem;margin-right:.5em}body.opcache-gui .nav-tab-link-reset>svg>path,body.opcache-gui .nav-tab-link-realtime>svg>path{fill:var(--nav-icon-color)}body.opcache-gui .nav-tab-link-reset.activated>svg>path,body.opcache-gui .nav-tab-link-realtime.activated>svg>path{fill:var(--nav-icon-active-color);transform-origin:50% 50%;display:inline-block}body.opcache-gui .nav-tab-link-reset.activated>svg>path{animation:spin-all 2s linear infinite}body.opcache-gui .nav-tab-link-reset.is-resetting>svg>path{fill:var(--nav-icon-active-color)}body.opcache-gui .nav-tab-link-realtime.activated>svg>path{animation:spin-pause 2s ease-in infinite}body.opcache-gui .tab-content{padding:2em}body.opcache-gui .tab-content-overview-counts{width:270px;float:right}body.opcache-gui .tab-content-overview-info{margin-right:280px}body.opcache-gui .graph-widget{max-width:100%;height:auto;margin:0 auto;display:flex;position:relative}body.opcache-gui .graph-widget .widget-value{display:flex;align-items:center;justify-content:center;text-align:center;position:absolute;top:0;width:100%;height:100%;margin:0 auto;font-size:3.2em;font-weight:100;color:var(--widget-graph-fill-color);user-select:none}body.opcache-gui .widget-panel{background-color:var(--widget-background-color);margin-bottom:10px}body.opcache-gui .widget-header{background-color:var(--widget-header-color);padding:4px 6px;margin:0;text-align:center;font-size:1rem;font-weight:bold}body.opcache-gui .widget-value{margin:0;text-align:center}body.opcache-gui .widget-value span.large{color:var(--widget-graph-fill-color);font-size:80pt;margin:0;padding:0;text-align:center}body.opcache-gui .widget-value span.large+span{font-size:20pt;margin:0;color:var(--widget-graph-fill-color)}body.opcache-gui .widget-info{margin:0;padding:10px}body.opcache-gui .widget-info *{margin:0;line-height:1.75em;text-align:left}body.opcache-gui .tables{margin:0 0 1em 0;border-collapse:collapse;width:100%;table-layout:fixed}body.opcache-gui .tables tr:nth-child(odd){background-color:var(--table-row-color)}body.opcache-gui .tables tr:nth-child(even){background-color:var(--table-row-color-alternative)}body.opcache-gui .tables th{text-align:left;padding:6px;background-color:var(--table-header-color);color:var(--table-header-font-color);border-color:var(--table-header-border-color);font-weight:normal}body.opcache-gui .tables td{padding:4px 6px;line-height:1.4em;vertical-align:top;border-color:var(--table-row-border-color);overflow:hidden;overflow-wrap:break-word;text-overflow:ellipsis}body.opcache-gui .directive-list{list-style-type:none;padding:0;margin:0}body.opcache-gui .directive-list li{margin-bottom:.5em}body.opcache-gui .directive-list li:last-child{margin-bottom:0}body.opcache-gui .directive-list li ul{margin-top:1.5em}body.opcache-gui .file-filter{width:520px}body.opcache-gui .file-metainfo{font-size:80%}body.opcache-gui .file-metainfo.invalid{font-style:italic}body.opcache-gui .file-pathname{width:70%;display:block}body.opcache-gui .main-footer{border-top:1px solid var(--footer-border-color);padding:1em 2em;display:flex;align-items:center}body.opcache-gui .github-link,body.opcache-gui .sponsor-link{text-decoration:none;opacity:.7;font-size:80%;display:flex;align-items:center}body.opcache-gui .github-link:hover,body.opcache-gui .sponsor-link:hover{opacity:1}body.opcache-gui .github-link>svg,body.opcache-gui .sponsor-link>svg{height:1rem;width:1rem;margin-right:.25rem}body.opcache-gui .github-link>svg>path{fill:var(--nav-icon-color)}body.opcache-gui .sponsor-link{margin-left:2em}body.opcache-gui .file-cache-only{margin-top:0}body.opcache-gui .paginate-filter{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap}body.opcache-gui .paginate-filter .filter>*{padding:3px;margin:3px 3px 10px 0}body.opcache-gui .pagination{margin:10px 0;padding:0}body.opcache-gui .pagination li{display:inline-block}body.opcache-gui .pagination li a{display:inline-flex;align-items:center;white-space:nowrap;line-height:1;padding:.5rem .75rem;border-radius:3px;text-decoration:none;height:100%}body.opcache-gui .pagination li a.arrow{font-size:1.1rem}body.opcache-gui .pagination li a:active{transform:translateY(2px)}body.opcache-gui .pagination li a.active{background-color:var(--pagination-active-color);color:var(--pagination-active-font-color)}body.opcache-gui .pagination li a:hover:not(.active){background-color:var(--pagination-hover-color);color:var(--pagination-hover-font-color)}body.opcache-gui .mode-container{display:flex;align-items:center;font-size:80%}body.opcache-gui .mode-container svg{width:1rem;height:1rem;margin:0 2px}body.opcache-gui .mode-container label{color:var(--font-color);font-weight:500}body.opcache-gui .mode-container .mode-switch{display:inline-block;margin:0;position:relative}body.opcache-gui .mode-container .mode-switch>label.mode-switch-inner{margin:0;width:140px;height:30px;background:#e0e0e0;border-radius:26px;overflow:hidden;position:relative;transition:all .3s ease;display:block}body.opcache-gui .mode-container .mode-switch>label.mode-switch-inner:before{content:attr(data-on);position:absolute;font-weight:500;top:7px;right:20px}body.opcache-gui .mode-container .mode-switch>label.mode-switch-inner:after{content:attr(data-off);width:70px;height:16px;background:#fff;border-radius:26px;position:absolute;left:2px;top:2px;text-align:center;transition:all .3s ease;box-shadow:0px 0px 6px -2px #111;padding:5px 0px}body.opcache-gui .mode-container .mode-switch>.alert{display:none;background:#ff9800;border:none;color:#fff}body.opcache-gui .mode-container .mode-switch input[type=checkbox]{cursor:pointer;width:50px;height:25px;opacity:0;position:absolute;top:0;z-index:1;margin:0}body.opcache-gui .mode-container .mode-switch input[type=checkbox]:checked+label.mode-switch-inner{background:#151515;color:#fff}body.opcache-gui .mode-container .mode-switch input[type=checkbox]:checked+label.mode-switch-inner:after{content:attr(data-on);left:68px;background:#3c3c3c}body.opcache-gui .mode-container .mode-switch input[type=checkbox]:checked+label.mode-switch-inner:before{content:attr(data-off);right:auto;left:20px}@media screen and (max-width: 750px){body.opcache-gui .nav-tab-list{border-bottom:0;display:flex;flex-direction:column;align-items:normal;padding:0}body.opcache-gui .nav-tab{margin:0;border:0;border-top:1px solid var(--nav-border-color);border-left:15px solid rgba(0,0,0,0);padding:15px 30px 15px 15px}body.opcache-gui .nav-tab:last-child{border-bottom:1px solid var(--nav-border-color)}body.opcache-gui .nav-tab.active{border:0;border-top:1px solid var(--nav-border-color);border-left:15px solid var(--nav-header-color)}body.opcache-gui .nav-tab-link{display:block;margin:0 10px;padding:10px 0 10px 30px;border:0}body.opcache-gui .nav-tab-link[data-for].active{border-bottom-color:var(--nav-border-color)}body.opcache-gui .tab-content-overview-info{margin-right:auto;clear:both}body.opcache-gui .tab-content-overview-counts{position:relative;display:block;width:100%}}@media screen and (max-width: 550px){body.opcache-gui .file-filter{width:100%}}@keyframes spin-pause{0%{transform:rotate(0deg)}50%,100%{transform:rotate(360deg)}}@keyframes spin-all{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
     </style>
 </head>
 
-<body style="padding: 0; margin: 0;">
+<body style="padding: 0; margin: 0;" class="opcache-gui">
 
-    <div class="opcache-gui" id="interface" />
+    <div id="interface" />
 
     <script type="text/javascript">
 
     function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
 class Interface extends React.Component {
   constructor(props) {
     super(props);
-
     _defineProperty(this, "startTimer", () => {
       this.setState({
         realtime: true
@@ -564,7 +563,6 @@ class Interface extends React.Component {
         });
       }, this.props.realtimeRefresh * 1000);
     });
-
     _defineProperty(this, "stopTimer", () => {
       this.setState({
         realtime: false,
@@ -572,10 +570,8 @@ class Interface extends React.Component {
       });
       clearInterval(this.polling);
     });
-
     _defineProperty(this, "realtimeHandler", () => {
       const realtime = !this.state.realtime;
-
       if (!realtime) {
         this.stopTimer();
         this.removeCookie();
@@ -584,7 +580,6 @@ class Interface extends React.Component {
         this.setCookie();
       }
     });
-
     _defineProperty(this, "resetHandler", () => {
       if (this.state.realtime) {
         this.setState({
@@ -601,33 +596,27 @@ class Interface extends React.Component {
         window.location.href = '?reset=1';
       }
     });
-
     _defineProperty(this, "setCookie", () => {
       let d = new Date();
       d.setTime(d.getTime() + this.props.cookie.ttl * 86400000);
       document.cookie = `${this.props.cookie.name}=true;expires=${d.toUTCString()};path=/${this.isSecure ? ';secure' : ''}`;
     });
-
     _defineProperty(this, "removeCookie", () => {
       document.cookie = `${this.props.cookie.name}=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/${this.isSecure ? ';secure' : ''}`;
     });
-
     _defineProperty(this, "getCookie", () => {
       const v = document.cookie.match(`(^|;) ?${this.props.cookie.name}=([^;]*)(;|$)`);
       return v ? !!v[2] : false;
     });
-
     _defineProperty(this, "txt", (text, ...args) => {
       if (this.props.language !== null && this.props.language.hasOwnProperty(text) && this.props.language[text]) {
         text = this.props.language[text];
       }
-
       args.forEach((arg, i) => {
         text = text.replaceAll(`{${i}}`, arg);
       });
       return text;
     });
-
     this.state = {
       realtime: this.getCookie(),
       resetting: false,
@@ -635,12 +624,10 @@ class Interface extends React.Component {
     };
     this.polling = false;
     this.isSecure = window.location.protocol === 'https:';
-
     if (this.getCookie()) {
       this.startTimer();
     }
   }
-
   render() {
     const {
       opstate,
@@ -658,9 +645,7 @@ class Interface extends React.Component {
       version: this.props.opstate.version.gui
     }));
   }
-
 }
-
 function MainNavigation(props) {
   return /*#__PURE__*/React.createElement("nav", {
     className: "main-nav"
@@ -728,38 +713,68 @@ function MainNavigation(props) {
   })), props.allow.reset && /*#__PURE__*/React.createElement("div", {
     label: props.txt("Reset cache"),
     tabId: "resetCache",
-    className: `nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`,
+    className: `nav-tab-link-reset${props.resetting ? ' is-resetting activated' : ''}`,
     handler: props.resetHandler,
-    tabIndex: 5
+    tabIndex: 5,
+    icon: /*#__PURE__*/React.createElement("svg", {
+      xmlns: "http://www.w3.org/2000/svg",
+      "aria-hidden": "true",
+      focusable: "false",
+      viewBox: "0 0 489.645 489.645"
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M460.656,132.911c-58.7-122.1-212.2-166.5-331.8-104.1c-9.4,5.2-13.5,16.6-8.3,27c5.2,9.4,16.6,13.5,27,8.3 c99.9-52,227.4-14.9,276.7,86.3c65.4,134.3-19,236.7-87.4,274.6c-93.1,51.7-211.2,17.4-267.6-70.7l69.3,14.5 c10.4,2.1,21.8-4.2,23.9-15.6c2.1-10.4-4.2-21.8-15.6-23.9l-122.8-25c-20.6-2-25,16.6-23.9,22.9l15.6,123.8 c1,10.4,9.4,17.7,19.8,17.7c12.8,0,20.8-12.5,19.8-23.9l-6-50.5c57.4,70.8,170.3,131.2,307.4,68.2 C414.856,432.511,548.256,314.811,460.656,132.911z"
+    }))
   }), props.allow.realtime && /*#__PURE__*/React.createElement("div", {
     label: props.txt(`${props.realtime ? 'Disable' : 'Enable'} real-time update`),
     tabId: "toggleRealtime",
-    className: `nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`,
+    className: `nav-tab-link-realtime${props.realtime ? ' live-update activated' : ''}`,
     handler: props.realtimeHandler,
-    tabIndex: 6
+    tabIndex: 6,
+    icon: /*#__PURE__*/React.createElement("svg", {
+      xmlns: "http://www.w3.org/2000/svg",
+      "aria-hidden": "true",
+      focusable: "false",
+      viewBox: "0 0 489.698 489.698"
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M468.999,227.774c-11.4,0-20.8,8.3-20.8,19.8c-1,74.9-44.2,142.6-110.3,178.9c-99.6,54.7-216,5.6-260.6-61l62.9,13.1 c10.4,2.1,21.8-4.2,23.9-15.6c2.1-10.4-4.2-21.8-15.6-23.9l-123.7-26c-7.2-1.7-26.1,3.5-23.9,22.9l15.6,124.8 c1,10.4,9.4,17.7,19.8,17.7c15.5,0,21.8-11.4,20.8-22.9l-7.3-60.9c101.1,121.3,229.4,104.4,306.8,69.3 c80.1-42.7,131.1-124.8,132.1-215.4C488.799,237.174,480.399,227.774,468.999,227.774z"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M20.599,261.874c11.4,0,20.8-8.3,20.8-19.8c1-74.9,44.2-142.6,110.3-178.9c99.6-54.7,216-5.6,260.6,61l-62.9-13.1 c-10.4-2.1-21.8,4.2-23.9,15.6c-2.1,10.4,4.2,21.8,15.6,23.9l123.8,26c7.2,1.7,26.1-3.5,23.9-22.9l-15.6-124.8 c-1-10.4-9.4-17.7-19.8-17.7c-15.5,0-21.8,11.4-20.8,22.9l7.2,60.9c-101.1-121.2-229.4-104.4-306.8-69.2 c-80.1,42.6-131.1,124.8-132.2,215.3C0.799,252.574,9.199,261.874,20.599,261.874z"
+    }))
   })));
 }
-
 class Tabs extends React.Component {
   constructor(props) {
     super(props);
-
     _defineProperty(this, "onClickTabItem", tab => {
       this.setState({
         activeTab: tab
       });
     });
-
+    _defineProperty(this, "onClickModeSwitch", event => {
+      event.stopPropagation();
+      console.log(event);
+      this.setState({
+        colourMode: event.target.checked ? 1 : 0
+      });
+      if (event.target.checked) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+    });
     this.state = {
-      activeTab: this.props.children[0].props.label
+      activeTab: this.props.children[0].props.label,
+      colourMode: 0 // 0 = light, 1 = dark
     };
   }
 
   render() {
     const {
       onClickTabItem,
+      onClickModeSwitch,
       state: {
-        activeTab
+        activeTab,
+        colourMode
       }
     } = this;
     const children = this.props.children.filter(Boolean);
@@ -771,7 +786,8 @@ class Tabs extends React.Component {
         label,
         className,
         handler,
-        tabIndex
+        tabIndex,
+        icon
       } = child.props;
       return /*#__PURE__*/React.createElement(Tab, {
         activeTab: activeTab,
@@ -780,8 +796,52 @@ class Tabs extends React.Component {
         onClick: handler || onClickTabItem,
         className: className,
         tabIndex: tabIndex,
-        tabId: tabId
+        tabId: tabId,
+        icon: icon
       });
+    }), /*#__PURE__*/React.createElement(Tab, {
+      activeTab: activeTab,
+      key: 7,
+      label: /*#__PURE__*/React.createElement("div", {
+        className: "mode-container",
+        onClick: onClickModeSwitch
+      }, /*#__PURE__*/React.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        fill: "none",
+        viewBox: "0 0 24 24",
+        strokeWidth: 1.5,
+        stroke: "currentColor"
+      }, /*#__PURE__*/React.createElement("path", {
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        d: "M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
+      })), /*#__PURE__*/React.createElement("label", {
+        className: "switch mode-switch"
+      }, /*#__PURE__*/React.createElement("input", {
+        type: "checkbox",
+        name: "dark_mode",
+        id: "dark_mode",
+        value: colourMode
+      }), /*#__PURE__*/React.createElement("label", {
+        htmlFor: "dark_mode",
+        "data-on": "Dark",
+        "data-off": "Light",
+        className: "mode-switch-inner"
+      })), /*#__PURE__*/React.createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        fill: "none",
+        viewBox: "0 0 24 24",
+        strokeWidth: 1.5,
+        stroke: "currentColor"
+      }, /*#__PURE__*/React.createElement("path", {
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        d: "M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"
+      }))),
+      onClick: () => null,
+      className: "",
+      tabIndex: 7,
+      tabId: "mode-switch"
     })), /*#__PURE__*/React.createElement("div", {
       className: "tab-content"
     }, children.map(child => /*#__PURE__*/React.createElement("div", {
@@ -792,13 +852,10 @@ class Tabs extends React.Component {
       id: `${child.props.tabId}-content`
     }, child.props.children))));
   }
-
 }
-
 class Tab extends React.Component {
   constructor(...args) {
     super(...args);
-
     _defineProperty(this, "onClick", () => {
       const {
         label,
@@ -807,7 +864,6 @@ class Tab extends React.Component {
       onClick(label);
     });
   }
-
   render() {
     const {
       onClick,
@@ -815,37 +871,32 @@ class Tab extends React.Component {
         activeTab,
         label,
         tabIndex,
-        tabId
+        tabId,
+        icon
       }
     } = this;
     let className = 'nav-tab';
-
     if (this.props.className) {
       className += ` ${this.props.className}`;
     }
-
     if (activeTab === label) {
       className += ' active';
     }
-
     return /*#__PURE__*/React.createElement("li", {
       className: className,
       onClick: onClick,
       tabIndex: tabIndex,
       role: "tab",
       "aria-controls": `${tabId}-content`
-    }, label);
+    }, icon, label);
   }
-
 }
-
 function OverviewCounts(props) {
   if (props.overview === false) {
     return /*#__PURE__*/React.createElement("p", {
       class: "file-cache-only"
     }, props.txt(`You have <i>opcache.file_cache_only</i> turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by <i>opcache_get_statistics()</i>.`));
   }
-
   const graphList = [{
     id: 'memoryUsageCanvas',
     title: props.txt('memory'),
@@ -874,7 +925,6 @@ function OverviewCounts(props) {
     if (!graph.show) {
       return null;
     }
-
     return /*#__PURE__*/React.createElement("div", {
       className: "widget-panel",
       key: graph.id
@@ -912,7 +962,6 @@ function OverviewCounts(props) {
     txt: props.txt
   }));
 }
-
 function GeneralInfo(props) {
   return /*#__PURE__*/React.createElement("table", {
     className: "tables general-info-table"
@@ -924,7 +973,6 @@ function GeneralInfo(props) {
     }
   })))));
 }
-
 function Directives(props) {
   let directiveList = directive => {
     return /*#__PURE__*/React.createElement("ul", {
@@ -939,7 +987,6 @@ function Directives(props) {
       }, item);
     }));
   };
-
   let directiveNodes = props.directives.map(function (directive) {
     let map = {
       'opcache.': '',
@@ -949,7 +996,6 @@ function Directives(props) {
       return map[matched];
     });
     let vShow;
-
     if (directive.v === true || directive.v === false) {
       vShow = React.createElement('i', {}, props.txt(directive.v.toString()));
     } else if (directive.v === '') {
@@ -961,15 +1007,12 @@ function Directives(props) {
         vShow = directive.v;
       }
     }
-
     let directiveLink = name => {
       if (name === 'opcache.jit_max_recursive_returns') {
         return 'opcache.jit-max-recursive-return';
       }
-
       return ['opcache.file_update_protection', 'opcache.huge_code_pages', 'opcache.lockfile_path', 'opcache.opt_debug_level'].includes(name) ? name : name.replace(/_/g, '-');
     };
-
     return /*#__PURE__*/React.createElement("tr", {
       key: directive.k
     }, /*#__PURE__*/React.createElement("td", {
@@ -985,7 +1028,6 @@ function Directives(props) {
     colSpan: "2"
   }, props.txt('Directives')))), /*#__PURE__*/React.createElement("tbody", null, directiveNodes));
 }
-
 function Functions(props) {
   return /*#__PURE__*/React.createElement("div", {
     id: "functions"
@@ -999,7 +1041,6 @@ function Functions(props) {
     target: "_blank"
   }, f)))))));
 }
-
 function UsageGraph(props) {
   const percentage = Math.round(3.6 * props.value / 360 * 100);
   return props.charts ? /*#__PURE__*/React.createElement(ReactCustomizableProgressbar, {
@@ -1016,22 +1057,19 @@ function UsageGraph(props) {
     className: "large"
   }, percentage), /*#__PURE__*/React.createElement("span", null, "%"));
 }
+
 /**
  * This component is from <https://github.com/martyan/react-customizable-progressbar/>
  * MIT License (MIT), Copyright (c) 2019 Martin Juzl
  */
-
-
 class ReactCustomizableProgressbar extends React.Component {
   constructor(props) {
     super(props);
-
     _defineProperty(this, "initAnimation", () => {
       this.setState({
         animationInited: true
       });
     });
-
     _defineProperty(this, "getProgress", () => {
       const {
         initialAnimation,
@@ -1042,7 +1080,6 @@ class ReactCustomizableProgressbar extends React.Component {
       } = this.state;
       return initialAnimation && !animationInited ? 0 : progress;
     });
-
     _defineProperty(this, "getStrokeDashoffset", strokeLength => {
       const {
         counterClockwise,
@@ -1054,7 +1091,6 @@ class ReactCustomizableProgressbar extends React.Component {
       if (inverse) return counterClockwise ? 0 : progressLength - strokeLength;
       return counterClockwise ? -1 * progressLength : progressLength;
     });
-
     _defineProperty(this, "getStrokeDashArray", (strokeLength, circumference) => {
       const {
         counterClockwise,
@@ -1066,7 +1102,6 @@ class ReactCustomizableProgressbar extends React.Component {
       if (inverse) return `${progressLength}, ${circumference}`;
       return counterClockwise ? `${strokeLength * (progress / 100)}, ${circumference}` : `${strokeLength}, ${circumference}`;
     });
-
     _defineProperty(this, "getTrackStrokeDashArray", (strokeLength, circumference) => {
       const {
         initialAnimation
@@ -1077,7 +1112,6 @@ class ReactCustomizableProgressbar extends React.Component {
       if (initialAnimation && !animationInited) return `0, ${circumference}`;
       return `${strokeLength}, ${circumference}`;
     });
-
     _defineProperty(this, "getExtendedWidth", () => {
       const {
         strokeWidth,
@@ -1088,7 +1122,6 @@ class ReactCustomizableProgressbar extends React.Component {
       const pointerWidth = pointerRadius + pointerStrokeWidth;
       if (pointerWidth > strokeWidth && pointerWidth > trackStrokeWidth) return pointerWidth * 2;else if (strokeWidth > trackStrokeWidth) return strokeWidth * 2;else return trackStrokeWidth * 2;
     });
-
     _defineProperty(this, "getPointerAngle", () => {
       const {
         cut,
@@ -1098,12 +1131,10 @@ class ReactCustomizableProgressbar extends React.Component {
       const progress = this.getProgress();
       return counterClockwise ? (360 - cut) / steps * (steps - progress) : (360 - cut) / steps * progress;
     });
-
     this.state = {
       animationInited: false
     };
   }
-
   componentDidMount() {
     const {
       initialAnimation,
@@ -1111,7 +1142,6 @@ class ReactCustomizableProgressbar extends React.Component {
     } = this.props;
     if (initialAnimation) setTimeout(this.initAnimation, initialAnimationDelay);
   }
-
   render() {
     const {
       radius,
@@ -1191,9 +1221,7 @@ class ReactCustomizableProgressbar extends React.Component {
       className: `widget-value`
     }, progress, "%"));
   }
-
 }
-
 ReactCustomizableProgressbar.defaultProps = {
   radius: 100,
   progress: 0,
@@ -1218,7 +1246,6 @@ ReactCustomizableProgressbar.defaultProps = {
   initialAnimation: false,
   initialAnimationDelay: 0
 };
-
 function MemoryUsagePanel(props) {
   return /*#__PURE__*/React.createElement("div", {
     className: "widget-panel"
@@ -1228,7 +1255,6 @@ function MemoryUsagePanel(props) {
     className: "widget-value widget-info"
   }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('total memory'), ":"), " ", props.total), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('used memory'), ":"), " ", props.used), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('free memory'), ":"), " ", props.free), props.preload && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('preload memory'), ":"), " ", props.preload), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('wasted memory'), ":"), " ", props.wasted, " (", props.wastedPercent, "%)"), props.jitBuffer && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('jit buffer'), ":"), " ", props.jitBuffer), props.jitBufferFree && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('jit buffer free'), ":"), " ", props.jitBufferFree, " (", 100 - props.jitBufferFreePercentage, "%)")));
 }
-
 function StatisticsPanel(props) {
   return /*#__PURE__*/React.createElement("div", {
     className: "widget-panel"
@@ -1238,7 +1264,6 @@ function StatisticsPanel(props) {
     className: "widget-value widget-info"
   }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of cached'), " files:"), " ", props.num_cached_scripts), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of hits'), ":"), " ", props.hits), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of misses'), ":"), " ", props.misses), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('blacklist misses'), ":"), " ", props.blacklist_miss), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of cached keys'), ":"), " ", props.num_cached_keys), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('max cached keys'), ":"), " ", props.max_cached_keys)));
 }
-
 function InternedStringsPanel(props) {
   return /*#__PURE__*/React.createElement("div", {
     className: "widget-panel"
@@ -1248,27 +1273,22 @@ function InternedStringsPanel(props) {
     className: "widget-value widget-info"
   }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('buffer size'), ":"), " ", props.buffer_size), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('used memory'), ":"), " ", props.strings_used_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('free memory'), ":"), " ", props.strings_free_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of strings'), ":"), " ", props.number_of_strings)));
 }
-
 class CachedFiles extends React.Component {
   constructor(props) {
     super(props);
-
     _defineProperty(this, "setSearchTerm", debounce(searchTerm => {
       this.setState({
         searchTerm,
         refreshPagination: !this.state.refreshPagination
       });
     }, this.props.debounceRate));
-
     _defineProperty(this, "onPageChanged", currentPage => {
       this.setState({
         currentPage
       });
     });
-
     _defineProperty(this, "handleInvalidate", e => {
       e.preventDefault();
-
       if (this.props.realtime) {
         axios.get(window.location.pathname, {
           params: {
@@ -1281,33 +1301,27 @@ class CachedFiles extends React.Component {
         window.location.href = e.currentTarget.href;
       }
     });
-
     _defineProperty(this, "changeSort", e => {
       this.setState({
         [e.target.name]: e.target.value
       });
     });
-
     _defineProperty(this, "compareValues", (key, order = 'asc') => {
       return function innerSort(a, b) {
         if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
           return 0;
         }
-
         const varA = typeof a[key] === 'string' ? a[key].toUpperCase() : a[key];
         const varB = typeof b[key] === 'string' ? b[key].toUpperCase() : b[key];
         let comparison = 0;
-
         if (varA > varB) {
           comparison = 1;
         } else if (varA < varB) {
           comparison = -1;
         }
-
         return order === 'desc' ? comparison * -1 : comparison;
       };
     });
-
     this.doPagination = typeof props.perPageLimit === "number" && props.perPageLimit > 0;
     this.state = {
       currentPage: 1,
@@ -1317,16 +1331,13 @@ class CachedFiles extends React.Component {
       sortDir: `desc`
     };
   }
-
   render() {
     if (!this.props.allow.fileList) {
       return null;
     }
-
     if (this.props.allFiles.length === 0) {
       return /*#__PURE__*/React.createElement("p", null, this.props.txt('No files have been cached or you have <i>opcache.file_cache_only</i> turned on'));
     }
-
     const {
       searchTerm,
       currentPage
@@ -1400,16 +1411,12 @@ class CachedFiles extends React.Component {
       }, file));
     }))));
   }
-
 }
-
 class CachedFile extends React.Component {
   constructor(...args) {
     super(...args);
-
     _defineProperty(this, "handleInvalidate", e => {
       e.preventDefault();
-
       if (this.props.realtime) {
         axios.get(window.location.pathname, {
           params: {
@@ -1423,7 +1430,6 @@ class CachedFile extends React.Component {
       }
     });
   }
-
   render() {
     return /*#__PURE__*/React.createElement("tr", {
       "data-path": this.props.full_path.toLowerCase()
@@ -1440,35 +1446,28 @@ class CachedFile extends React.Component {
       onClick: this.handleInvalidate
     }, this.props.txt('force file invalidation')))));
   }
-
 }
-
 class IgnoredFiles extends React.Component {
   constructor(props) {
     super(props);
-
     _defineProperty(this, "onPageChanged", currentPage => {
       this.setState({
         currentPage
       });
     });
-
     this.doPagination = typeof props.perPageLimit === "number" && props.perPageLimit > 0;
     this.state = {
       currentPage: 1,
       refreshPagination: 0
     };
   }
-
   render() {
     if (!this.props.allow.fileList) {
       return null;
     }
-
     if (this.props.allFiles.length === 0) {
       return /*#__PURE__*/React.createElement("p", null, this.props.txt('No files have been ignored via <i>opcache.blacklist_filename</i>'));
     }
-
     const {
       currentPage
     } = this.state;
@@ -1490,35 +1489,28 @@ class IgnoredFiles extends React.Component {
       }, /*#__PURE__*/React.createElement("td", null, file));
     }))));
   }
-
 }
-
 class PreloadedFiles extends React.Component {
   constructor(props) {
     super(props);
-
     _defineProperty(this, "onPageChanged", currentPage => {
       this.setState({
         currentPage
       });
     });
-
     this.doPagination = typeof props.perPageLimit === "number" && props.perPageLimit > 0;
     this.state = {
       currentPage: 1,
       refreshPagination: 0
     };
   }
-
   render() {
     if (!this.props.allow.fileList) {
       return null;
     }
-
     if (this.props.allFiles.length === 0) {
       return /*#__PURE__*/React.createElement("p", null, this.props.txt('No files have been preloaded <i>opcache.preload</i>'));
     }
-
     const {
       currentPage
     } = this.state;
@@ -1540,13 +1532,10 @@ class PreloadedFiles extends React.Component {
       }, /*#__PURE__*/React.createElement("td", null, file));
     }))));
   }
-
 }
-
 class Pagination extends React.Component {
   constructor(props) {
     super(props);
-
     _defineProperty(this, "gotoPage", page => {
       const {
         onPageChanged = f => f
@@ -1556,54 +1545,43 @@ class Pagination extends React.Component {
         currentPage
       }, () => onPageChanged(currentPage));
     });
-
     _defineProperty(this, "totalPages", () => {
       return Math.ceil(this.props.totalRecords / this.props.pageLimit);
     });
-
     _defineProperty(this, "handleClick", (page, evt) => {
       evt.preventDefault();
       this.gotoPage(page);
     });
-
     _defineProperty(this, "handleJumpLeft", evt => {
       evt.preventDefault();
       this.gotoPage(this.state.currentPage - this.pageNeighbours * 2 - 1);
     });
-
     _defineProperty(this, "handleJumpRight", evt => {
       evt.preventDefault();
       this.gotoPage(this.state.currentPage + this.pageNeighbours * 2 + 1);
     });
-
     _defineProperty(this, "handleMoveLeft", evt => {
       evt.preventDefault();
       this.gotoPage(this.state.currentPage - 1);
     });
-
     _defineProperty(this, "handleMoveRight", evt => {
       evt.preventDefault();
       this.gotoPage(this.state.currentPage + 1);
     });
-
     _defineProperty(this, "range", (from, to, step = 1) => {
       let i = from;
       const range = [];
-
       while (i <= to) {
         range.push(i);
         i += step;
       }
-
       return range;
     });
-
     _defineProperty(this, "fetchPageNumbers", () => {
       const totalPages = this.totalPages();
       const pageNeighbours = this.pageNeighbours;
       const totalNumbers = this.pageNeighbours * 2 + 3;
       const totalBlocks = totalNumbers + 2;
-
       if (totalPages > totalBlocks) {
         let pages = [];
         const leftBound = this.state.currentPage - pageNeighbours;
@@ -1618,7 +1596,6 @@ class Pagination extends React.Component {
         const rightSpill = endPage < beforeLastPage;
         const leftSpillPage = "LEFT";
         const rightSpillPage = "RIGHT";
-
         if (leftSpill && !rightSpill) {
           const extraPages = this.range(startPage - singleSpillOffset, startPage - 1);
           pages = [leftSpillPage, ...extraPages, ...pages];
@@ -1628,38 +1605,30 @@ class Pagination extends React.Component {
         } else if (leftSpill && rightSpill) {
           pages = [leftSpillPage, ...pages, rightSpillPage];
         }
-
         return [1, ...pages, totalPages];
       }
-
       return this.range(1, totalPages);
     });
-
     this.state = {
       currentPage: 1
     };
     this.pageNeighbours = typeof props.pageNeighbours === "number" ? Math.max(0, Math.min(props.pageNeighbours, 2)) : 0;
   }
-
   componentDidMount() {
     this.gotoPage(1);
   }
-
   componentDidUpdate(props) {
     const {
       refresh
     } = this.props;
-
     if (props.refresh !== refresh) {
       this.gotoPage(1);
     }
   }
-
   render() {
     if (!this.props.totalRecords || this.totalPages() === 1) {
       return null;
     }
-
     const {
       currentPage
     } = this.state;
@@ -1696,7 +1665,6 @@ class Pagination extends React.Component {
           className: "sr-only"
         }, this.props.txt('Previous page')))));
       }
-
       if (page === "RIGHT") {
         return /*#__PURE__*/React.createElement(React.Fragment, {
           key: index
@@ -1724,7 +1692,6 @@ class Pagination extends React.Component {
           className: "sr-only"
         }, this.props.txt('Jump forward')))));
       }
-
       return /*#__PURE__*/React.createElement("li", {
         key: index,
         className: "page-item"
@@ -1735,9 +1702,7 @@ class Pagination extends React.Component {
       }, page));
     })));
   }
-
 }
-
 function Footer(props) {
   return /*#__PURE__*/React.createElement("footer", {
     className: "main-footer"
@@ -1746,33 +1711,45 @@ function Footer(props) {
     href: "https://github.com/amnuts/opcache-gui",
     target: "_blank",
     title: "opcache-gui (currently version {props.version}) on GitHub"
-  }, "https://github.com/amnuts/opcache-gui - version ", props.version), /*#__PURE__*/React.createElement("a", {
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    "aria-hidden": "true",
+    focusable: "false",
+    width: "1.19em",
+    height: "1em",
+    viewBox: "0 0 1664 1408"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M640 960q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm640 0q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm160 0q0-120-69-204t-187-84q-41 0-195 21q-71 11-157 11t-157-11q-152-21-195-21q-118 0-187 84t-69 204q0 88 32 153.5t81 103t122 60t140 29.5t149 7h168q82 0 149-7t140-29.5t122-60t81-103t32-153.5zm224-176q0 207-61 331q-38 77-105.5 133t-141 86t-170 47.5t-171.5 22t-167 4.5q-78 0-142-3t-147.5-12.5t-152.5-30t-137-51.5t-121-81t-86-115Q0 992 0 784q0-237 136-396q-27-82-27-170q0-116 51-218q108 0 190 39.5T539 163q147-35 309-35q148 0 280 32q105-82 187-121t189-39q51 102 51 218q0 87-27 168q136 160 136 398z"
+  })), " https://github.com/amnuts/opcache-gui, v", props.version), /*#__PURE__*/React.createElement("a", {
     className: "sponsor-link",
     href: "https://github.com/sponsors/amnuts",
     target: "_blank",
     title: "Sponsor this project and author on GitHub"
-  }, "Sponsor this project"));
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    width: "24",
+    height: "24",
+    viewBox: "0 0 24 24"
+  }, /*#__PURE__*/React.createElement("path", {
+    fill: "crimson",
+    d: "M12 21.35l-1.45-1.32c-5.15-4.67-8.55-7.75-8.55-11.53 0-3.08 2.42-5.5 5.5-5.5 1.74 0 3.41.81 4.5 2.09 1.09-1.28 2.76-2.09 4.5-2.09 3.08 0 5.5 2.42 5.5 5.5 0 3.78-3.4 6.86-8.55 11.54l-1.45 1.31z"
+  })), " Sponsor this project"));
 }
-
 function debounce(func, wait, immediate) {
   let timeout;
   wait = wait || 250;
   return function () {
     let context = this,
-        args = arguments;
-
+      args = arguments;
     let later = function () {
       timeout = null;
-
       if (!immediate) {
         func.apply(context, args);
       }
     };
-
     let callNow = immediate && !timeout;
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
-
     if (callNow) {
       func.apply(context, args);
     }
