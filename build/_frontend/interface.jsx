@@ -166,17 +166,28 @@ function MainNavigation(props) {
                 {
                     props.allow.reset &&
                         <div label={props.txt("Reset cache")} tabId="resetCache"
-                           className={`nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`}
-                           handler={props.resetHandler}
-                           tabIndex={5}
+                            className={`nav-tab-link-reset${props.resetting ? ' is-resetting activated' : ''}`}
+                            handler={props.resetHandler}
+                            tabIndex={5}
+                            icon={(
+                                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" viewBox="0 0 489.645 489.645">
+                                    <path d="M460.656,132.911c-58.7-122.1-212.2-166.5-331.8-104.1c-9.4,5.2-13.5,16.6-8.3,27c5.2,9.4,16.6,13.5,27,8.3 c99.9-52,227.4-14.9,276.7,86.3c65.4,134.3-19,236.7-87.4,274.6c-93.1,51.7-211.2,17.4-267.6-70.7l69.3,14.5 c10.4,2.1,21.8-4.2,23.9-15.6c2.1-10.4-4.2-21.8-15.6-23.9l-122.8-25c-20.6-2-25,16.6-23.9,22.9l15.6,123.8 c1,10.4,9.4,17.7,19.8,17.7c12.8,0,20.8-12.5,19.8-23.9l-6-50.5c57.4,70.8,170.3,131.2,307.4,68.2 C414.856,432.511,548.256,314.811,460.656,132.911z"/>
+                                </svg>
+                            )}
                         ></div>
                 }
                 {
                     props.allow.realtime &&
                         <div label={props.txt(`${props.realtime ? 'Disable' : 'Enable'} real-time update`)} tabId="toggleRealtime"
-                            className={`nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`}
+                            className={`nav-tab-link-realtime${props.realtime ? ' live-update activated' : ''}`}
                             handler={props.realtimeHandler}
                             tabIndex={6}
+                            icon={(
+                                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" viewBox="0 0 489.698 489.698">
+                                    <path d="M468.999,227.774c-11.4,0-20.8,8.3-20.8,19.8c-1,74.9-44.2,142.6-110.3,178.9c-99.6,54.7-216,5.6-260.6-61l62.9,13.1 c10.4,2.1,21.8-4.2,23.9-15.6c2.1-10.4-4.2-21.8-15.6-23.9l-123.7-26c-7.2-1.7-26.1,3.5-23.9,22.9l15.6,124.8 c1,10.4,9.4,17.7,19.8,17.7c15.5,0,21.8-11.4,20.8-22.9l-7.3-60.9c101.1,121.3,229.4,104.4,306.8,69.3 c80.1-42.7,131.1-124.8,132.1-215.4C488.799,237.174,480.399,227.774,468.999,227.774z"/>
+                                    <path d="M20.599,261.874c11.4,0,20.8-8.3,20.8-19.8c1-74.9,44.2-142.6,110.3-178.9c99.6-54.7,216-5.6,260.6,61l-62.9-13.1 c-10.4-2.1-21.8,4.2-23.9,15.6c-2.1,10.4,4.2,21.8,15.6,23.9l123.8,26c7.2,1.7,26.1-3.5,23.9-22.9l-15.6-124.8 c-1-10.4-9.4-17.7-19.8-17.7c-15.5,0-21.8,11.4-20.8,22.9l7.2,60.9c-101.1-121.2-229.4-104.4-306.8-69.2 c-80.1,42.6-131.1,124.8-132.2,215.3C0.799,252.574,9.199,261.874,20.599,261.874z"/>
+                                </svg>
+                            )}
                         ></div>
                 }
             </Tabs>
@@ -190,6 +201,7 @@ class Tabs extends React.Component {
         super(props);
         this.state = {
             activeTab: this.props.children[0].props.label,
+            colourMode: 0, // 0 = light, 1 = dark
         };
     }
 
@@ -197,10 +209,22 @@ class Tabs extends React.Component {
         this.setState({ activeTab: tab });
     }
 
+    onClickModeSwitch = (event) => {
+        event.stopPropagation()
+        console.log(event)
+        this.setState({ colourMode: event.target.checked ? 1 : 0 });
+        if (event.target.checked) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+    }
+
     render() {
         const {
             onClickTabItem,
-            state: { activeTab }
+            onClickModeSwitch,
+            state: { activeTab, colourMode }
         } = this;
 
         const children = this.props.children.filter(Boolean);
@@ -209,7 +233,7 @@ class Tabs extends React.Component {
             <>
                 <ul className="nav-tab-list">
                     {children.map((child) => {
-                        const { tabId, label, className, handler, tabIndex } = child.props;
+                        const { tabId, label, className, handler, tabIndex, icon } = child.props;
                         return (
                             <Tab
                                 activeTab={activeTab}
@@ -219,9 +243,33 @@ class Tabs extends React.Component {
                                 className={className}
                                 tabIndex={tabIndex}
                                 tabId={tabId}
+                                icon={icon}
                             />
                         );
                     })}
+
+                    <Tab
+                        activeTab={activeTab}
+                        key={7}
+                        label={(
+                            <div className="mode-container" onClick={onClickModeSwitch}>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                                </svg>
+                                <label className="switch mode-switch">
+                                    <input type="checkbox" name="dark_mode" id="dark_mode" value={colourMode} />
+                                    <label htmlFor="dark_mode" data-on="Dark" data-off="Light" className="mode-switch-inner"></label>
+                                </label>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                                </svg>
+                            </div>
+                        )}
+                        onClick={() => null}
+                        className=""
+                        tabIndex={7}
+                        tabId="mode-switch"
+                    />
                 </ul>
                 <div className="tab-content">
                     {children.map((child) => (
@@ -248,7 +296,7 @@ class Tab extends React.Component {
     render() {
         const {
             onClick,
-            props: { activeTab, label, tabIndex, tabId },
+            props: { activeTab, label, tabIndex, tabId, icon },
         } = this;
 
         let className = 'nav-tab';
@@ -265,7 +313,7 @@ class Tab extends React.Component {
                 tabIndex={tabIndex}
                 role="tab"
                 aria-controls={`${tabId}-content`}
-            >{label}</li>
+            >{icon}{label}</li>
         );
     }
 }
@@ -1188,12 +1236,16 @@ function Footer(props) {
             <a className="github-link" href="https://github.com/amnuts/opcache-gui"
                target="_blank"
                title="opcache-gui (currently version {props.version}) on GitHub"
-            >https://github.com/amnuts/opcache-gui - version {props.version}</a>
+            ><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" width="1.19em" height="1em" viewBox="0 0 1664 1408">
+                <path d="M640 960q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm640 0q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm160 0q0-120-69-204t-187-84q-41 0-195 21q-71 11-157 11t-157-11q-152-21-195-21q-118 0-187 84t-69 204q0 88 32 153.5t81 103t122 60t140 29.5t149 7h168q82 0 149-7t140-29.5t122-60t81-103t32-153.5zm224-176q0 207-61 331q-38 77-105.5 133t-141 86t-170 47.5t-171.5 22t-167 4.5q-78 0-142-3t-147.5-12.5t-152.5-30t-137-51.5t-121-81t-86-115Q0 992 0 784q0-237 136-396q-27-82-27-170q0-116 51-218q108 0 190 39.5T539 163q147-35 309-35q148 0 280 32q105-82 187-121t189-39q51 102 51 218q0 87-27 168q136 160 136 398z"/>
+            </svg> https://github.com/amnuts/opcache-gui, v{props.version}</a>
 
             <a className="sponsor-link" href="https://github.com/sponsors/amnuts"
                target="_blank"
                title="Sponsor this project and author on GitHub"
-            >Sponsor this project</a>
+            ><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                <path fill="crimson" d="M12 21.35l-1.45-1.32c-5.15-4.67-8.55-7.75-8.55-11.53 0-3.08 2.42-5.5 5.5-5.5 1.74 0 3.41.81 4.5 2.09 1.09-1.28 2.76-2.09 4.5-2.09 3.08 0 5.5 2.42 5.5 5.5 0 3.78-3.4 6.86-8.55 11.54l-1.45 1.31z"/>
+            </svg> Sponsor this project</a>
         </footer>
     );
 }

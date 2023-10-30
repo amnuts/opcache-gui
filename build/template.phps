@@ -75,9 +75,9 @@ $opcache = (new Service($options))->handle();
     </style>
 </head>
 
-<body style="padding: 0; margin: 0;">
+<body style="padding: 0; margin: 0;" class="opcache-gui">
 
-    <div class="opcache-gui" id="interface" />
+    <div id="interface" />
 
     <script type="text/javascript">
 
