@@ -31,6 +31,8 @@
     }
   },
   "scripts": {
-    "build": "php build/build.php"
+    "build": "php build/build.php",
+    "build-french": "php build/build.php --lang fr",
+    "build-spanish": "php build/build.php --lang es"
   }
 }

@@ -225,9 +225,11 @@ However, it is now possible to build the interface with a different language.  C
 
 If the language pack is in the `build/_languages/` directory then you can use that with the `-l` or `--lang` flag.  For example, if there is a `fr.json` language pack then you can use `php ./build/build.php -l fr` in order to build with that language.
 
+There have been a few composer scripts added to help with the building.  They are, `composer build`, `composer build-french`, and `composer build-spanish`.
+
 If you want to create a language file then `build/_languages/example.json` contains all you need.  It's a simple json structure with the key being the English version which matches what's in the UI, and the value is what you're converting it to - which in the example file is just blank.  If a value is empty or the index doesn't exist for a translation, then it'll just use the English version.  This gives you the ability to replace some or all of the interface strings as you see fit.
 
-So to get started with a new language, copy the `example.json` to the language you want that doesn't already exist - for example, `pt-br.json`.  Then fill in the translations into the values.  Once done, rebuild with `php ./build/build.php -l pt-br`.
+To get started with a new language, copy the `example.json` to the language you want that doesn't already exist - for example, `pt-br.json` or `pirate.json`.  Then fill in the translations into the values.  Once done, rebuild with `php ./build/build.php -l pt-br` or `php ./build/build.php -l pirate`.
 
 ## Releases
 
