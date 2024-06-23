@@ -6,7 +6,7 @@
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.5.4
+ * @version 3.5.5
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, https://acollington.mit-license.org/
  */
@@ -59,7 +59,7 @@ header('Pragma: no-cache');
 
 class Service
 {
-    public const VERSION = '3.5.4';
+    public const VERSION = '3.5.5';
 
     protected $tz;
     protected $data;
@@ -538,14 +538,13 @@ $opcache = (new Service($options))->handle();
 
     <script type="text/javascript">
 
-    function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
+    function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 class Interface extends React.Component {
   constructor(props) {
     super(props);
-
     _defineProperty(this, "startTimer", () => {
       this.setState({
         realtime: true
@@ -564,7 +563,6 @@ class Interface extends React.Component {
         });
       }, this.props.realtimeRefresh * 1000);
     });
-
     _defineProperty(this, "stopTimer", () => {
       this.setState({
         realtime: false,
@@ -572,10 +570,8 @@ class Interface extends React.Component {
       });
       clearInterval(this.polling);
     });
-
     _defineProperty(this, "realtimeHandler", () => {
       const realtime = !this.state.realtime;
-
       if (!realtime) {
         this.stopTimer();
         this.removeCookie();
@@ -584,7 +580,6 @@ class Interface extends React.Component {
         this.setCookie();
       }
     });
-
     _defineProperty(this, "resetHandler", () => {
       if (this.state.realtime) {
         this.setState({
@@ -601,33 +596,27 @@ class Interface extends React.Component {
         window.location.href = '?reset=1';
       }
     });
-
     _defineProperty(this, "setCookie", () => {
       let d = new Date();
       d.setTime(d.getTime() + this.props.cookie.ttl * 86400000);
       document.cookie = `${this.props.cookie.name}=true;expires=${d.toUTCString()};path=/${this.isSecure ? ';secure' : ''}`;
     });
-
     _defineProperty(this, "removeCookie", () => {
       document.cookie = `${this.props.cookie.name}=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/${this.isSecure ? ';secure' : ''}`;
     });
-
     _defineProperty(this, "getCookie", () => {
       const v = document.cookie.match(`(^|;) ?${this.props.cookie.name}=([^;]*)(;|$)`);
       return v ? !!v[2] : false;
     });
-
     _defineProperty(this, "txt", (text, ...args) => {
       if (this.props.language !== null && this.props.language.hasOwnProperty(text) && this.props.language[text]) {
         text = this.props.language[text];
       }
-
       args.forEach((arg, i) => {
         text = text.replaceAll(`{${i}}`, arg);
       });
       return text;
     });
-
     this.state = {
       realtime: this.getCookie(),
       resetting: false,
@@ -635,12 +624,10 @@ class Interface extends React.Component {
     };
     this.polling = false;
     this.isSecure = window.location.protocol === 'https:';
-
     if (this.getCookie()) {
       this.startTimer();
     }
   }
-
   render() {
     const {
       opstate,
@@ -655,12 +642,11 @@ class Interface extends React.Component {
       resetHandler: this.resetHandler,
       txt: this.txt
     }))), /*#__PURE__*/React.createElement(Footer, {
-      version: this.props.opstate.version.gui
+      version: this.props.opstate.version.gui,
+      txt: this.txt
     }));
   }
-
 }
-
 function MainNavigation(props) {
   return /*#__PURE__*/React.createElement("nav", {
     className: "main-nav"
@@ -739,22 +725,18 @@ function MainNavigation(props) {
     tabIndex: 6
   })));
 }
-
 class Tabs extends React.Component {
   constructor(props) {
     super(props);
-
     _defineProperty(this, "onClickTabItem", tab => {
       this.setState({
         activeTab: tab
       });
     });
-
     this.state = {
       activeTab: this.props.children[0].props.label
     };
   }
-
   render() {
     const {
       onClickTabItem,
@@ -792,13 +774,10 @@ class Tabs extends React.Component {
       id: `${child.props.tabId}-content`
     }, child.props.children))));
   }
-
 }
-
 class Tab extends React.Component {
   constructor(...args) {
     super(...args);
-
     _defineProperty(this, "onClick", () => {
       const {
         label,
@@ -807,7 +786,6 @@ class Tab extends React.Component {
       onClick(label);
     });
   }
-
   render() {
     const {
       onClick,
@@ -819,15 +797,12 @@ class Tab extends React.Component {
       }
     } = this;
     let className = 'nav-tab';
-
     if (this.props.className) {
       className += ` ${this.props.className}`;
     }
-
     if (activeTab === label) {
       className += ' active';
     }
-
     return /*#__PURE__*/React.createElement("li", {
       className: className,
       onClick: onClick,
@@ -836,16 +811,13 @@ class Tab extends React.Component {
       "aria-controls": `${tabId}-content`
     }, label);
   }
-
 }
-
 function OverviewCounts(props) {
   if (props.overview === false) {
     return /*#__PURE__*/React.createElement("p", {
       class: "file-cache-only"
     }, props.txt(`You have <i>opcache.file_cache_only</i> turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by <i>opcache_get_statistics()</i>.`));
   }
-
   const graphList = [{
     id: 'memoryUsageCanvas',
     title: props.txt('memory'),
@@ -874,7 +846,6 @@ function OverviewCounts(props) {
     if (!graph.show) {
       return null;
     }
-
     return /*#__PURE__*/React.createElement("div", {
       className: "widget-panel",
       key: graph.id
@@ -912,7 +883,6 @@ function OverviewCounts(props) {
     txt: props.txt
   }));
 }
-
 function GeneralInfo(props) {
   return /*#__PURE__*/React.createElement("table", {
     className: "tables general-info-table"
@@ -924,7 +894,6 @@ function GeneralInfo(props) {
     }
   })))));
 }
-
 function Directives(props) {
   let directiveList = directive => {
     return /*#__PURE__*/React.createElement("ul", {
@@ -939,7 +908,6 @@ function Directives(props) {
       }, item);
     }));
   };
-
   let directiveNodes = props.directives.map(function (directive) {
     let map = {
       'opcache.': '',
@@ -949,7 +917,6 @@ function Directives(props) {
       return map[matched];
     });
     let vShow;
-
     if (directive.v === true || directive.v === false) {
       vShow = React.createElement('i', {}, props.txt(directive.v.toString()));
     } else if (directive.v === '') {
@@ -961,15 +928,12 @@ function Directives(props) {
         vShow = directive.v;
       }
     }
-
     let directiveLink = name => {
       if (name === 'opcache.jit_max_recursive_returns') {
         return 'opcache.jit-max-recursive-return';
       }
-
       return ['opcache.file_update_protection', 'opcache.huge_code_pages', 'opcache.lockfile_path', 'opcache.opt_debug_level'].includes(name) ? name : name.replace(/_/g, '-');
     };
-
     return /*#__PURE__*/React.createElement("tr", {
       key: directive.k
     }, /*#__PURE__*/React.createElement("td", {
@@ -985,7 +949,6 @@ function Directives(props) {
     colSpan: "2"
   }, props.txt('Directives')))), /*#__PURE__*/React.createElement("tbody", null, directiveNodes));
 }
-
 function Functions(props) {
   return /*#__PURE__*/React.createElement("div", {
     id: "functions"
@@ -999,7 +962,6 @@ function Functions(props) {
     target: "_blank"
   }, f)))))));
 }
-
 function UsageGraph(props) {
   const percentage = Math.round(3.6 * props.value / 360 * 100);
   return props.charts ? /*#__PURE__*/React.createElement(ReactCustomizableProgressbar, {
@@ -1016,22 +978,19 @@ function UsageGraph(props) {
     className: "large"
   }, percentage), /*#__PURE__*/React.createElement("span", null, "%"));
 }
+
 /**
  * This component is from <https://github.com/martyan/react-customizable-progressbar/>
  * MIT License (MIT), Copyright (c) 2019 Martin Juzl
  */
-
-
 class ReactCustomizableProgressbar extends React.Component {
   constructor(props) {
     super(props);
-
     _defineProperty(this, "initAnimation", () => {
       this.setState({
         animationInited: true
       });
     });
-
     _defineProperty(this, "getProgress", () => {
       const {
         initialAnimation,
@@ -1042,7 +1001,6 @@ class ReactCustomizableProgressbar extends React.Component {
       } = this.state;
       return initialAnimation && !animationInited ? 0 : progress;
     });
-
     _defineProperty(this, "getStrokeDashoffset", strokeLength => {
       const {
         counterClockwise,
@@ -1054,7 +1012,6 @@ class ReactCustomizableProgressbar extends React.Component {
       if (inverse) return counterClockwise ? 0 : progressLength - strokeLength;
       return counterClockwise ? -1 * progressLength : progressLength;
     });
-
     _defineProperty(this, "getStrokeDashArray", (strokeLength, circumference) => {
       const {
         counterClockwise,
@@ -1066,7 +1023,6 @@ class ReactCustomizableProgressbar extends React.Component {
       if (inverse) return `${progressLength}, ${circumference}`;
       return counterClockwise ? `${strokeLength * (progress / 100)}, ${circumference}` : `${strokeLength}, ${circumference}`;
     });
-
     _defineProperty(this, "getTrackStrokeDashArray", (strokeLength, circumference) => {
       const {
         initialAnimation
@@ -1077,7 +1033,6 @@ class ReactCustomizableProgressbar extends React.Component {
       if (initialAnimation && !animationInited) return `0, ${circumference}`;
       return `${strokeLength}, ${circumference}`;
     });
-
     _defineProperty(this, "getExtendedWidth", () => {
       const {
         strokeWidth,
@@ -1088,7 +1043,6 @@ class ReactCustomizableProgressbar extends React.Component {
       const pointerWidth = pointerRadius + pointerStrokeWidth;
       if (pointerWidth > strokeWidth && pointerWidth > trackStrokeWidth) return pointerWidth * 2;else if (strokeWidth > trackStrokeWidth) return strokeWidth * 2;else return trackStrokeWidth * 2;
     });
-
     _defineProperty(this, "getPointerAngle", () => {
       const {
         cut,
@@ -1098,12 +1052,10 @@ class ReactCustomizableProgressbar extends React.Component {
       const progress = this.getProgress();
       return counterClockwise ? (360 - cut) / steps * (steps - progress) : (360 - cut) / steps * progress;
     });
-
     this.state = {
       animationInited: false
     };
   }
-
   componentDidMount() {
     const {
       initialAnimation,
@@ -1111,7 +1063,6 @@ class ReactCustomizableProgressbar extends React.Component {
     } = this.props;
     if (initialAnimation) setTimeout(this.initAnimation, initialAnimationDelay);
   }
-
   render() {
     const {
       radius,
@@ -1191,9 +1142,7 @@ class ReactCustomizableProgressbar extends React.Component {
       className: `widget-value`
     }, progress, "%"));
   }
-
 }
-
 ReactCustomizableProgressbar.defaultProps = {
   radius: 100,
   progress: 0,
@@ -1218,7 +1167,6 @@ ReactCustomizableProgressbar.defaultProps = {
   initialAnimation: false,
   initialAnimationDelay: 0
 };
-
 function MemoryUsagePanel(props) {
   return /*#__PURE__*/React.createElement("div", {
     className: "widget-panel"
@@ -1228,7 +1176,6 @@ function MemoryUsagePanel(props) {
     className: "widget-value widget-info"
   }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('total memory'), ":"), " ", props.total), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('used memory'), ":"), " ", props.used), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('free memory'), ":"), " ", props.free), props.preload && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('preload memory'), ":"), " ", props.preload), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('wasted memory'), ":"), " ", props.wasted, " (", props.wastedPercent, "%)"), props.jitBuffer && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('jit buffer'), ":"), " ", props.jitBuffer), props.jitBufferFree && /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('jit buffer free'), ":"), " ", props.jitBufferFree, " (", 100 - props.jitBufferFreePercentage, "%)")));
 }
-
 function StatisticsPanel(props) {
   return /*#__PURE__*/React.createElement("div", {
     className: "widget-panel"
@@ -1238,7 +1185,6 @@ function StatisticsPanel(props) {
     className: "widget-value widget-info"
   }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of cached'), " files:"), " ", props.num_cached_scripts), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of hits'), ":"), " ", props.hits), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of misses'), ":"), " ", props.misses), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('blacklist misses'), ":"), " ", props.blacklist_miss), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of cached keys'), ":"), " ", props.num_cached_keys), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('max cached keys'), ":"), " ", props.max_cached_keys)));
 }
-
 function InternedStringsPanel(props) {
   return /*#__PURE__*/React.createElement("div", {
     className: "widget-panel"
@@ -1248,27 +1194,22 @@ function InternedStringsPanel(props) {
     className: "widget-value widget-info"
   }, /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('buffer size'), ":"), " ", props.buffer_size), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('used memory'), ":"), " ", props.strings_used_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('free memory'), ":"), " ", props.strings_free_memory), /*#__PURE__*/React.createElement("p", null, /*#__PURE__*/React.createElement("b", null, props.txt('number of strings'), ":"), " ", props.number_of_strings)));
 }
-
 class CachedFiles extends React.Component {
   constructor(props) {
     super(props);
-
     _defineProperty(this, "setSearchTerm", debounce(searchTerm => {
       this.setState({
         searchTerm,
         refreshPagination: !this.state.refreshPagination
       });
     }, this.props.debounceRate));
-
     _defineProperty(this, "onPageChanged", currentPage => {
       this.setState({
         currentPage
       });
     });
-
     _defineProperty(this, "handleInvalidate", e => {
       e.preventDefault();
-
       if (this.props.realtime) {
         axios.get(window.location.pathname, {
           params: {
@@ -1281,33 +1222,27 @@ class CachedFiles extends React.Component {
         window.location.href = e.currentTarget.href;
       }
     });
-
     _defineProperty(this, "changeSort", e => {
       this.setState({
         [e.target.name]: e.target.value
       });
     });
-
     _defineProperty(this, "compareValues", (key, order = 'asc') => {
       return function innerSort(a, b) {
         if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
           return 0;
         }
-
         const varA = typeof a[key] === 'string' ? a[key].toUpperCase() : a[key];
         const varB = typeof b[key] === 'string' ? b[key].toUpperCase() : b[key];
         let comparison = 0;
-
         if (varA > varB) {
           comparison = 1;
         } else if (varA < varB) {
           comparison = -1;
         }
-
         return order === 'desc' ? comparison * -1 : comparison;
       };
     });
-
     this.doPagination = typeof props.perPageLimit === "number" && props.perPageLimit > 0;
     this.state = {
       currentPage: 1,
@@ -1317,16 +1252,13 @@ class CachedFiles extends React.Component {
       sortDir: `desc`
     };
   }
-
   render() {
     if (!this.props.allow.fileList) {
       return null;
     }
-
     if (this.props.allFiles.length === 0) {
       return /*#__PURE__*/React.createElement("p", null, this.props.txt('No files have been cached or you have <i>opcache.file_cache_only</i> turned on'));
     }
-
     const {
       searchTerm,
       currentPage
@@ -1400,16 +1332,12 @@ class CachedFiles extends React.Component {
       }, file));
     }))));
   }
-
 }
-
 class CachedFile extends React.Component {
   constructor(...args) {
     super(...args);
-
     _defineProperty(this, "handleInvalidate", e => {
       e.preventDefault();
-
       if (this.props.realtime) {
         axios.get(window.location.pathname, {
           params: {
@@ -1423,7 +1351,6 @@ class CachedFile extends React.Component {
       }
     });
   }
-
   render() {
     return /*#__PURE__*/React.createElement("tr", {
       "data-path": this.props.full_path.toLowerCase()
@@ -1440,35 +1367,28 @@ class CachedFile extends React.Component {
       onClick: this.handleInvalidate
     }, this.props.txt('force file invalidation')))));
   }
-
 }
-
 class IgnoredFiles extends React.Component {
   constructor(props) {
     super(props);
-
     _defineProperty(this, "onPageChanged", currentPage => {
       this.setState({
         currentPage
       });
     });
-
     this.doPagination = typeof props.perPageLimit === "number" && props.perPageLimit > 0;
     this.state = {
       currentPage: 1,
       refreshPagination: 0
     };
   }
-
   render() {
     if (!this.props.allow.fileList) {
       return null;
     }
-
     if (this.props.allFiles.length === 0) {
       return /*#__PURE__*/React.createElement("p", null, this.props.txt('No files have been ignored via <i>opcache.blacklist_filename</i>'));
     }
-
     const {
       currentPage
     } = this.state;
@@ -1490,35 +1410,28 @@ class IgnoredFiles extends React.Component {
       }, /*#__PURE__*/React.createElement("td", null, file));
     }))));
   }
-
 }
-
 class PreloadedFiles extends React.Component {
   constructor(props) {
     super(props);
-
     _defineProperty(this, "onPageChanged", currentPage => {
       this.setState({
         currentPage
       });
     });
-
     this.doPagination = typeof props.perPageLimit === "number" && props.perPageLimit > 0;
     this.state = {
       currentPage: 1,
       refreshPagination: 0
     };
   }
-
   render() {
     if (!this.props.allow.fileList) {
       return null;
     }
-
     if (this.props.allFiles.length === 0) {
       return /*#__PURE__*/React.createElement("p", null, this.props.txt('No files have been preloaded <i>opcache.preload</i>'));
     }
-
     const {
       currentPage
     } = this.state;
@@ -1540,13 +1453,10 @@ class PreloadedFiles extends React.Component {
       }, /*#__PURE__*/React.createElement("td", null, file));
     }))));
   }
-
 }
-
 class Pagination extends React.Component {
   constructor(props) {
     super(props);
-
     _defineProperty(this, "gotoPage", page => {
       const {
         onPageChanged = f => f
@@ -1556,54 +1466,43 @@ class Pagination extends React.Component {
         currentPage
       }, () => onPageChanged(currentPage));
     });
-
     _defineProperty(this, "totalPages", () => {
       return Math.ceil(this.props.totalRecords / this.props.pageLimit);
     });
-
     _defineProperty(this, "handleClick", (page, evt) => {
       evt.preventDefault();
       this.gotoPage(page);
     });
-
     _defineProperty(this, "handleJumpLeft", evt => {
       evt.preventDefault();
       this.gotoPage(this.state.currentPage - this.pageNeighbours * 2 - 1);
     });
-
     _defineProperty(this, "handleJumpRight", evt => {
       evt.preventDefault();
       this.gotoPage(this.state.currentPage + this.pageNeighbours * 2 + 1);
     });
-
     _defineProperty(this, "handleMoveLeft", evt => {
       evt.preventDefault();
       this.gotoPage(this.state.currentPage - 1);
     });
-
     _defineProperty(this, "handleMoveRight", evt => {
       evt.preventDefault();
       this.gotoPage(this.state.currentPage + 1);
     });
-
     _defineProperty(this, "range", (from, to, step = 1) => {
       let i = from;
       const range = [];
-
       while (i <= to) {
         range.push(i);
         i += step;
       }
-
       return range;
     });
-
     _defineProperty(this, "fetchPageNumbers", () => {
       const totalPages = this.totalPages();
       const pageNeighbours = this.pageNeighbours;
       const totalNumbers = this.pageNeighbours * 2 + 3;
       const totalBlocks = totalNumbers + 2;
-
       if (totalPages > totalBlocks) {
         let pages = [];
         const leftBound = this.state.currentPage - pageNeighbours;
@@ -1618,7 +1517,6 @@ class Pagination extends React.Component {
         const rightSpill = endPage < beforeLastPage;
         const leftSpillPage = "LEFT";
         const rightSpillPage = "RIGHT";
-
         if (leftSpill && !rightSpill) {
           const extraPages = this.range(startPage - singleSpillOffset, startPage - 1);
           pages = [leftSpillPage, ...extraPages, ...pages];
@@ -1628,38 +1526,30 @@ class Pagination extends React.Component {
         } else if (leftSpill && rightSpill) {
           pages = [leftSpillPage, ...pages, rightSpillPage];
         }
-
         return [1, ...pages, totalPages];
       }
-
       return this.range(1, totalPages);
     });
-
     this.state = {
       currentPage: 1
     };
     this.pageNeighbours = typeof props.pageNeighbours === "number" ? Math.max(0, Math.min(props.pageNeighbours, 2)) : 0;
   }
-
   componentDidMount() {
     this.gotoPage(1);
   }
-
   componentDidUpdate(props) {
     const {
       refresh
     } = this.props;
-
     if (props.refresh !== refresh) {
       this.gotoPage(1);
     }
   }
-
   render() {
     if (!this.props.totalRecords || this.totalPages() === 1) {
       return null;
     }
-
     const {
       currentPage
     } = this.state;
@@ -1696,7 +1586,6 @@ class Pagination extends React.Component {
           className: "sr-only"
         }, this.props.txt('Previous page')))));
       }
-
       if (page === "RIGHT") {
         return /*#__PURE__*/React.createElement(React.Fragment, {
           key: index
@@ -1724,7 +1613,6 @@ class Pagination extends React.Component {
           className: "sr-only"
         }, this.props.txt('Jump forward')))));
       }
-
       return /*#__PURE__*/React.createElement("li", {
         key: index,
         className: "page-item"
@@ -1735,9 +1623,7 @@ class Pagination extends React.Component {
       }, page));
     })));
   }
-
 }
-
 function Footer(props) {
   return /*#__PURE__*/React.createElement("footer", {
     className: "main-footer"
@@ -1745,34 +1631,29 @@ function Footer(props) {
     className: "github-link",
     href: "https://github.com/amnuts/opcache-gui",
     target: "_blank",
-    title: "opcache-gui (currently version {props.version}) on GitHub"
-  }, "https://github.com/amnuts/opcache-gui - version ", props.version), /*#__PURE__*/React.createElement("a", {
+    title: props.txt("opcache-gui (currently version {0}) on GitHub", props.version)
+  }, "https://github.com/amnuts/opcache-gui - ", props.txt("version {0}", props.version)), /*#__PURE__*/React.createElement("a", {
     className: "sponsor-link",
     href: "https://github.com/sponsors/amnuts",
     target: "_blank",
-    title: "Sponsor this project and author on GitHub"
-  }, "Sponsor this project"));
+    title: props.txt("Sponsor this project and author on GitHub")
+  }, props.txt("Sponsor this project")));
 }
-
 function debounce(func, wait, immediate) {
   let timeout;
   wait = wait || 250;
   return function () {
     let context = this,
-        args = arguments;
-
+      args = arguments;
     let later = function () {
       timeout = null;
-
       if (!immediate) {
         func.apply(context, args);
       }
     };
-
     let callNow = immediate && !timeout;
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
-
     if (callNow) {
       func.apply(context, args);
     }

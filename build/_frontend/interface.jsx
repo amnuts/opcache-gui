@@ -91,7 +91,10 @@ class Interface extends React.Component {
                         txt={this.txt}
                     />
                 </header>
-                <Footer version={this.props.opstate.version.gui} />
+                <Footer
+                    version={this.props.opstate.version.gui}
+                    txt={this.txt}
+                />
             </>
         );
     }
@@ -1187,13 +1190,13 @@ function Footer(props) {
         <footer className="main-footer">
             <a className="github-link" href="https://github.com/amnuts/opcache-gui"
                target="_blank"
-               title="opcache-gui (currently version {props.version}) on GitHub"
-            >https://github.com/amnuts/opcache-gui - version {props.version}</a>
+               title={props.txt("opcache-gui (currently version {0}) on GitHub", props.version)}
+            >https://github.com/amnuts/opcache-gui - {props.txt("version {0}", props.version)}</a>
 
             <a className="sponsor-link" href="https://github.com/sponsors/amnuts"
                target="_blank"
-               title="Sponsor this project and author on GitHub"
-            >Sponsor this project</a>
+               title={props.txt("Sponsor this project and author on GitHub")}
+            >{props.txt("Sponsor this project")}</a>
         </footer>
     );
 }
