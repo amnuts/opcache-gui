@@ -33,6 +33,7 @@
   "scripts": {
     "build": "php build/build.php",
     "build-french": "php build/build.php --lang fr",
+    "build-german": "php build/build.php --lang de",
     "build-spanish": "php build/build.php --lang es"
   }
 }
