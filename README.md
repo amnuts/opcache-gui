@@ -47,7 +47,7 @@ $options = [/* ... */];
 $opcache = (new Service($options))->handle();
 ```
 
-Then you can create whatever view you want with which to show the opcache details.  Although there is a pretty neat React-based interface available for you in this repo.
+Then, you can create whatever view you want with which to show the opcache details.  Although there is a pretty neat React-based interface available for you in this repo.
 
 Alternatively, include `vendor/amnuts/opcache-gui/index.php` directly and this'll give you the same result as just copying/pasting the `index.php` somewhere.
 
@@ -149,7 +149,7 @@ If you want to adjust the pagination length you can do so with the `per_page` co
 
 #### Ignored files
 
-If you have set up a list of files which you don't want cache by supplying an `opcache.blacklist_filename` value, then the list of files will be listed within this tab.
+If you have set up a list of files which you don't want cached by supplying an `opcache.blacklist_filename` value, then the list of files will be listed within this tab.
 
 If you have not supplied that configuration option in the `php.ini` file then this tab will not be displayed.  If you set the `allow_filelist` configuration option to `false` then this tab will not be displayed irrespective of your ini setting.
 
@@ -221,11 +221,11 @@ If you wanted to have the js in-line, then you can use the `-j` or `--local-js` 
 
 There's an old saying that goes, "If you know more than one language you're multilingual, if you don't you're British."  Not only is that a damning indictment of the British mentality towards other languages, but also goes to explain why the UI has only so far been in English - because I am, for all my sins, British.
 
-However, it is now possible to build the interface with a different language.  Currently, thanks to contributors, French and Spanish are also supported.  If anyone else wants to contribute additional language packs, please submit a PR! 
+However, it is now possible to build the interface with a different language.  Currently, thanks to contributors, French, German and Spanish are also supported.  If anyone else wants to contribute additional language packs, please submit a PR! 
 
 If the language pack is in the `build/_languages/` directory then you can use that with the `-l` or `--lang` flag.  For example, if there is a `fr.json` language pack then you can use `php ./build/build.php -l fr` in order to build with that language.
 
-There have been a few composer scripts added to help with the building.  They are, `composer build`, `composer build-french`, and `composer build-spanish`.
+There have been a few composer scripts added to help with the building.  They are `composer build`, `composer build-french`, `composer build-german` and `composer build-spanish`.
 
 If you want to create a language file then `build/_languages/example.json` contains all you need.  It's a simple json structure with the key being the English version which matches what's in the UI, and the value is what you're converting it to - which in the example file is just blank.  If a value is empty or the index doesn't exist for a translation, then it'll just use the English version.  This gives you the ability to replace some or all of the interface strings as you see fit.
 
