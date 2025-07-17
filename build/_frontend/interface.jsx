@@ -664,7 +664,7 @@ ReactCustomizableProgressbar.defaultProps = {
 function MemoryUsagePanel(props) {
     return (
         <div className="widget-panel">
-            <h3 className="widget-header">memory usage</h3>
+            <h3 className="widget-header">{props.txt('memory usage')}</h3>
             <div className="widget-value widget-info">
                 <p><b>{props.txt('total memory')}:</b> {props.total}</p>
                 <p><b>{props.txt('used memory')}:</b> {props.used}</p>
@@ -684,7 +684,7 @@ function StatisticsPanel(props) {
         <div className="widget-panel">
             <h3 className="widget-header">{props.txt('opcache statistics')}</h3>
             <div className="widget-value widget-info">
-                <p><b>{props.txt('number of cached')} files:</b> {props.num_cached_scripts}</p>
+                <p><b>{props.txt('number of cached files')}:</b> {props.num_cached_scripts}</p>
                 <p><b>{props.txt('number of hits')}:</b> {props.hits}</p>
                 <p><b>{props.txt('number of misses')}:</b> {props.misses}</p>
                 <p><b>{props.txt('blacklist misses')}:</b> {props.blacklist_miss}</p>
