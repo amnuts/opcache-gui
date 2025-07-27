@@ -445,7 +445,7 @@ class Service
     protected function jitState(array $status, array $directives): array
     {
         $state = [
-            'enabled' => $status['jit']['enabled'] ?? null,
+            'enabled' => $status['jit']['enabled'] ?? false,
             'reason' => ''
         ];
 
