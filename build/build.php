@@ -11,18 +11,18 @@
 
 $remoteJsLocations = [
     'cloudflare' => [
-        'cdnjs.cloudflare.com/ajax/libs/react/19.1.0/umd/react.production.min.js',
-        'cdnjs.cloudflare.com/ajax/libs/react-dom/19.1.0/umd/react-dom.production.min.js',
+        'cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js',
+        'cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js',
         'cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js',
     ],
     'jsdelivr' => [
-        'cdn.jsdelivr.net/npm/react@19/umd/react.production.min.js',
-        'cdn.jsdelivr.net/npm/react-dom@19/umd/react-dom.production.min.js',
+        'cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js',
+        'cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js',
         'cdn.jsdelivr.net/npm/axios@1.11.0/dist/axios.min.js',
     ],
     'unpkg' => [
-        'unpkg.com/react@19.1.0/umd/react.production.min.js',
-        'unpkg.com/react-dom@19.1.0/umd/react-dom.production.min.js',
+        'unpkg.com/react@18.3.1/umd/react.production.min.js',
+        'unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js',
         'unpkg.com/axios@1.11.0/dist/axios.min.js',
     ],
 ];
@@ -87,7 +87,7 @@ if ($makeJsLocal) {
     echo "🔗 Using remote js links from '{$useRemoteJsFrom}'\n";
     $output = str_replace('{{JS_LIBRARIES}}',
         implode("\n    ", array_map(static function ($jsUrl) {
-            return "<script crossorigin src=\"//{$jsUrl}\"></script>";
+            return "<script src=\"//{$jsUrl}\"></script>";
         }, $remoteJsLocations[$useRemoteJsFrom])),
         $output
     );
