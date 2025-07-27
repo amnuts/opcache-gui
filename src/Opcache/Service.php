@@ -416,7 +416,7 @@ class Service
             $config['version'],
             [
                 'php' => PHP_VERSION,
-                'server' => $_SERVER['SERVER_SOFTWARE'] ?: '',
+                'server' => $_SERVER['SERVER_SOFTWARE'] ?? '',
                 'host' => (function_exists('gethostname')
                     ? gethostname()
                     : (php_uname('n')
