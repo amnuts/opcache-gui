@@ -11,19 +11,19 @@
 
 $remoteJsLocations = [
     'cloudflare' => [
-        'cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js',
-        'cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js',
-        'cdnjs.cloudflare.com/ajax/libs/axios/1.3.6/axios.min.js',
+        'cdnjs.cloudflare.com/ajax/libs/react/19.1.0/cjs/react.production.min.js',
+        'cdnjs.cloudflare.com/ajax/libs/react-dom/19.1.0/cjs/react-dom.production.min.js',
+        'cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js',
     ],
     'jsdelivr' => [
-        'cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js',
-        'cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js',
-        'cdn.jsdelivr.net/npm/axios/dist/axios.min.js',
+        'cdn.jsdelivr.net/npm/react@19/cjs/react.production.min.js',
+        'cdn.jsdelivr.net/npm/react-dom@19/cjs/react-dom.production.min.js',
+        'cdn.jsdelivr.net/npm/axios@1.11.0/dist/axios.min.js',
     ],
     'unpkg' => [
-        'unpkg.com/react@18/umd/react.production.min.js',
-        'unpkg.com/react-dom@18/umd/react-dom.production.min.js',
-        'unpkg.com/axios/dist/axios.min.js',
+        'unpkg.com/react@19.1.0/cjs/react.production.js',
+        'unpkg.com/react-dom@19.1.0/cjs/react-dom.production.js',
+        'unpkg.com/axios@1.11.0/dist/axios.min.js',
     ],
 ];
 $defaultRemoteJsFrom = array_keys($remoteJsLocations)[0];

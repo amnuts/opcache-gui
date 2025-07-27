@@ -4,15 +4,16 @@
   "version": "3.5.5",
   "main": "index.js",
   "devDependencies": {
-    "@babel/cli": "^7.24.7",
-    "@babel/core": "^7.24.7",
-    "@babel/preset-react": "^7.24.7",
-    "node-sass": "^9.0.0"
+    "@babel/cli": "^7.28.0",
+    "@babel/core": "^7.28.0",
+    "@babel/preset-react": "^7.27.1",
+    "@babel/plugin-transform-class-properties": "^7.27.1",
+    "sass": "^1.89.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "compile-jsx": "node_modules/.bin/babel --presets @babel/preset-react build/_frontend/interface.jsx --plugins @babel/plugin-proposal-class-properties -o build/interface.js",
-    "compile-scss": "node_modules/.bin/node-sass -xi build/_frontend/interface.scss -o build/ --output-style=compressed"
+    "compile-scss": "node_modules/.bin/sass -xi build/_frontend/interface.scss -o build/ --output-style=compressed"
   },
   "repository": {
     "type": "git",
@@ -23,8 +24,5 @@
   "bugs": {
     "url": "https://github.com/amnuts/opcache-gui/issues"
   },
-  "homepage": "https://github.com/amnuts/opcache-gui#readme",
-  "dependencies": {
-    "@babel/plugin-proposal-class-properties": "^7.12.1"
-  }
+  "homepage": "https://github.com/amnuts/opcache-gui#readme"
 }
