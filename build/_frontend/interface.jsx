@@ -780,7 +780,7 @@ class CachedFiles extends React.Component {
         }
 
         if (this.props.allFiles.length === 0) {
-            return <p>{this.props.txt('No files have been cached or you have <i>opcache.file_cache_only</i> turned on')}</p>;
+            return <p dangerouslySetInnerHTML={{__html: `No files have been cached or you have <i>opcache.file_cache_only</i> turned on`}}></p>;
         }
 
         const { searchTerm, currentPage } = this.state;
