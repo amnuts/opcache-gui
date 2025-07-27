@@ -1,6 +1,6 @@
 # opcache-gui
 
-A clean and responsive interface for Zend OPcache information, showing statistics, settings and cached files, and providing a real-time update for the information.
+A clean and responsive interface for Zend OPcache information, showing statistics, settings, cached files, and providing a real-time update for the information.
 
 This interface uses ReactJS and Axios and is for modern browsers, and requires a minimum of PHP 7.1.
 
@@ -22,13 +22,13 @@ There are two ways to getting started using this gui:
 
 #### Copy/clone this repo
 
-The easiest way to start using the opcache-gui is to clone this repo, or simply copy/paste/download the `index.php` file to a location which your web server can load.  Then point your browser to that location, such as `https://www.example.com/opcache/index.php`.
+The easiest way to start using the opcache-gui is to clone this repo, or copy/paste/download the `index.php` file to a location which your web server can load.  Then point your browser to that location, such as `https://www.example.com/opcache/index.php`.
 
 #### Install via composer
 
 You can include the files with [Composer](https://getcomposer.org/) by running the command `composer require amnuts/opcache-gui`.
 
-Once in your `vendor` directory, there are numerous ways in which you can use the interface.  For example, if you're using a framework such as Symfony or Laravel, you could load opcache-gui into a `Controller`.  Your requirements of setting it up within your framework of choice will vary, so it's not really possible to detail how to do that within this readme... but I have faith in your ability to figure it out!
+Once in your `vendor` directory, there are number of ways in which you can use the interface.  For example, if you're using a framework such as Symfony or Laravel, you could load opcache-gui into a `Controller`.  Your requirements of setting it up within your framework of choice will vary, so it's not really possible to detail how to do that within this readme... but I have faith in your ability to figure it out!
 
 The namespace used for the class is `Amnuts\Opcache`, so once the dependency is in your `autoload.php` you can use the `\Amnuts\Opcache\Service` class.  For example, you could do something like:
 
@@ -49,7 +49,7 @@ $opcache = (new Service($options))->handle();
 
 Then, you can create whatever view you want with which to show the opcache details.  Although there is a pretty neat React-based interface available for you in this repo.
 
-Alternatively, include `vendor/amnuts/opcache-gui/index.php` directly and this'll give you the same result as just copying/pasting the `index.php` somewhere.
+Alternatively, include `vendor/amnuts/opcache-gui/index.php` directly and this will give you the same result as just copying/pasting the `index.php` somewhere.
 
 ```php
 <?php
@@ -59,7 +59,7 @@ Alternatively, include `vendor/amnuts/opcache-gui/index.php` directly and this'l
 require_once __DIR__ . '/../vendor/amnuts/opcache-gui/index.php';
 ```
 
-You could even simply create a symlink to the `index.php` that's in the `vendor` directory:
+You could even create a symlink to the `index.php` that's in the `vendor` directory:
 
 ```shell script
 ln -s /var/www/vendor/amnuts/opcache-gui/index.php /var/www/html/opcache.php
@@ -97,7 +97,7 @@ $options = [
 ];
 ```
 
-If you want to change any of the defaults, you can pass in just the ones you want to change if you're happy to keep the rest as-is.  Just alter the array at the top of the `index.php` script (or pass in the array differently to the `Service` class).
+If you want to change any of the defaults, you can pass in just the ones you want to change if you're happy to keep the rest as-is.  Alter the array at the top of the `index.php` script (or pass in the array differently to the `Service` class).
 
 For example, the following would change only the `allow_reset` and `refresh_time` values but keep everything else as the default:
 
@@ -141,9 +141,9 @@ All the files currently in the cache are listed here with their associated stati
 
 You can filter the results to help find the particular scripts you're looking for and change the way cached files are sorted.  From here you can invalidate the cache for individual files or invalidate the cache for all the files matching your search.
 
-If you do not want to show the file list at all then you can use the `allow_filelist` configuration option; setting it to `false` will suppress the file list altogether.
+If you do not want to show the file list at all, then you can use the `allow_filelist` configuration option; setting it to `false` will suppress the file list altogether.
 
-If you want to adjust the pagination length you can do so with the `per_page` configuration option.
+If you want to adjust the pagination length, you can do so with the `per_page` configuration option.
 
 ![Screenshot of the Cached files list showing filtered results and pagination](http://amnuts.com/images/opcache/screenshot/cached-v3.png)
 
@@ -175,9 +175,9 @@ Also, if you choose to invalidate any files or reset the cache it will do this w
 
 ### Building it yourself
 
-The interface has been designed around the principle of having just one file that anyone needs in order to get up and running.  To fulfil this, there's a template file, language files, jsx and css, which are all used in order to create the interface and they're brought together in the build process.
+The interface has been designed around the principle of having just one file that anyone needs to get up and running.  To fulfil this, there's a template file, language files, jsx, and css, which are all used to create the interface and they're brought together in the build process.
 
-This build process will allow you to change the language used, how the required 3rd-party javascript libraries are included, the look and feel, or even the core components, should you wish.
+This build process will allow you to change the language used, how the required third-party javascript libraries are included, the look and feel, or even the core components, should you wish.
 
 #### The build command
 
@@ -199,7 +199,7 @@ The build process will create a compiled css file at `build/interface.css` and t
 
 The CSS for the interface is in the `build/_frontend/interface.scss` file.  Make changes there if you want to change the colours or formatting.
 
-If you make any changes to the scss file then you'll need to run the build script in order to see the changes.
+If you make any changes to the scss file then you'll need to run the build script to see the changes.
 
 #### The layout
 
@@ -211,9 +211,9 @@ Run the build script again should you make changes here.
 
 The wrapper PHP template used in the build process, and that acts to pass various bits of data to the ReactJS side of things, is located at `build/template.phps`.  If you wanted to update the version of ReactJS used, or how the wrapper html is structured (such as wanting to pass additional things to the ReactJS side of things), then this would be the file you'd want to update. 
 
-The interface requires a few 3rd-party js files to function correctly.  You have the option of being able to change where these are fetched (between CloudFare, JSDelivr, and Unpkg), or you can have js js completely local and in-line (for example, you have CSP policies in place and the remote urls are not whitelisted).
+The interface requires a few third-party js files to function correctly.  You have the option of being able to change where these are fetched (between CloudFare, JSDelivr, and Unpkg), or you can have js completely local and in-line (for example, you have CSP policies in place and the remote urls are not allowed).
 
-In order to change the location of the 3rd-party resources, use the `-r` or `--remote-js` option followed by either `cloudflare`, `jsdelivr`, or `unpkg`.  For example, if you wanted to use _jsdelivr_ then you'd run the build command like this: `php ./build/build.php -r jsdelivr`.  This defaults to `cloudflare`.
+To change the location of the third-party resources, use the `-r` or `--remote-js` option followed by either `cloudflare`, `jsdelivr`, or `unpkg`.  For example, if you wanted to use _jsdelivr_ then you'd run the build command like this: `php ./build/build.php -r jsdelivr`.  This defaults to `cloudflare`.
 
 If you wanted to have the js in-line, then you can use the `-j` or `--local-js` flag when building, such as `php ./build/build.php -j`.  This will fetch the remote script files and embed the js into main `index.php` file.  If you want to build it again with remote files, run the command again without the flag.  Fetching the files will take your `-r` option into consideration if you provide it.
 
@@ -221,13 +221,13 @@ If you wanted to have the js in-line, then you can use the `-j` or `--local-js` 
 
 There's an old saying that goes, "If you know more than one language you're multilingual, if you don't you're British."  Not only is that a damning indictment of the British mentality towards other languages, but also goes to explain why the UI has only so far been in English - because I am, for all my sins, British.
 
-However, it is now possible to build the interface with a different language.  Currently, thanks to contributors, French, German and Spanish are also supported.  If anyone else wants to contribute additional language packs, please submit a PR! 
+However, it is now possible to build the interface with a different language.  Currently, thanks to contributors, French, German, and Spanish are also supported.  If anyone else wants to contribute additional language packs, please submit a PR! 
 
 If the language pack is in the `build/_languages/` directory then you can use that with the `-l` or `--lang` flag.  For example, if there is a `fr.json` language pack then you can use `php ./build/build.php -l fr` in order to build with that language.
 
 There have been a few composer scripts added to help with the building.  They are `composer build`, `composer build-french`, `composer build-german` and `composer build-spanish`.
 
-If you want to create a language file then `build/_languages/example.json` contains all you need.  It's a simple json structure with the key being the English version which matches what's in the UI, and the value is what you're converting it to - which in the example file is just blank.  If a value is empty or the index doesn't exist for a translation, then it'll just use the English version.  This gives you the ability to replace some or all of the interface strings as you see fit.
+If you want to create a language file then `build/_languages/example.json` contains all you need.  It's a simple json structure with the key being the English version which matches what's in the UI, and the value is what you're converting it to - which in the example file is just blank.  If a value is empty or the index doesn't exist for a translation, then it'll just use the English version.  This allows you to replace some or all of the interface strings as you see fit.
 
 To get started with a new language, copy the `example.json` to the language you want that doesn't already exist - for example, `pt-br.json` or `pirate.json`.  Then fill in the translations into the values.  Once done, rebuild with `php ./build/build.php -l pt-br` or `php ./build/build.php -l pirate`.
 
@@ -238,6 +238,8 @@ Added German translation and various fixes thanks to @matthiasstraka (PR#123)
 Added fix for missing JIT in older PHP versions thanks to @cpeel (PR#120)
 Updated React and Axios packages
 Changes node-sass to sass, and various updates to support that
+Fixed #118
+Fixed #122
 
 **Version 3.5.5**\
 Added Spanish translations thanks to @cvc90 (PR#110)
