@@ -277,7 +277,7 @@ class Tab extends React.Component {
 function OverviewCounts(props) {
     if (props.overview === false) {
         return (
-            <p class="file-cache-only">
+            <p className="file-cache-only">
                 {props.txt(`You have <i>opcache.file_cache_only</i> turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by <i>opcache_get_statistics()</i>.`)}
             </p>
         );
