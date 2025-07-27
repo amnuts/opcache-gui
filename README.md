@@ -233,6 +233,12 @@ To get started with a new language, copy the `example.json` to the language you 
 
 ## Releases
 
+**Version 3.6.0**\
+Added German translation and various fixes thanks to @matthiasstraka (PR#123)
+Added fix for missing JIT in older PHP versions thanks to @cpeel (PR#120)
+Updated React and Axios packages
+Changes node-sass to sass, and various updates to support that
+
 **Version 3.5.5**\
 Added Spanish translations thanks to @cvc90 (PR#110)
 
