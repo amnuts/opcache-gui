@@ -817,7 +817,7 @@ function OverviewCounts(props) {
     return /*#__PURE__*/React.createElement("p", {
       className: "file-cache-only",
       dangerouslySetInnerHTML: {
-        __html: `You have <i>opcache.file_cache_only</i> turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by <i>opcache_get_statistics()</i>.`
+        __html: props.txt(`You have <i>opcache.file_cache_only</i> turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by <i>opcache_get_statistics()</i>.`)
       }
     });
   }
@@ -1262,7 +1262,7 @@ class CachedFiles extends React.Component {
     if (this.props.allFiles.length === 0) {
       return /*#__PURE__*/React.createElement("p", {
         dangerouslySetInnerHTML: {
-          __html: `No files have been cached or you have <i>opcache.file_cache_only</i> turned on`
+          __html: this.props.txt(`No files have been cached or you have <i>opcache.file_cache_only</i> turned on`)
         }
       });
     }

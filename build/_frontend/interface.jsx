@@ -278,7 +278,7 @@ function OverviewCounts(props) {
     if (props.overview === false) {
         return (
             <p className="file-cache-only"
-                dangerouslySetInnerHTML={{__html: `You have <i>opcache.file_cache_only</i> turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by <i>opcache_get_statistics()</i>.`}}
+                dangerouslySetInnerHTML={{__html: props.txt(`You have <i>opcache.file_cache_only</i> turned on.  As a result, the memory information is not available.  Statistics and file list may also not be returned by <i>opcache_get_statistics()</i>.`)}}
             >
             </p>
         );
@@ -780,7 +780,7 @@ class CachedFiles extends React.Component {
         }
 
         if (this.props.allFiles.length === 0) {
-            return <p dangerouslySetInnerHTML={{__html: `No files have been cached or you have <i>opcache.file_cache_only</i> turned on`}}></p>;
+            return <p dangerouslySetInnerHTML={{__html: this.props.txt(`No files have been cached or you have <i>opcache.file_cache_only</i> turned on`)}}></p>;
         }
 
         const { searchTerm, currentPage } = this.state;
