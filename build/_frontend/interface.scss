@@ -468,15 +468,16 @@ $footer-border-color: #CCC;
   }
 
   .nav-tab {
-    background-color: #1e1e1e;
-    border-color: #555;
+    background-color: transparent;
+    border-color: transparent;
 
     &:hover {
       background-color: #2a2a2a;
     }
 
     &.active {
-      border-color: #555;
+      background-color: #1e1e1e;
+      border-color: transparent;
       border-top-color: #84b8ff;
       border-bottom-color: #1e1e1e;
     }
