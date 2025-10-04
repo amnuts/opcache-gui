@@ -6,7 +6,6 @@ $nav-icon-color: #626262;
 $nav-icon-active-color: #00ba00;
 $nav-icon-color-dark: #CCCCCC;
 
-// SVG icon colors for light and dark modes
 $github-icon-color: $nav-icon-color;
 $github-icon-color-dark: $nav-icon-color-dark;
 
@@ -82,16 +81,17 @@ $footer-border-color: #CCC;
   header, .main-nav {
     display: flex;
     flex-direction: column;
-    flex: 1 1 auto;
     min-height: 0;
+    padding-top: 20px;
   }
   .main-nav {
-    padding-top: 20px;
+    position: relative;
   }
 
   .nav-tab-list {
     list-style-type: none;
     padding-left: 8px;
+    padding-right: 160px; // reserve space for theme switcher on the right
     margin: 0;
     border-bottom: 1px solid $nav-border-color;
   }
@@ -162,6 +162,10 @@ $footer-border-color: #CCC;
       border-radius: 100%;
       animation: pulse 2s linear infinite;
     }
+  }
+
+  main {
+    flex: 1 1 auto;
   }
 
   .tab-content {
@@ -350,6 +354,64 @@ $footer-border-color: #CCC;
     }
   }
 
+  .theme-switcher {
+    position: absolute;
+    top: 0;
+    right: 8px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    z-index: 2;
+    margin: 15px 20px 0 0;
+  }
+
+  .theme-toggle {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: stretch;
+    min-width: 156px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid $nav-border-color;
+    border-radius: 999px;
+    background-color: $nav-background-color;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.02);
+  }
+
+  .theme-toggle-slider {
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    bottom: 3px;
+    width: calc((100% - 12px) / 3);
+    border-radius: 999px;
+    background-color: $nav-hover-color;
+    transition: transform .2s ease;
+    z-index: 0;
+  }
+
+  .theme-toggle-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: $nav-icon-color;
+    cursor: pointer;
+    border-radius: 999px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .theme-toggle-btn.active {
+    color: $nav-icon-active-color;
+  }
+
   .github-link {
     @include github-icon($github-icon-color);
   }
@@ -416,6 +478,7 @@ $footer-border-color: #CCC;
   @media screen and (max-width: 750px) {
     .nav-tab-list {
       border-bottom: 0;
+      padding-right: 8px;
     }
     .nav-tab {
       display: block;
@@ -430,6 +493,13 @@ $footer-border-color: #CCC;
     .nav-tab-link[data-for].active {
       border-bottom-color: $nav-border-color;
     }
+    .theme-switcher {
+      position: static;
+      height: auto;
+      margin: 5px;
+      align-self: center;
+      transform: none;
+    }
     .tab-content-overview-info {
       margin-right: auto;
       clear: both;
@@ -438,6 +508,9 @@ $footer-border-color: #CCC;
       position: relative;
       display: block;
       width: 100%;
+    }
+    header {
+      flex-direction: column-reverse;
     }
   }
 
@@ -552,10 +625,24 @@ $footer-border-color: #CCC;
       color: #fff;
     }
   }
+
+  .theme-toggle {
+    background-color: #1e1e1e;
+    border-color: #444;
+  }
+  .theme-toggle-slider {
+    background-color: #2a2a2a;
+  }
+  .theme-toggle-btn {
+    color: $nav-icon-color-dark;
+  }
+  .theme-toggle-btn.active {
+    color: #84b8ff;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
-  .opcache-gui {
+  :root:not(.light) .opcache-gui {
     @include dark-theme;
   }
 }

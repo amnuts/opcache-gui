@@ -1,10 +1,12 @@
 class Interface extends React.Component {
+    static THEME_STORAGE_KEY = 'opcache_gui_theme';
     constructor(props) {
         super(props);
         this.state = {
             realtime: this.getCookie(),
             resetting: false,
-            opstate: props.opstate
+            opstate: props.opstate,
+            theme: this.getStoredTheme()
         }
         this.polling = false;
         this.isSecure = (window.location.protocol === 'https:');
@@ -67,6 +69,38 @@ class Interface extends React.Component {
         return v ? !!v[2] : false;
     };
 
+    getStoredTheme = () => {
+        try {
+            const t = localStorage.getItem(Interface.THEME_STORAGE_KEY);
+            return t === 'light' || t === 'dark' || t === 'system' ? t : 'system';
+        } catch (e) {
+            return 'system';
+        }
+    };
+
+    applyTheme = (theme) => {
+        const root = document.documentElement;
+        root.classList.remove('dark');
+        root.classList.remove('light');
+        if (theme === 'dark') {
+            root.classList.add('dark');
+        } else if (theme === 'light') {
+            root.classList.add('light');
+        }
+    };
+
+    setTheme = (theme) => {
+        this.setState({ theme });
+        try {
+            localStorage.setItem(Interface.THEME_STORAGE_KEY, theme);
+        } catch (e) {}
+        this.applyTheme(theme);
+    };
+
+    componentDidMount() {
+        this.applyTheme(this.state.theme);
+    }
+
     txt = (text, ...args) => {
         if (this.props.language !== null && this.props.language.hasOwnProperty(text) && this.props.language[text]) {
             text = this.props.language[text];
@@ -81,16 +115,16 @@ class Interface extends React.Component {
         const { opstate, realtimeRefresh, ...otherProps } = this.props;
         return (
             <>
-                <header>
-                    <MainNavigation {...otherProps}
-                        opstate={this.state.opstate}
-                        realtime={this.state.realtime}
-                        resetting={this.state.resetting}
-                        realtimeHandler={this.realtimeHandler}
-                        resetHandler={this.resetHandler}
-                        txt={this.txt}
-                    />
-                </header>
+                <MainNavigation {...otherProps}
+                    opstate={this.state.opstate}
+                    realtime={this.state.realtime}
+                    resetting={this.state.resetting}
+                    realtimeHandler={this.realtimeHandler}
+                    resetHandler={this.resetHandler}
+                    theme={this.state.theme}
+                    onThemeChange={this.setTheme}
+                    txt={this.txt}
+                />
                 <Footer
                     version={this.props.opstate.version.gui}
                     txt={this.txt}
@@ -103,90 +137,130 @@ class Interface extends React.Component {
 
 function MainNavigation(props) {
     return (
-        <nav className="main-nav">
-            <Tabs>
-                <div label={props.txt("Overview")} tabId="overview" tabIndex={1}>
-                    <OverviewCounts
-                        overview={props.opstate.overview}
-                        highlight={props.highlight}
-                        useCharts={props.useCharts}
+        <Tabs {...props}>
+            <div label={props.txt("Overview")} tabId="overview" tabIndex={1}>
+                <OverviewCounts
+                    overview={props.opstate.overview}
+                    highlight={props.highlight}
+                    useCharts={props.useCharts}
+                    txt={props.txt}
+                />
+                <div id="info" className="tab-content-overview-info">
+                    <GeneralInfo
+                        start={props.opstate.overview && props.opstate.overview.readable.start_time || null}
+                        reset={props.opstate.overview && props.opstate.overview.readable.last_restart_time || null}
+                        version={props.opstate.version}
+                        jit={props.opstate.jitState}
                         txt={props.txt}
                     />
-                    <div id="info" className="tab-content-overview-info">
-                        <GeneralInfo
-                            start={props.opstate.overview && props.opstate.overview.readable.start_time || null}
-                            reset={props.opstate.overview && props.opstate.overview.readable.last_restart_time || null}
-                            version={props.opstate.version}
-                            jit={props.opstate.jitState}
-                            txt={props.txt}
-                        />
-                        <Directives
-                            directives={props.opstate.directives}
-                            txt={props.txt}
-                        />
-                        <Functions
-                            functions={props.opstate.functions}
+                    <Directives
+                        directives={props.opstate.directives}
+                        txt={props.txt}
+                    />
+                    <Functions
+                        functions={props.opstate.functions}
+                        txt={props.txt}
+                    />
+                </div>
+            </div>
+            {
+                props.allow.filelist &&
+                    <div label={props.txt("Cached")} tabId="cached" tabIndex={2}>
+                        <CachedFiles
+                            perPageLimit={props.perPageLimit}
+                            allFiles={props.opstate.files}
+                            searchTerm={props.searchTerm}
+                            debounceRate={props.debounceRate}
+                            allow={{fileList: props.allow.filelist, invalidate: props.allow.invalidate}}
+                            realtime={props.realtime}
                             txt={props.txt}
                         />
                     </div>
-                </div>
-                {
-                    props.allow.filelist &&
-                        <div label={props.txt("Cached")} tabId="cached" tabIndex={2}>
-                            <CachedFiles
-                                perPageLimit={props.perPageLimit}
-                                allFiles={props.opstate.files}
-                                searchTerm={props.searchTerm}
-                                debounceRate={props.debounceRate}
-                                allow={{fileList: props.allow.filelist, invalidate: props.allow.invalidate}}
-                                realtime={props.realtime}
-                                txt={props.txt}
-                            />
-                        </div>
-                }
-                {
-                    (props.allow.filelist && props.opstate.blacklist.length &&
-                        <div label={props.txt("Ignored")} tabId="ignored" tabIndex={3}>
-                            <IgnoredFiles
-                                perPageLimit={props.perPageLimit}
-                                allFiles={props.opstate.blacklist}
-                                allow={{fileList: props.allow.filelist }}
-                                txt={props.txt}
-                            />
-                        </div>)
-                }
-                {
-                    (props.allow.filelist && props.opstate.preload.length &&
-                        <div label={props.txt("Preloaded")} tabId="preloaded" tabIndex={4}>
-                            <PreloadedFiles
-                                perPageLimit={props.perPageLimit}
-                                allFiles={props.opstate.preload}
-                                allow={{fileList: props.allow.filelist }}
-                                txt={props.txt}
-                            />
-                        </div>)
-                }
-                {
-                    props.allow.reset &&
-                        <div label={props.txt("Reset cache")} tabId="resetCache"
-                           className={`nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`}
-                           handler={props.resetHandler}
-                           tabIndex={5}
-                        ></div>
-                }
-                {
-                    props.allow.realtime &&
-                        <div label={props.txt(`${props.realtime ? 'Disable' : 'Enable'} real-time update`)} tabId="toggleRealtime"
-                            className={`nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`}
-                            handler={props.realtimeHandler}
-                            tabIndex={6}
-                        ></div>
-                }
-            </Tabs>
-        </nav>
+            }
+            {
+                (props.allow.filelist && props.opstate.blacklist.length &&
+                    <div label={props.txt("Ignored")} tabId="ignored" tabIndex={3}>
+                        <IgnoredFiles
+                            perPageLimit={props.perPageLimit}
+                            allFiles={props.opstate.blacklist}
+                            allow={{fileList: props.allow.filelist }}
+                            txt={props.txt}
+                        />
+                    </div>)
+            }
+            {
+                (props.allow.filelist && props.opstate.preload.length &&
+                    <div label={props.txt("Preloaded")} tabId="preloaded" tabIndex={4}>
+                        <PreloadedFiles
+                            perPageLimit={props.perPageLimit}
+                            allFiles={props.opstate.preload}
+                            allow={{fileList: props.allow.filelist }}
+                            txt={props.txt}
+                        />
+                    </div>)
+            }
+            {
+                props.allow.reset &&
+                    <div label={props.txt("Reset cache")} tabId="resetCache"
+                       className={`nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`}
+                       handler={props.resetHandler}
+                       tabIndex={5}
+                    ></div>
+            }
+            {
+                props.allow.realtime &&
+                    <div label={props.txt(`${props.realtime ? 'Disable' : 'Enable'} real-time update`)} tabId="toggleRealtime"
+                        className={`nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`}
+                        handler={props.realtimeHandler}
+                        tabIndex={6}
+                    ></div>
+            }
+        </Tabs>
     );
 }
 
+function ThemeSwitcher(props) {
+    const themeOrder = ['light', 'dark', 'system'];
+    const index = Math.max(0, themeOrder.indexOf(props.theme));
+    const set = (t) => props.onThemeChange && props.onThemeChange(t);
+    const btn = (t, icon, label) => (
+        <button type="button"
+                className={`theme-toggle-btn${props.theme === t ? ' active' : ''}`}
+                aria-pressed={props.theme === t}
+                aria-label={props.txt(label)}
+                title={props.txt(label)}
+                onClick={() => set(t)}>
+            {icon}
+            <span className="sr-only">{props.txt(label)}</span>
+        </button>
+    );
+    const SunIcon = (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.8 1.42-1.42zm10.45 12.02l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM12 4V1h-0v3h0zm0 19v-3h0v3h0zM4 12H1v0h3v0zm19 0h-3v0h3v0zM6.76 19.16l-1.42 1.42-1.79-1.8 1.41-1.41 1.8 1.79zM17.24 4.84l1.4-1.4 1.8 1.79-1.41 1.41-1.79-1.8zM12 6a6 6 0 100 12 6 6 0 000-12z"/>
+        </svg>
+    );
+    const MoonIcon = (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/>
+        </svg>
+    );
+    const LaptopIcon = (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M4 5h16a1 1 0 011 1v9H3V6a1 1 0 011-1zm-2 12h20a1 1 0 01-1 1H3a1 1 0 01-1-1z"/>
+        </svg>
+    );
+
+    return (
+        <div className="theme-switcher" aria-label={props.txt('Theme')}>
+            <div className="theme-toggle" role="radiogroup" aria-label={props.txt('Theme')}>
+                <div className="theme-toggle-slider" style={{ transform: `translateX(${index * 100}%)` }} />
+                {btn('light', SunIcon, 'Light')}
+                {btn('dark', MoonIcon, 'Dark')}
+                {btn('system', LaptopIcon, 'System')}
+            </div>
+        </div>
+    );
+}
 
 class Tabs extends React.Component {
     constructor(props) {
@@ -208,34 +282,43 @@ class Tabs extends React.Component {
 
         const children = this.props.children.filter(Boolean);
 
+        console.log(this.props)
+
         return (
             <>
-                <ul className="nav-tab-list">
-                    {children.map((child) => {
-                        const { tabId, label, className, handler, tabIndex } = child.props;
-                        return (
-                            <Tab
-                                activeTab={activeTab}
-                                key={tabId}
-                                label={label}
-                                onClick={handler || onClickTabItem}
-                                className={className}
-                                tabIndex={tabIndex}
-                                tabId={tabId}
-                            />
-                        );
-                    })}
-                </ul>
-                <div className="tab-content">
-                    {children.map((child) => (
-                        <div key={child.props.label}
-                             style={{ display: child.props.label === activeTab ? 'block' : 'none' }}
-                             id={`${child.props.tabId}-content`}
-                        >
-                            {child.props.children}
-                        </div>
-                    ))}
-                </div>
+                <header>
+                    <ThemeSwitcher theme={this.props.theme} onThemeChange={this.props.onThemeChange} txt={this.props.txt} />
+                    <nav>
+                        <ul className="nav-tab-list">
+                            {children.map((child) => {
+                                const { tabId, label, className, handler, tabIndex } = child.props;
+                                return (
+                                    <Tab
+                                        activeTab={activeTab}
+                                        key={tabId}
+                                        label={label}
+                                        onClick={handler || onClickTabItem}
+                                        className={className}
+                                        tabIndex={tabIndex}
+                                        tabId={tabId}
+                                    />
+                                );
+                            })}
+                        </ul>
+                    </nav>
+                </header>
+                <main>
+                    <div className="tab-content">
+                        {children.map((child) => (
+                            <div key={child.props.label}
+                                 style={{ display: child.props.label === activeTab ? 'block' : 'none' }}
+                                 id={`${child.props.tabId}-content`}
+                            >
+                                {child.props.children}
+                            </div>
+                        ))}
+                    </div>
+                </main>
             </>
         );
     }
