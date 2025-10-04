@@ -48,6 +48,9 @@ $footer-border-color: #CCC;
   font-size: 90%;
   padding: 0;
   margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 
   .hide {
     display: none;
@@ -67,6 +70,12 @@ $footer-border-color: #CCC;
     white-space: nowrap !important;
   }
 
+  header, .main-nav {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
   .main-nav {
     padding-top: 20px;
   }
@@ -148,6 +157,9 @@ $footer-border-color: #CCC;
 
   .tab-content {
     padding: 2em;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
   }
 
   .tab-content-overview-counts {
