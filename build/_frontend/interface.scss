@@ -437,3 +437,105 @@ $footer-border-color: #CCC;
     opacity: 0;
   }
 }
+
+@mixin dark-theme {
+  background-color: #121212;
+  color: #ddd;
+
+  a {
+    color: dodgerblue;
+  }
+
+  .nav-tab {
+    background-color: #1e1e1e;
+    border-color: #555;
+
+    &:hover {
+      background-color: #2a2a2a;
+    }
+
+    &.active {
+      border-color: #555;
+      border-top-color: #84b8ff;
+      border-bottom-color: #1e1e1e;
+    }
+  }
+
+  .nav-tab-link-reset,
+  .nav-tab-link-realtime {
+    background-color: transparent;
+
+    &.is-resetting,
+    &.live-update {
+      background-color: transparent;
+    }
+
+    &.pulse::before {
+      border-color: #00e600;
+    }
+  }
+
+  .graph-widget .widget-value,
+  .widget-value span.large,
+  .widget-value span.large + span {
+    color: #84b8ff;
+  }
+
+  .widget-panel {
+    background-color: #2a2a2a;
+  }
+
+  .widget-header {
+    background-color: #333;
+    color: #ccc;
+  }
+
+  .tables {
+    tr:nth-child(odd) {
+      background-color: #2a2a2a;
+    }
+
+    tr:nth-child(even) {
+      background-color: #1f1f1f;
+    }
+
+    th {
+      background-color: #3a4a5e;
+      color: #ddd;
+      border-color: #444;
+    }
+
+    td {
+      border-color: #333;
+    }
+  }
+
+  .main-footer {
+    border-top-color: #444;
+    color: #ccc;
+  }
+
+  .pagination li a {
+    &.active {
+      background-color: #4d75af;
+      color: #fff;
+    }
+
+    &:hover:not(.active) {
+      background-color: #ff7400;
+      color: #fff;
+    }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .opcache-gui {
+    @include dark-theme;
+  }
+}
+
+.dark .opcache-gui {
+  @include dark-theme;
+}
+
+
