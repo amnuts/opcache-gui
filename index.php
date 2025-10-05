@@ -528,13 +528,13 @@ $opcache = (new Service($options))->handle();
     <script src="//cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js"></script>
     <style>
-        :root{--opcache-gui-graph-track-fill-color: #6CA6EF;--opcache-gui-graph-track-background-color: rgba(229, 231, 231, 0.9058823529)}.opcache-gui{font-family:sans-serif;font-size:90%;padding:0;margin:0}.opcache-gui .hide{display:none}.opcache-gui .sr-only{border:0 !important;clip:rect(1px, 1px, 1px, 1px) !important;-webkit-clip-path:inset(50%) !important;clip-path:inset(50%) !important;height:1px !important;margin:-1px !important;overflow:hidden !important;padding:0 !important;position:absolute !important;width:1px !important;white-space:nowrap !important}.opcache-gui .main-nav{padding-top:20px}.opcache-gui .nav-tab-list{list-style-type:none;padding-left:8px;margin:0;border-bottom:1px solid #ccc}.opcache-gui .nav-tab{display:inline-block;margin:0 0 -1px 0;padding:15px 30px;border:1px solid rgba(0,0,0,0);border-bottom-color:#ccc;text-decoration:none;background-color:#fff;cursor:pointer;user-select:none}.opcache-gui .nav-tab:hover{background-color:#f4f4f4;text-decoration:underline}.opcache-gui .nav-tab.active{border:1px solid #ccc;border-bottom-color:#fff;border-top:3px solid #6ca6ef}.opcache-gui .nav-tab.active:hover{background-color:initial}.opcache-gui .nav-tab:focus{outline:0;text-decoration:underline}.opcache-gui .nav-tab-link-reset{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .nav-tab-link-reset.is-resetting{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgb(0, 186, 0)"/></svg>')}.opcache-gui .nav-tab-link-realtime{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="rgb(98, 98, 98)"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .nav-tab-link-realtime.live-update{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="rgb(0, 186, 0)"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="rgb(0, 186, 0)"/></svg>')}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime{position:relative;padding-left:50px}.opcache-gui .nav-tab-link-reset.pulse::before,.opcache-gui .nav-tab-link-realtime.pulse::before{content:"";position:absolute;top:12px;left:25px;width:18px;height:18px;z-index:10;opacity:0;background-color:rgba(0,0,0,0);border:2px solid #00ba00;border-radius:100%;animation:pulse 2s linear infinite}.opcache-gui .tab-content{padding:2em}.opcache-gui .tab-content-overview-counts{width:270px;float:right}.opcache-gui .tab-content-overview-info{margin-right:280px}.opcache-gui .graph-widget{max-width:100%;height:auto;margin:0 auto;display:flex;position:relative}.opcache-gui .graph-widget .widget-value{display:flex;align-items:center;justify-content:center;text-align:center;position:absolute;top:0;width:100%;height:100%;margin:0 auto;font-size:3.2em;font-weight:100;color:#6ca6ef;user-select:none}.opcache-gui .widget-panel{background-color:#ededed;margin-bottom:10px}.opcache-gui .widget-header{background-color:#cdcdcd;padding:4px 6px;margin:0;text-align:center;font-size:1rem;font-weight:bold}.opcache-gui .widget-value{margin:0;text-align:center}.opcache-gui .widget-value span.large{color:#6ca6ef;font-size:80pt;margin:0;padding:0;text-align:center}.opcache-gui .widget-value span.large+span{font-size:20pt;margin:0;color:#6ca6ef}.opcache-gui .widget-info{margin:0;padding:10px}.opcache-gui .widget-info *{margin:0;line-height:1.75em;text-align:left}.opcache-gui .tables{margin:0 0 1em 0;border-collapse:collapse;width:100%;table-layout:fixed}.opcache-gui .tables tr:nth-child(odd){background-color:#effeff}.opcache-gui .tables tr:nth-child(even){background-color:#e0ecef}.opcache-gui .tables th{text-align:left;padding:6px;background-color:#6ca6ef;color:#fff;border-color:#fff;font-weight:normal}.opcache-gui .tables td{padding:4px 6px;line-height:1.4em;vertical-align:top;border-color:#fff;overflow:hidden;overflow-wrap:break-word;text-overflow:ellipsis}.opcache-gui .directive-list{list-style-type:none;padding:0;margin:0}.opcache-gui .directive-list li{margin-bottom:.5em}.opcache-gui .directive-list li:last-child{margin-bottom:0}.opcache-gui .directive-list li ul{margin-top:1.5em}.opcache-gui .file-filter{width:520px}.opcache-gui .file-metainfo{font-size:80%}.opcache-gui .file-metainfo.invalid{font-style:italic}.opcache-gui .file-pathname{width:70%;display:block}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime,.opcache-gui .github-link,.opcache-gui .sponsor-link{background-repeat:no-repeat;background-color:rgba(0,0,0,0)}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime{background-position:24px 50%}.opcache-gui .main-footer{border-top:1px solid #ccc;padding:1em 2em}.opcache-gui .github-link,.opcache-gui .sponsor-link{background-position:0 50%;padding:2em 0 2em 2.3em;text-decoration:none;opacity:.7;font-size:80%}.opcache-gui .github-link:hover,.opcache-gui .sponsor-link:hover{opacity:1}.opcache-gui .github-link{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.19em" height="1em" viewBox="0 0 1664 1408"><path d="M640 960q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm640 0q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm160 0q0-120-69-204t-187-84q-41 0-195 21q-71 11-157 11t-157-11q-152-21-195-21q-118 0-187 84t-69 204q0 88 32 153.5t81 103t122 60t140 29.5t149 7h168q82 0 149-7t140-29.5t122-60t81-103t32-153.5zm224-176q0 207-61 331q-38 77-105.5 133t-141 86t-170 47.5t-171.5 22t-167 4.5q-78 0-142-3t-147.5-12.5t-152.5-30t-137-51.5t-121-81t-86-115Q0 992 0 784q0-237 136-396q-27-82-27-170q0-116 51-218q108 0 190 39.5T539 163q147-35 309-35q148 0 280 32q105-82 187-121t189-39q51 102 51 218q0 87-27 168q136 160 136 398z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .sponsor-link{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24"><path fill="crimson" d="M12 21.35l-1.45-1.32c-5.15-4.67-8.55-7.75-8.55-11.53 0-3.08 2.42-5.5 5.5-5.5 1.74 0 3.41.81 4.5 2.09 1.09-1.28 2.76-2.09 4.5-2.09 3.08 0 5.5 2.42 5.5 5.5 0 3.78-3.4 6.86-8.55 11.54l-1.45 1.31z"/></svg>');margin-left:2em}.opcache-gui .file-cache-only{margin-top:0}.opcache-gui .paginate-filter{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap}.opcache-gui .paginate-filter .filter>*{padding:3px;margin:3px 3px 10px 0}.opcache-gui .pagination{margin:10px 0;padding:0}.opcache-gui .pagination li{display:inline-block}.opcache-gui .pagination li a{display:inline-flex;align-items:center;white-space:nowrap;line-height:1;padding:.5rem .75rem;border-radius:3px;text-decoration:none;height:100%}.opcache-gui .pagination li a.arrow{font-size:1.1rem}.opcache-gui .pagination li a:active{transform:translateY(2px)}.opcache-gui .pagination li a.active{background-color:#4d75af;color:#fff}.opcache-gui .pagination li a:hover:not(.active){background-color:#ff7400;color:#fff}@media screen and (max-width: 750px){.opcache-gui .nav-tab-list{border-bottom:0}.opcache-gui .nav-tab{display:block;margin:0}.opcache-gui .nav-tab-link{display:block;margin:0 10px;padding:10px 0 10px 30px;border:0}.opcache-gui .nav-tab-link[data-for].active{border-bottom-color:#ccc}.opcache-gui .tab-content-overview-info{margin-right:auto;clear:both}.opcache-gui .tab-content-overview-counts{position:relative;display:block;width:100%}}@media screen and (max-width: 550px){.opcache-gui .file-filter{width:100%}}@keyframes pulse{0%{transform:scale(1);opacity:1}50%,100%{transform:scale(2);opacity:0}}/*# sourceMappingURL=interface.css.map */
+        :root{--opcache-gui-graph-track-fill-color: #6CA6EF;--opcache-gui-graph-track-background-color: rgba(229, 231, 231, 0.9058823529)}.opcache-gui{font-family:sans-serif;font-size:90%;padding:0;margin:0;min-height:100vh;display:flex;flex-direction:column}.opcache-gui #interface{flex:1 1 auto;display:flex;flex-direction:column}.opcache-gui .hide{display:none}.opcache-gui .sr-only{border:0 !important;clip:rect(1px, 1px, 1px, 1px) !important;-webkit-clip-path:inset(50%) !important;clip-path:inset(50%) !important;height:1px !important;margin:-1px !important;overflow:hidden !important;padding:0 !important;position:absolute !important;width:1px !important;white-space:nowrap !important}.opcache-gui header,.opcache-gui .main-nav{display:flex;flex-direction:column;min-height:0;padding-top:20px}.opcache-gui .main-nav{position:relative}.opcache-gui .nav-tab-list{list-style-type:none;padding-left:8px;padding-right:160px;margin:0;border-bottom:1px solid #ccc;display:flex;align-items:end}.opcache-gui .nav-tab{display:inline-flex;margin:0 0 -1px 0;padding:15px 30px;border:1px solid rgba(0,0,0,0);border-bottom-color:#ccc;text-decoration:none;background-color:#fff;cursor:pointer;user-select:none;align-items:center}.opcache-gui .nav-tab:hover{background-color:#f4f4f4;text-decoration:underline}.opcache-gui .nav-tab.active{border:1px solid #ccc;border-bottom-color:#fff;border-top:3px solid #6ca6ef}.opcache-gui .nav-tab.active:hover{background-color:initial}.opcache-gui .nav-tab:focus{outline:0;text-decoration:underline}.opcache-gui .nav-tab-link-reset>svg,.opcache-gui .nav-tab-link-realtime>svg{overflow:visible;width:1.1rem;height:1.1rem;margin-right:.5em}.opcache-gui .nav-tab-link-reset>svg>path,.opcache-gui .nav-tab-link-realtime>svg>path{fill:#626262}.opcache-gui .nav-tab-link-reset.activated>svg>path,.opcache-gui .nav-tab-link-realtime.activated>svg>path{fill:#00ba00;transform-origin:50% 50%;display:inline-block}.opcache-gui .nav-tab-link-reset.activated>svg>path{animation:spin-all 2s linear infinite}.opcache-gui .nav-tab-link-reset.is-resetting>svg>path{fill:#00ba00}.opcache-gui .nav-tab-link-realtime.activated>svg>path{animation:spin-pause 2s ease-in infinite}main{flex:1 1 auto}.tab-content{padding:2em;flex:1 1 auto;min-height:0;overflow:auto}.tab-content-overview-counts{width:270px;float:right}.tab-content-overview-info{margin-right:280px}.graph-widget{max-width:100%;height:auto;margin:0 auto;display:flex;position:relative}.graph-widget .widget-value{display:flex;align-items:center;justify-content:center;text-align:center;position:absolute;top:0;width:100%;height:100%;margin:0 auto;font-size:3.2em;font-weight:100;color:#6ca6ef;user-select:none}.widget-panel{background-color:#ededed;margin-bottom:10px}.widget-header{background-color:#cdcdcd;padding:4px 6px;margin:0;text-align:center;font-size:1rem;font-weight:bold}.widget-value{margin:0;text-align:center}.widget-value span.large{color:#6ca6ef;font-size:80pt;margin:0;padding:0;text-align:center}.widget-value span.large+span{font-size:20pt;margin:0;color:#6ca6ef}.widget-info{margin:0;padding:10px}.widget-info *{margin:0;line-height:1.75em;text-align:left}.tables{margin:0 0 1em 0;border-collapse:collapse;width:100%;table-layout:fixed}.tables tr:nth-child(odd){background-color:#effeff}.tables tr:nth-child(even){background-color:#e0ecef}.tables th{text-align:left;padding:6px;background-color:#6ca6ef;color:#fff;border-color:#fff;font-weight:normal}.tables td{padding:4px 6px;line-height:1.4em;vertical-align:top;border-color:#fff;overflow:hidden;overflow-wrap:break-word;text-overflow:ellipsis}.directive-list{list-style-type:none;padding:0;margin:0}.directive-list li{margin-bottom:.5em}.directive-list li:last-child{margin-bottom:0}.directive-list li ul{margin-top:1.5em}.file-filter{width:520px}.file-metainfo{font-size:80%}.file-metainfo.invalid{font-style:italic}.file-pathname{width:70%;display:block}.nav-tab-link-reset,.nav-tab-link-realtime,.github-link,.sponsor-link{background-repeat:no-repeat;background-color:rgba(0,0,0,0)}.nav-tab-link-reset,.nav-tab-link-realtime{background-position:24px 50%}.main-footer{border-top:1px solid #ccc;padding:1em 2em;display:flex;align-items:center}.github-link,.sponsor-link{background-position:0 50%;padding:2em 0 2em 2.3em;text-decoration:none;opacity:.7;font-size:80%;display:flex;align-items:center}.github-link:hover,.sponsor-link:hover{opacity:1}.github-link>svg,.sponsor-link>svg{height:1rem;width:1rem;margin-right:.25rem}.theme-switcher{position:absolute;top:0;right:8px;height:54px;display:flex;align-items:center;z-index:2;margin:15px 20px 0 0}.theme-toggle{position:relative;display:grid;grid-template-columns:1fr 1fr 1fr;align-items:stretch;min-width:156px;height:30px;padding:0;border:1px solid #ccc;border-radius:999px;background-color:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.02)}.theme-toggle-slider{position:absolute;left:3px;top:3px;bottom:3px;width:calc((100% - 12px)/3);border-radius:999px;background-color:#f4f4f4;transition:transform .2s ease;z-index:0}.theme-toggle-btn{appearance:none;-webkit-appearance:none;border:0;background:rgba(0,0,0,0);padding:0;margin:0;display:inline-flex;align-items:center;justify-content:center;color:#626262;cursor:pointer;border-radius:999px;position:relative;z-index:1}.theme-toggle-btn.active{color:#00ba00}.github-link>svg>path{fill:#626262}.sponsor-link{margin-left:2em}.file-cache-only{margin-top:0}.paginate-filter{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap}.paginate-filter .filter>*{padding:3px;margin:3px 3px 10px 0}.pagination{margin:10px 0;padding:0}.pagination li{display:inline-block}.pagination li a{display:inline-flex;align-items:center;white-space:nowrap;line-height:1;padding:.5rem .75rem;border-radius:3px;text-decoration:none;height:100%}.pagination li a.arrow{font-size:1.1rem}.pagination li a:active{transform:translateY(2px)}.pagination li a.active{background-color:#4d75af;color:#fff}.pagination li a:hover:not(.active){background-color:#ff7400;color:#fff}@media screen and (max-width: 750px){.opcache-gui .nav-tab-list{border-bottom:0;display:flex;flex-direction:column;padding:0;align-items:center}.opcache-gui .nav-tab{margin:0;border:0;border-top:1px solid #ccc;width:100%;align-items:center;justify-content:center}.opcache-gui .nav-tab:last-child{border-bottom:1px solid #ccc}.opcache-gui .nav-tab.active{border:0;border-top:1px solid #ccc;background:rgba(108,166,239,.1)}.opcache-gui .nav-tab-link{display:block;margin:0 10px;padding:10px 0 10px 30px;border:0}.opcache-gui .theme-switcher{position:static;height:auto;margin:5px;align-self:center;transform:none}.opcache-gui .tab-content-overview-info{margin-right:auto;clear:both}.opcache-gui .tab-content-overview-counts{position:relative;display:block;width:100%}.opcache-gui header{flex-direction:column-reverse}}@media screen and (max-width: 750px)and (max-width: 550px){.file-filter{width:100%}}@keyframes spin-pause{0%{transform:rotate(0deg)}50%,100%{transform:rotate(360deg)}}@keyframes spin-all{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@media(prefers-color-scheme: dark){:root:not(.light) .opcache-gui{background-color:#121212;color:#ddd}:root:not(.light) .opcache-gui a{color:#1e90ff}:root:not(.light) .opcache-gui .nav-tab{background-color:rgba(0,0,0,0);border-color:rgba(0,0,0,0)}:root:not(.light) .opcache-gui .nav-tab:hover{background-color:#2a2a2a}:root:not(.light) .opcache-gui .nav-tab.active{background-color:#1e1e1e;border-color:rgba(0,0,0,0);border-top-color:#84b8ff;border-bottom-color:#1e1e1e}:root:not(.light) .opcache-gui .nav-tab-link-reset,:root:not(.light) .opcache-gui .nav-tab-link-realtime{background-color:rgba(0,0,0,0)}:root:not(.light) .opcache-gui .nav-tab-link-reset.is-resetting,:root:not(.light) .opcache-gui .nav-tab-link-reset.live-update,:root:not(.light) .opcache-gui .nav-tab-link-realtime.is-resetting,:root:not(.light) .opcache-gui .nav-tab-link-realtime.live-update{background-color:rgba(0,0,0,0)}:root:not(.light) .opcache-gui .nav-tab-link-reset.pulse::before,:root:not(.light) .opcache-gui .nav-tab-link-realtime.pulse::before{border-color:#00e600}:root:not(.light) .opcache-gui .github-link>svg>path{fill:#ccc}:root:not(.light) .opcache-gui .graph-widget .widget-value,:root:not(.light) .opcache-gui .widget-value span.large,:root:not(.light) .opcache-gui .widget-value span.large+span{color:#84b8ff}:root:not(.light) .opcache-gui .widget-panel{background-color:#2a2a2a}:root:not(.light) .opcache-gui .widget-header{background-color:#333;color:#ccc}:root:not(.light) .opcache-gui .tables tr:nth-child(odd){background-color:#2a2a2a}:root:not(.light) .opcache-gui .tables tr:nth-child(even){background-color:#1f1f1f}:root:not(.light) .opcache-gui .tables th{background-color:#3a4a5e;color:#ddd;border-color:#444}:root:not(.light) .opcache-gui .tables td{border-color:#333}:root:not(.light) .opcache-gui .main-footer{border-top-color:#444;color:#ccc}:root:not(.light) .opcache-gui .pagination li a.active{background-color:#4d75af;color:#fff}:root:not(.light) .opcache-gui .pagination li a:hover:not(.active){background-color:#ff7400;color:#fff}:root:not(.light) .opcache-gui .theme-toggle{background-color:#1e1e1e;border-color:#444}:root:not(.light) .opcache-gui .theme-toggle-slider{background-color:#2a2a2a}:root:not(.light) .opcache-gui .theme-toggle-btn{color:#ccc}:root:not(.light) .opcache-gui .theme-toggle-btn.active{color:#84b8ff}}.dark .opcache-gui{background-color:#121212;color:#ddd}.dark .opcache-gui a{color:#1e90ff}.dark .opcache-gui .nav-tab{background-color:rgba(0,0,0,0);border-color:rgba(0,0,0,0)}.dark .opcache-gui .nav-tab:hover{background-color:#2a2a2a}.dark .opcache-gui .nav-tab.active{background-color:#1e1e1e;border-color:rgba(0,0,0,0);border-top-color:#84b8ff;border-bottom-color:#1e1e1e}.dark .opcache-gui .nav-tab-link-reset,.dark .opcache-gui .nav-tab-link-realtime{background-color:rgba(0,0,0,0)}.dark .opcache-gui .nav-tab-link-reset.is-resetting,.dark .opcache-gui .nav-tab-link-reset.live-update,.dark .opcache-gui .nav-tab-link-realtime.is-resetting,.dark .opcache-gui .nav-tab-link-realtime.live-update{background-color:rgba(0,0,0,0)}.dark .opcache-gui .nav-tab-link-reset.pulse::before,.dark .opcache-gui .nav-tab-link-realtime.pulse::before{border-color:#00e600}.dark .opcache-gui .github-link>svg>path{fill:#ccc}.dark .opcache-gui .graph-widget .widget-value,.dark .opcache-gui .widget-value span.large,.dark .opcache-gui .widget-value span.large+span{color:#84b8ff}.dark .opcache-gui .widget-panel{background-color:#2a2a2a}.dark .opcache-gui .widget-header{background-color:#333;color:#ccc}.dark .opcache-gui .tables tr:nth-child(odd){background-color:#2a2a2a}.dark .opcache-gui .tables tr:nth-child(even){background-color:#1f1f1f}.dark .opcache-gui .tables th{background-color:#3a4a5e;color:#ddd;border-color:#444}.dark .opcache-gui .tables td{border-color:#333}.dark .opcache-gui .main-footer{border-top-color:#444;color:#ccc}.dark .opcache-gui .pagination li a.active{background-color:#4d75af;color:#fff}.dark .opcache-gui .pagination li a:hover:not(.active){background-color:#ff7400;color:#fff}.dark .opcache-gui .theme-toggle{background-color:#1e1e1e;border-color:#444}.dark .opcache-gui .theme-toggle-slider{background-color:#2a2a2a}.dark .opcache-gui .theme-toggle-btn{color:#ccc}.dark .opcache-gui .theme-toggle-btn.active{color:#84b8ff}
     </style>
 </head>
 
-<body style="padding: 0; margin: 0;">
+<body style="padding: 0; margin: 0;" class="opcache-gui">
 
-    <div class="opcache-gui" id="interface" />
+    <div id="interface" />
 
     <script type="text/javascript">
 
@@ -608,6 +608,33 @@ class Interface extends React.Component {
       const v = document.cookie.match(`(^|;) ?${this.props.cookie.name}=([^;]*)(;|$)`);
       return v ? !!v[2] : false;
     });
+    _defineProperty(this, "getStoredTheme", () => {
+      try {
+        const t = localStorage.getItem(Interface.THEME_STORAGE_KEY);
+        return t === 'light' || t === 'dark' || t === 'system' ? t : 'system';
+      } catch (e) {
+        return 'system';
+      }
+    });
+    _defineProperty(this, "applyTheme", theme => {
+      const root = document.documentElement;
+      root.classList.remove('dark');
+      root.classList.remove('light');
+      if (theme === 'dark') {
+        root.classList.add('dark');
+      } else if (theme === 'light') {
+        root.classList.add('light');
+      }
+    });
+    _defineProperty(this, "setTheme", theme => {
+      this.setState({
+        theme
+      });
+      try {
+        localStorage.setItem(Interface.THEME_STORAGE_KEY, theme);
+      } catch (e) {}
+      this.applyTheme(theme);
+    });
     _defineProperty(this, "txt", (text, ...args) => {
       if (this.props.language !== null && this.props.language.hasOwnProperty(text) && this.props.language[text]) {
         text = this.props.language[text];
@@ -620,7 +647,8 @@ class Interface extends React.Component {
     this.state = {
       realtime: this.getCookie(),
       resetting: false,
-      opstate: props.opstate
+      opstate: props.opstate,
+      theme: this.getStoredTheme()
     };
     this.polling = false;
     this.isSecure = window.location.protocol === 'https:';
@@ -628,29 +656,33 @@ class Interface extends React.Component {
       this.startTimer();
     }
   }
+  componentDidMount() {
+    this.applyTheme(this.state.theme);
+  }
   render() {
     const {
       opstate,
       realtimeRefresh,
       ...otherProps
     } = this.props;
-    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("header", null, /*#__PURE__*/React.createElement(MainNavigation, _extends({}, otherProps, {
+    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(MainNavigation, _extends({}, otherProps, {
       opstate: this.state.opstate,
       realtime: this.state.realtime,
       resetting: this.state.resetting,
       realtimeHandler: this.realtimeHandler,
       resetHandler: this.resetHandler,
+      theme: this.state.theme,
+      onThemeChange: this.setTheme,
       txt: this.txt
-    }))), /*#__PURE__*/React.createElement(Footer, {
+    })), /*#__PURE__*/React.createElement(Footer, {
       version: this.props.opstate.version.gui,
       txt: this.txt
     }));
   }
 }
+_defineProperty(Interface, "THEME_STORAGE_KEY", 'opcache_gui_theme');
 function MainNavigation(props) {
-  return /*#__PURE__*/React.createElement("nav", {
-    className: "main-nav"
-  }, /*#__PURE__*/React.createElement(Tabs, null, /*#__PURE__*/React.createElement("div", {
+  return /*#__PURE__*/React.createElement(Tabs, props, /*#__PURE__*/React.createElement("div", {
     label: props.txt("Overview"),
     tabId: "overview",
     tabIndex: 1
@@ -716,14 +748,87 @@ function MainNavigation(props) {
     tabId: "resetCache",
     className: `nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`,
     handler: props.resetHandler,
-    tabIndex: 5
+    tabIndex: 5,
+    icon: /*#__PURE__*/React.createElement("svg", {
+      xmlns: "http://www.w3.org/2000/svg",
+      "aria-hidden": "true",
+      focusable: "false",
+      viewBox: "0 0 489.645 489.645"
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M460.656,132.911c-58.7-122.1-212.2-166.5-331.8-104.1c-9.4,5.2-13.5,16.6-8.3,27c5.2,9.4,16.6,13.5,27,8.3 c99.9-52,227.4-14.9,276.7,86.3c65.4,134.3-19,236.7-87.4,274.6c-93.1,51.7-211.2,17.4-267.6-70.7l69.3,14.5 c10.4,2.1,21.8-4.2,23.9-15.6c2.1-10.4-4.2-21.8-15.6-23.9l-122.8-25c-20.6-2-25,16.6-23.9,22.9l15.6,123.8 c1,10.4,9.4,17.7,19.8,17.7c12.8,0,20.8-12.5,19.8-23.9l-6-50.5c57.4,70.8,170.3,131.2,307.4,68.2 C414.856,432.511,548.256,314.811,460.656,132.911z"
+    }))
   }), props.allow.realtime && /*#__PURE__*/React.createElement("div", {
     label: props.txt(`${props.realtime ? 'Disable' : 'Enable'} real-time update`),
     tabId: "toggleRealtime",
-    className: `nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`,
+    className: `nav-tab-link-realtime${props.realtime ? ' live-update activated' : ''}`,
     handler: props.realtimeHandler,
-    tabIndex: 6
-  })));
+    tabIndex: 6,
+    icon: /*#__PURE__*/React.createElement("svg", {
+      xmlns: "http://www.w3.org/2000/svg",
+      "aria-hidden": "true",
+      focusable: "false",
+      viewBox: "0 0 489.698 489.698"
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M468.999,227.774c-11.4,0-20.8,8.3-20.8,19.8c-1,74.9-44.2,142.6-110.3,178.9c-99.6,54.7-216,5.6-260.6-61l62.9,13.1 c10.4,2.1,21.8-4.2,23.9-15.6c2.1-10.4-4.2-21.8-15.6-23.9l-123.7-26c-7.2-1.7-26.1,3.5-23.9,22.9l15.6,124.8 c1,10.4,9.4,17.7,19.8,17.7c15.5,0,21.8-11.4,20.8-22.9l-7.3-60.9c101.1,121.3,229.4,104.4,306.8,69.3 c80.1-42.7,131.1-124.8,132.1-215.4C488.799,237.174,480.399,227.774,468.999,227.774z"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M20.599,261.874c11.4,0,20.8-8.3,20.8-19.8c1-74.9,44.2-142.6,110.3-178.9c99.6-54.7,216-5.6,260.6,61l-62.9-13.1 c-10.4-2.1-21.8,4.2-23.9,15.6c-2.1,10.4,4.2,21.8,15.6,23.9l123.8,26c7.2,1.7,26.1-3.5,23.9-22.9l-15.6-124.8 c-1-10.4-9.4-17.7-19.8-17.7c-15.5,0-21.8,11.4-20.8,22.9l7.2,60.9c-101.1-121.2-229.4-104.4-306.8-69.2 c-80.1,42.6-131.1,124.8-132.2,215.3C0.799,252.574,9.199,261.874,20.599,261.874z"
+    }))
+  }));
+}
+function ThemeSwitcher(props) {
+  const themeOrder = ['light', 'dark', 'system'];
+  const index = Math.max(0, themeOrder.indexOf(props.theme));
+  const set = t => props.onThemeChange && props.onThemeChange(t);
+  const btn = (t, icon, label) => /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: `theme-toggle-btn${props.theme === t ? ' active' : ''}`,
+    "aria-pressed": props.theme === t,
+    "aria-label": props.txt(label),
+    title: props.txt(label),
+    onClick: () => set(t)
+  }, icon, /*#__PURE__*/React.createElement("span", {
+    className: "sr-only"
+  }, props.txt(label)));
+  const SunIcon = /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "currentColor",
+    "aria-hidden": "true"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.8 1.42-1.42zm10.45 12.02l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM12 4V1h-0v3h0zm0 19v-3h0v3h0zM4 12H1v0h3v0zm19 0h-3v0h3v0zM6.76 19.16l-1.42 1.42-1.79-1.8 1.41-1.41 1.8 1.79zM17.24 4.84l1.4-1.4 1.8 1.79-1.41 1.41-1.79-1.8zM12 6a6 6 0 100 12 6 6 0 000-12z"
+  }));
+  const MoonIcon = /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "currentColor",
+    "aria-hidden": "true"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"
+  }));
+  const LaptopIcon = /*#__PURE__*/React.createElement("svg", {
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "currentColor",
+    "aria-hidden": "true"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M4 5h16a1 1 0 011 1v9H3V6a1 1 0 011-1zm-2 12h20a1 1 0 01-1 1H3a1 1 0 01-1-1z"
+  }));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "theme-switcher",
+    "aria-label": props.txt('Theme')
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "theme-toggle",
+    role: "radiogroup",
+    "aria-label": props.txt('Theme')
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "theme-toggle-slider",
+    style: {
+      transform: `translateX(${index * 100}%)`
+    }
+  }), btn('light', SunIcon, 'Light'), btn('dark', MoonIcon, 'Dark'), btn('system', LaptopIcon, 'System')));
 }
 class Tabs extends React.Component {
   constructor(props) {
@@ -745,7 +850,12 @@ class Tabs extends React.Component {
       }
     } = this;
     const children = this.props.children.filter(Boolean);
-    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("ul", {
+    console.log(this.props);
+    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("header", null, /*#__PURE__*/React.createElement(ThemeSwitcher, {
+      theme: this.props.theme,
+      onThemeChange: this.props.onThemeChange,
+      txt: this.props.txt
+    }), /*#__PURE__*/React.createElement("nav", null, /*#__PURE__*/React.createElement("ul", {
       className: "nav-tab-list"
     }, children.map(child => {
       const {
@@ -753,7 +863,8 @@ class Tabs extends React.Component {
         label,
         className,
         handler,
-        tabIndex
+        tabIndex,
+        icon
       } = child.props;
       return /*#__PURE__*/React.createElement(Tab, {
         activeTab: activeTab,
@@ -762,9 +873,10 @@ class Tabs extends React.Component {
         onClick: handler || onClickTabItem,
         className: className,
         tabIndex: tabIndex,
-        tabId: tabId
+        tabId: tabId,
+        icon: icon
       });
-    })), /*#__PURE__*/React.createElement("div", {
+    })))), /*#__PURE__*/React.createElement("main", null, /*#__PURE__*/React.createElement("div", {
       className: "tab-content"
     }, children.map(child => /*#__PURE__*/React.createElement("div", {
       key: child.props.label,
@@ -772,7 +884,7 @@ class Tabs extends React.Component {
         display: child.props.label === activeTab ? 'block' : 'none'
       },
       id: `${child.props.tabId}-content`
-    }, child.props.children))));
+    }, child.props.children)))));
   }
 }
 class Tab extends React.Component {
@@ -793,7 +905,8 @@ class Tab extends React.Component {
         activeTab,
         label,
         tabIndex,
-        tabId
+        tabId,
+        icon
       }
     } = this;
     let className = 'nav-tab';
@@ -809,7 +922,7 @@ class Tab extends React.Component {
       tabIndex: tabIndex,
       role: "tab",
       "aria-controls": `${tabId}-content`
-    }, label);
+    }, icon, label);
   }
 }
 function OverviewCounts(props) {
@@ -1639,12 +1752,29 @@ function Footer(props) {
     href: "https://github.com/amnuts/opcache-gui",
     target: "_blank",
     title: props.txt("opcache-gui (currently version {0}) on GitHub", props.version)
-  }, "https://github.com/amnuts/opcache-gui - ", props.txt("version {0}", props.version)), /*#__PURE__*/React.createElement("a", {
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    "aria-hidden": "true",
+    focusable: "false",
+    width: "1.19em",
+    height: "1em",
+    viewBox: "0 0 1664 1408"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M640 960q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm640 0q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm160 0q0-120-69-204t-187-84q-41 0-195 21q-71 11-157 11t-157-11q-152-21-195-21q-118 0-187 84t-69 204q0 88 32 153.5t81 103t122 60t140 29.5t149 7h168q82 0 149-7t140-29.5t122-60t81-103t32-153.5zm224-176q0 207-61 331q-38 77-105.5 133t-141 86t-170 47.5t-171.5 22t-167 4.5q-78 0-142-3t-147.5-12.5t-152.5-30t-137-51.5t-121-81t-86-115Q0 992 0 784q0-237 136-396q-27-82-27-170q0-116 51-218q108 0 190 39.5T539 163q147-35 309-35q148 0 280 32q105-82 187-121t189-39q51 102 51 218q0 87-27 168q136 160 136 398z"
+  })), " https://github.com/amnuts/opcache-gui - ", props.txt("version {0}", props.version)), /*#__PURE__*/React.createElement("a", {
     className: "sponsor-link",
     href: "https://github.com/sponsors/amnuts",
     target: "_blank",
     title: props.txt("Sponsor this project and author on GitHub")
-  }, props.txt("Sponsor this project")));
+  }, /*#__PURE__*/React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    width: "24",
+    height: "24",
+    viewBox: "0 0 24 24"
+  }, /*#__PURE__*/React.createElement("path", {
+    fill: "crimson",
+    d: "M12 21.35l-1.45-1.32c-5.15-4.67-8.55-7.75-8.55-11.53 0-3.08 2.42-5.5 5.5-5.5 1.74 0 3.41.81 4.5 2.09 1.09-1.28 2.76-2.09 4.5-2.09 3.08 0 5.5 2.42 5.5 5.5 0 3.78-3.4 6.86-8.55 11.54l-1.45 1.31z"
+  })), " ", props.txt("Sponsor this project")));
 }
 function debounce(func, wait, immediate) {
   let timeout;

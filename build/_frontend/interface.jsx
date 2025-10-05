@@ -1,10 +1,12 @@
 class Interface extends React.Component {
+    static THEME_STORAGE_KEY = 'opcache_gui_theme';
     constructor(props) {
         super(props);
         this.state = {
             realtime: this.getCookie(),
             resetting: false,
-            opstate: props.opstate
+            opstate: props.opstate,
+            theme: this.getStoredTheme()
         }
         this.polling = false;
         this.isSecure = (window.location.protocol === 'https:');
@@ -67,6 +69,38 @@ class Interface extends React.Component {
         return v ? !!v[2] : false;
     };
 
+    getStoredTheme = () => {
+        try {
+            const t = localStorage.getItem(Interface.THEME_STORAGE_KEY);
+            return t === 'light' || t === 'dark' || t === 'system' ? t : 'system';
+        } catch (e) {
+            return 'system';
+        }
+    };
+
+    applyTheme = (theme) => {
+        const root = document.documentElement;
+        root.classList.remove('dark');
+        root.classList.remove('light');
+        if (theme === 'dark') {
+            root.classList.add('dark');
+        } else if (theme === 'light') {
+            root.classList.add('light');
+        }
+    };
+
+    setTheme = (theme) => {
+        this.setState({ theme });
+        try {
+            localStorage.setItem(Interface.THEME_STORAGE_KEY, theme);
+        } catch (e) {}
+        this.applyTheme(theme);
+    };
+
+    componentDidMount() {
+        this.applyTheme(this.state.theme);
+    }
+
     txt = (text, ...args) => {
         if (this.props.language !== null && this.props.language.hasOwnProperty(text) && this.props.language[text]) {
             text = this.props.language[text];
@@ -81,16 +115,16 @@ class Interface extends React.Component {
         const { opstate, realtimeRefresh, ...otherProps } = this.props;
         return (
             <>
-                <header>
-                    <MainNavigation {...otherProps}
-                        opstate={this.state.opstate}
-                        realtime={this.state.realtime}
-                        resetting={this.state.resetting}
-                        realtimeHandler={this.realtimeHandler}
-                        resetHandler={this.resetHandler}
-                        txt={this.txt}
-                    />
-                </header>
+                <MainNavigation {...otherProps}
+                    opstate={this.state.opstate}
+                    realtime={this.state.realtime}
+                    resetting={this.state.resetting}
+                    realtimeHandler={this.realtimeHandler}
+                    resetHandler={this.resetHandler}
+                    theme={this.state.theme}
+                    onThemeChange={this.setTheme}
+                    txt={this.txt}
+                />
                 <Footer
                     version={this.props.opstate.version.gui}
                     txt={this.txt}
@@ -103,90 +137,141 @@ class Interface extends React.Component {
 
 function MainNavigation(props) {
     return (
-        <nav className="main-nav">
-            <Tabs>
-                <div label={props.txt("Overview")} tabId="overview" tabIndex={1}>
-                    <OverviewCounts
-                        overview={props.opstate.overview}
-                        highlight={props.highlight}
-                        useCharts={props.useCharts}
+        <Tabs {...props}>
+            <div label={props.txt("Overview")} tabId="overview" tabIndex={1}>
+                <OverviewCounts
+                    overview={props.opstate.overview}
+                    highlight={props.highlight}
+                    useCharts={props.useCharts}
+                    txt={props.txt}
+                />
+                <div id="info" className="tab-content-overview-info">
+                    <GeneralInfo
+                        start={props.opstate.overview && props.opstate.overview.readable.start_time || null}
+                        reset={props.opstate.overview && props.opstate.overview.readable.last_restart_time || null}
+                        version={props.opstate.version}
+                        jit={props.opstate.jitState}
                         txt={props.txt}
                     />
-                    <div id="info" className="tab-content-overview-info">
-                        <GeneralInfo
-                            start={props.opstate.overview && props.opstate.overview.readable.start_time || null}
-                            reset={props.opstate.overview && props.opstate.overview.readable.last_restart_time || null}
-                            version={props.opstate.version}
-                            jit={props.opstate.jitState}
-                            txt={props.txt}
-                        />
-                        <Directives
-                            directives={props.opstate.directives}
-                            txt={props.txt}
-                        />
-                        <Functions
-                            functions={props.opstate.functions}
+                    <Directives
+                        directives={props.opstate.directives}
+                        txt={props.txt}
+                    />
+                    <Functions
+                        functions={props.opstate.functions}
+                        txt={props.txt}
+                    />
+                </div>
+            </div>
+            {
+                props.allow.filelist &&
+                    <div label={props.txt("Cached")} tabId="cached" tabIndex={2}>
+                        <CachedFiles
+                            perPageLimit={props.perPageLimit}
+                            allFiles={props.opstate.files}
+                            searchTerm={props.searchTerm}
+                            debounceRate={props.debounceRate}
+                            allow={{fileList: props.allow.filelist, invalidate: props.allow.invalidate}}
+                            realtime={props.realtime}
                             txt={props.txt}
                         />
                     </div>
-                </div>
-                {
-                    props.allow.filelist &&
-                        <div label={props.txt("Cached")} tabId="cached" tabIndex={2}>
-                            <CachedFiles
-                                perPageLimit={props.perPageLimit}
-                                allFiles={props.opstate.files}
-                                searchTerm={props.searchTerm}
-                                debounceRate={props.debounceRate}
-                                allow={{fileList: props.allow.filelist, invalidate: props.allow.invalidate}}
-                                realtime={props.realtime}
-                                txt={props.txt}
-                            />
-                        </div>
-                }
-                {
-                    (props.allow.filelist && props.opstate.blacklist.length &&
-                        <div label={props.txt("Ignored")} tabId="ignored" tabIndex={3}>
-                            <IgnoredFiles
-                                perPageLimit={props.perPageLimit}
-                                allFiles={props.opstate.blacklist}
-                                allow={{fileList: props.allow.filelist }}
-                                txt={props.txt}
-                            />
-                        </div>)
-                }
-                {
-                    (props.allow.filelist && props.opstate.preload.length &&
-                        <div label={props.txt("Preloaded")} tabId="preloaded" tabIndex={4}>
-                            <PreloadedFiles
-                                perPageLimit={props.perPageLimit}
-                                allFiles={props.opstate.preload}
-                                allow={{fileList: props.allow.filelist }}
-                                txt={props.txt}
-                            />
-                        </div>)
-                }
-                {
-                    props.allow.reset &&
-                        <div label={props.txt("Reset cache")} tabId="resetCache"
-                           className={`nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`}
-                           handler={props.resetHandler}
-                           tabIndex={5}
-                        ></div>
-                }
-                {
-                    props.allow.realtime &&
-                        <div label={props.txt(`${props.realtime ? 'Disable' : 'Enable'} real-time update`)} tabId="toggleRealtime"
-                            className={`nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`}
-                            handler={props.realtimeHandler}
-                            tabIndex={6}
-                        ></div>
-                }
-            </Tabs>
-        </nav>
+            }
+            {
+                (props.allow.filelist && props.opstate.blacklist.length &&
+                    <div label={props.txt("Ignored")} tabId="ignored" tabIndex={3}>
+                        <IgnoredFiles
+                            perPageLimit={props.perPageLimit}
+                            allFiles={props.opstate.blacklist}
+                            allow={{fileList: props.allow.filelist }}
+                            txt={props.txt}
+                        />
+                    </div>)
+            }
+            {
+                (props.allow.filelist && props.opstate.preload.length &&
+                    <div label={props.txt("Preloaded")} tabId="preloaded" tabIndex={4}>
+                        <PreloadedFiles
+                            perPageLimit={props.perPageLimit}
+                            allFiles={props.opstate.preload}
+                            allow={{fileList: props.allow.filelist }}
+                            txt={props.txt}
+                        />
+                    </div>)
+            }
+            {
+                props.allow.reset &&
+                    <div label={props.txt("Reset cache")} tabId="resetCache"
+                       className={`nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`}
+                       handler={props.resetHandler}
+                       tabIndex={5}
+                       icon={(
+                           <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" viewBox="0 0 489.645 489.645">
+                             <path d="M460.656,132.911c-58.7-122.1-212.2-166.5-331.8-104.1c-9.4,5.2-13.5,16.6-8.3,27c5.2,9.4,16.6,13.5,27,8.3 c99.9-52,227.4-14.9,276.7,86.3c65.4,134.3-19,236.7-87.4,274.6c-93.1,51.7-211.2,17.4-267.6-70.7l69.3,14.5 c10.4,2.1,21.8-4.2,23.9-15.6c2.1-10.4-4.2-21.8-15.6-23.9l-122.8-25c-20.6-2-25,16.6-23.9,22.9l15.6,123.8 c1,10.4,9.4,17.7,19.8,17.7c12.8,0,20.8-12.5,19.8-23.9l-6-50.5c57.4,70.8,170.3,131.2,307.4,68.2 C414.856,432.511,548.256,314.811,460.656,132.911z"/>
+                           </svg>
+                       )}
+                    ></div>
+            }
+            {
+                props.allow.realtime &&
+                    <div label={props.txt(`${props.realtime ? 'Disable' : 'Enable'} real-time update`)} tabId="toggleRealtime"
+                        className={`nav-tab-link-realtime${props.realtime ? ' live-update activated' : ''}`}
+                        handler={props.realtimeHandler}
+                        tabIndex={6}
+                        icon={(
+                           <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" viewBox="0 0 489.698 489.698">
+                             <path d="M468.999,227.774c-11.4,0-20.8,8.3-20.8,19.8c-1,74.9-44.2,142.6-110.3,178.9c-99.6,54.7-216,5.6-260.6-61l62.9,13.1 c10.4,2.1,21.8-4.2,23.9-15.6c2.1-10.4-4.2-21.8-15.6-23.9l-123.7-26c-7.2-1.7-26.1,3.5-23.9,22.9l15.6,124.8 c1,10.4,9.4,17.7,19.8,17.7c15.5,0,21.8-11.4,20.8-22.9l-7.3-60.9c101.1,121.3,229.4,104.4,306.8,69.3 c80.1-42.7,131.1-124.8,132.1-215.4C488.799,237.174,480.399,227.774,468.999,227.774z"/>
+                             <path d="M20.599,261.874c11.4,0,20.8-8.3,20.8-19.8c1-74.9,44.2-142.6,110.3-178.9c99.6-54.7,216-5.6,260.6,61l-62.9-13.1 c-10.4-2.1-21.8,4.2-23.9,15.6c-2.1,10.4,4.2,21.8,15.6,23.9l123.8,26c7.2,1.7,26.1-3.5,23.9-22.9l-15.6-124.8 c-1-10.4-9.4-17.7-19.8-17.7c-15.5,0-21.8,11.4-20.8,22.9l7.2,60.9c-101.1-121.2-229.4-104.4-306.8-69.2 c-80.1,42.6-131.1,124.8-132.2,215.3C0.799,252.574,9.199,261.874,20.599,261.874z"/>
+                           </svg>
+                        )}
+                    ></div>
+            }
+        </Tabs>
     );
 }
 
+function ThemeSwitcher(props) {
+    const themeOrder = ['light', 'dark', 'system'];
+    const index = Math.max(0, themeOrder.indexOf(props.theme));
+    const set = (t) => props.onThemeChange && props.onThemeChange(t);
+    const btn = (t, icon, label) => (
+        <button type="button"
+                className={`theme-toggle-btn${props.theme === t ? ' active' : ''}`}
+                aria-pressed={props.theme === t}
+                aria-label={props.txt(label)}
+                title={props.txt(label)}
+                onClick={() => set(t)}>
+            {icon}
+            <span className="sr-only">{props.txt(label)}</span>
+        </button>
+    );
+    const SunIcon = (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.8 1.42-1.42zm10.45 12.02l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM12 4V1h-0v3h0zm0 19v-3h0v3h0zM4 12H1v0h3v0zm19 0h-3v0h3v0zM6.76 19.16l-1.42 1.42-1.79-1.8 1.41-1.41 1.8 1.79zM17.24 4.84l1.4-1.4 1.8 1.79-1.41 1.41-1.79-1.8zM12 6a6 6 0 100 12 6 6 0 000-12z"/>
+        </svg>
+    );
+    const MoonIcon = (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/>
+        </svg>
+    );
+    const LaptopIcon = (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M4 5h16a1 1 0 011 1v9H3V6a1 1 0 011-1zm-2 12h20a1 1 0 01-1 1H3a1 1 0 01-1-1z"/>
+        </svg>
+    );
+
+    return (
+        <div className="theme-switcher" aria-label={props.txt('Theme')}>
+            <div className="theme-toggle" role="radiogroup" aria-label={props.txt('Theme')}>
+                <div className="theme-toggle-slider" style={{ transform: `translateX(${index * 100}%)` }} />
+                {btn('light', SunIcon, 'Light')}
+                {btn('dark', MoonIcon, 'Dark')}
+                {btn('system', LaptopIcon, 'System')}
+            </div>
+        </div>
+    );
+}
 
 class Tabs extends React.Component {
     constructor(props) {
@@ -208,34 +293,44 @@ class Tabs extends React.Component {
 
         const children = this.props.children.filter(Boolean);
 
+        console.log(this.props)
+
         return (
             <>
-                <ul className="nav-tab-list">
-                    {children.map((child) => {
-                        const { tabId, label, className, handler, tabIndex } = child.props;
-                        return (
-                            <Tab
-                                activeTab={activeTab}
-                                key={tabId}
-                                label={label}
-                                onClick={handler || onClickTabItem}
-                                className={className}
-                                tabIndex={tabIndex}
-                                tabId={tabId}
-                            />
-                        );
-                    })}
-                </ul>
-                <div className="tab-content">
-                    {children.map((child) => (
-                        <div key={child.props.label}
-                             style={{ display: child.props.label === activeTab ? 'block' : 'none' }}
-                             id={`${child.props.tabId}-content`}
-                        >
-                            {child.props.children}
-                        </div>
-                    ))}
-                </div>
+                <header>
+                    <ThemeSwitcher theme={this.props.theme} onThemeChange={this.props.onThemeChange} txt={this.props.txt} />
+                    <nav>
+                        <ul className="nav-tab-list">
+                            {children.map((child) => {
+                                const { tabId, label, className, handler, tabIndex, icon } = child.props;
+                                return (
+                                    <Tab
+                                        activeTab={activeTab}
+                                        key={tabId}
+                                        label={label}
+                                        onClick={handler || onClickTabItem}
+                                        className={className}
+                                        tabIndex={tabIndex}
+                                        tabId={tabId}
+                                        icon={icon}
+                                    />
+                                );
+                            })}
+                        </ul>
+                    </nav>
+                </header>
+                <main>
+                    <div className="tab-content">
+                        {children.map((child) => (
+                            <div key={child.props.label}
+                                 style={{ display: child.props.label === activeTab ? 'block' : 'none' }}
+                                 id={`${child.props.tabId}-content`}
+                            >
+                                {child.props.children}
+                            </div>
+                        ))}
+                    </div>
+                </main>
             </>
         );
     }
@@ -251,7 +346,7 @@ class Tab extends React.Component {
     render() {
         const {
             onClick,
-            props: { activeTab, label, tabIndex, tabId },
+            props: { activeTab, label, tabIndex, tabId, icon },
         } = this;
 
         let className = 'nav-tab';
@@ -268,7 +363,7 @@ class Tab extends React.Component {
                 tabIndex={tabIndex}
                 role="tab"
                 aria-controls={`${tabId}-content`}
-            >{label}</li>
+            >{icon}{label}</li>
         );
     }
 }
@@ -1192,12 +1287,17 @@ function Footer(props) {
             <a className="github-link" href="https://github.com/amnuts/opcache-gui"
                target="_blank"
                title={props.txt("opcache-gui (currently version {0}) on GitHub", props.version)}
-            >https://github.com/amnuts/opcache-gui - {props.txt("version {0}", props.version)}</a>
+            ><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" width="1.19em" height="1em" viewBox="0 0 1664 1408">
+                <path d="M640 960q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm640 0q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm160 0q0-120-69-204t-187-84q-41 0-195 21q-71 11-157 11t-157-11q-152-21-195-21q-118 0-187 84t-69 204q0 88 32 153.5t81 103t122 60t140 29.5t149 7h168q82 0 149-7t140-29.5t122-60t81-103t32-153.5zm224-176q0 207-61 331q-38 77-105.5 133t-141 86t-170 47.5t-171.5 22t-167 4.5q-78 0-142-3t-147.5-12.5t-152.5-30t-137-51.5t-121-81t-86-115Q0 992 0 784q0-237 136-396q-27-82-27-170q0-116 51-218q108 0 190 39.5T539 163q147-35 309-35q148 0 280 32q105-82 187-121t189-39q51 102 51 218q0 87-27 168q136 160 136 398z"/>
+            </svg> https://github.com/amnuts/opcache-gui - {props.txt("version {0}", props.version)}</a>
+
 
             <a className="sponsor-link" href="https://github.com/sponsors/amnuts"
                target="_blank"
                title={props.txt("Sponsor this project and author on GitHub")}
-            >{props.txt("Sponsor this project")}</a>
+            ><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                <path fill="crimson" d="M12 21.35l-1.45-1.32c-5.15-4.67-8.55-7.75-8.55-11.53 0-3.08 2.42-5.5 5.5-5.5 1.74 0 3.41.81 4.5 2.09 1.09-1.28 2.76-2.09 4.5-2.09 3.08 0 5.5 2.42 5.5 5.5 0 3.78-3.4 6.86-8.55 11.54l-1.45 1.31z"/>
+            </svg> {props.txt("Sponsor this project")}</a>
         </footer>
     );
 }
