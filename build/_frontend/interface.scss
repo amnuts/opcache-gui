@@ -42,10 +42,6 @@ $footer-border-color: #CCC;
   @return "rgb(#{$r}, #{$g}, #{$b})";
 }
 
-@mixin github-icon($color) {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.19em" height="1em" viewBox="0 0 1664 1408"><path d="M640 960q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm640 0q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm160 0q0-120-69-204t-187-84q-41 0-195 21q-71 11-157 11t-157-11q-152-21-195-21q-118 0-187 84t-69 204q0 88 32 153.5t81 103t122 60t140 29.5t149 7h168q82 0 149-7t140-29.5t122-60t81-103t32-153.5zm224-176q0 207-61 331q-38 77-105.5 133t-141 86t-170 47.5t-171.5 22t-167 4.5q-78 0-142-3t-147.5-12.5t-152.5-30t-137-51.5t-121-81t-86-115Q0 992 0 784q0-237 136-396q-27-82-27-170q0-116 51-218q108 0 190 39.5T539 163q147-35 309-35q148 0 280 32q105-82 187-121t189-39q51 102 51 218q0 87-27 168q136 160 136 398z" fill="#{toRGB($color)}"/></svg>');
-}
-
 :root {
   --opcache-gui-graph-track-fill-color: #{$widget-graph-fill-color};
   --opcache-gui-graph-track-background-color: #{$widget-graph-background-color};
@@ -59,6 +55,12 @@ $footer-border-color: #CCC;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+
+  #interface {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
 
   .hide {
     display: none;
@@ -84,6 +86,7 @@ $footer-border-color: #CCC;
     min-height: 0;
     padding-top: 20px;
   }
+
   .main-nav {
     position: relative;
   }
@@ -94,10 +97,12 @@ $footer-border-color: #CCC;
     padding-right: 160px; // reserve space for theme switcher on the right
     margin: 0;
     border-bottom: 1px solid $nav-border-color;
+    display: flex;
+    align-items: end;
   }
 
   .nav-tab {
-    display: inline-block;
+    display: inline-flex;
     margin: 0 0 -1px 0;
     padding: 15px 30px;
     border: 1px solid transparent;
@@ -106,6 +111,7 @@ $footer-border-color: #CCC;
     background-color: $nav-background-color;
     cursor: pointer;
     user-select: none;
+    align-items: center;
 
     &:hover {
       background-color: $nav-hover-color;
@@ -128,527 +134,571 @@ $footer-border-color: #CCC;
     }
   }
 
-  .nav-tab-link-reset {
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="#{toRGB($nav-icon-color)}"/></svg>');
-
-    &.is-resetting {
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="#{toRGB($nav-icon-active-color)}"/></svg>');
-    }
-  }
-
-  .nav-tab-link-realtime {
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="#{toRGB($nav-icon-color)}"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="#{toRGB($nav-icon-color)}"/></svg>');
-
-    &.live-update {
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="#{toRGB($nav-icon-active-color)}"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="#{toRGB($nav-icon-active-color)}"/></svg>');
-    }
-  }
-
   .nav-tab-link-reset, .nav-tab-link-realtime {
-    position: relative;
-    padding-left: 50px;
+    > svg {
+      overflow: visible;
+      width: 1.1rem;
+      height: 1.1rem;
+      margin-right: 0.5em;
 
-    &.pulse::before {
-      content: "";
-      position: absolute;
-      top: 12px;
-      left: 25px;
-      width: 18px;
-      height: 18px;
-      z-index: 10;
-      opacity: 0;
-      background-color: transparent;
-      border: 2px solid $nav-icon-active-color;
-      border-radius: 100%;
-      animation: pulse 2s linear infinite;
+      > path {
+        fill: $nav-icon-color;
+      }
+    }
+
+    &.activated {
+      > svg > path {
+        fill: $nav-icon-active-color;
+        transform-origin: 50% 50%;
+        display: inline-block;
+      }
     }
   }
 
-  main {
-    flex: 1 1 auto;
+    .nav-tab-link-reset {
+      &.activated {
+        > svg > path {
+          animation: spin-all 2s linear infinite;
+        }
+      }
+
+      &.is-resetting {
+        > svg > path {
+          fill: $nav-icon-active-color;
+        }
+      }
+    }
+
+    .nav-tab-link-realtime {
+      &.activated {
+        > svg > path {
+          animation: spin-pause 2s ease-in infinite;
+        }
+      }
+    }
   }
 
-  .tab-content {
-    padding: 2em;
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow: auto;
-  }
+    main {
+      flex: 1 1 auto;
+    }
 
-  .tab-content-overview-counts {
-    width: 270px;
-    float: right;
-  }
+    .tab-content {
+      padding: 2em;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+    }
 
-  .tab-content-overview-info {
-    margin-right: 280px;
-  }
+    .tab-content-overview-counts {
+      width: 270px;
+      float: right;
+    }
 
-  .graph-widget {
-    max-width: 100%;
-    height: auto;
-    margin: 0 auto;
-    display: flex;
-    position: relative;
+    .tab-content-overview-info {
+      margin-right: 280px;
+    }
+
+    .graph-widget {
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+      display: flex;
+      position: relative;
+
+      .widget-value {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0 auto;
+        font-size: 3.2em;
+        font-weight: 100;
+        color: $widget-graph-fill-color;
+        user-select: none;
+      }
+    }
+
+    .widget-panel {
+      background-color: $widget-background-color;
+      margin-bottom: 10px;
+    }
+
+    .widget-header {
+      background-color: $widget-header-color;
+      padding: 4px 6px;
+      margin: 0;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: bold;
+    }
 
     .widget-value {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      position: absolute;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      margin: 0 auto;
-      font-size: 3.2em;
-      font-weight: 100;
-      color: $widget-graph-fill-color;
-      user-select: none;
-    }
-  }
-
-  .widget-panel {
-    background-color: $widget-background-color;
-    margin-bottom: 10px;
-  }
-
-  .widget-header {
-    background-color: $widget-header-color;
-    padding: 4px 6px;
-    margin: 0;
-    text-align: center;
-    font-size: 1rem;
-    font-weight: bold;
-  }
-
-  .widget-value {
-    margin: 0;
-    text-align: center;
-
-    span.large {
-      color: $widget-graph-fill-color;
-      font-size: 80pt;
       margin: 0;
-      padding: 0;
       text-align: center;
 
-      + span {
-        font-size: 20pt;
-        margin: 0;
+      span.large {
         color: $widget-graph-fill-color;
+        font-size: 80pt;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+
+        + span {
+          font-size: 20pt;
+          margin: 0;
+          color: $widget-graph-fill-color;
+        }
       }
     }
-  }
 
-  .widget-info {
-    margin: 0;
-    padding: 10px;
-
-    * {
+    .widget-info {
       margin: 0;
-      line-height: 1.75em;
-      text-align: left;
-    }
-  }
+      padding: 10px;
 
-  .tables {
-    margin: 0 0 1em 0;
-    border-collapse: collapse;
-    width: 100%;
-    table-layout: fixed;
-
-    tr {
-      &:nth-child(odd) {
-        background-color: $table-row-color;
-      }
-
-      &:nth-child(even) {
-        background-color: $table-row-color-alternative;
+      * {
+        margin: 0;
+        line-height: 1.75em;
+        text-align: left;
       }
     }
 
-    th {
-      text-align: left;
-      padding: 6px;
-      background-color: $table-header-color;
-      color: $table-header-font-color;
-      border-color: $table-header-border-color;
-      font-weight: normal;
-    }
-
-    td {
-      padding: 4px 6px;
-      line-height: 1.4em;
-      vertical-align: top;
-      border-color: $table-row-border-color;
-      overflow: hidden;
-      overflow-wrap: break-word;
-      text-overflow: ellipsis;
-    }
-  }
-
-  .directive-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-
-    li {
-      margin-bottom: 0.5em;
-
-      &:last-child {
-        margin-bottom: 0;
-      }
-
-      ul {
-        margin-top: 1.5em;
-      }
-    }
-  }
-
-  .file-filter {
-    width: 520px;
-  }
-
-  .file-metainfo {
-    font-size: 80%;
-
-    &.invalid {
-      font-style: italic;
-    }
-  }
-
-  .file-pathname {
-    width: 70%;
-    display: block;
-  }
-
-  .nav-tab-link-reset,
-  .nav-tab-link-realtime,
-  .github-link,
-  .sponsor-link {
-    background-repeat: no-repeat;
-    background-color: transparent;
-  }
-
-  .nav-tab-link-reset,
-  .nav-tab-link-realtime {
-    background-position: 24px 50%;
-  }
-
-  .main-footer {
-    border-top: 1px solid $footer-border-color;
-    padding: 1em 2em;
-  }
-
-  .github-link,
-  .sponsor-link {
-    background-position: 0 50%;
-    padding: 2em 0 2em 2.3em;
-    text-decoration: none;
-    opacity: 0.7;
-    font-size: 80%;
-
-    &:hover {
-      opacity: 1;
-    }
-  }
-
-  .theme-switcher {
-    position: absolute;
-    top: 0;
-    right: 8px;
-    height: 54px;
-    display: flex;
-    align-items: center;
-    z-index: 2;
-    margin: 15px 20px 0 0;
-  }
-
-  .theme-toggle {
-    position: relative;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    align-items: stretch;
-    min-width: 156px;
-    height: 30px;
-    padding: 0;
-    border: 1px solid $nav-border-color;
-    border-radius: 999px;
-    background-color: $nav-background-color;
-    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.02);
-  }
-
-  .theme-toggle-slider {
-    position: absolute;
-    left: 3px;
-    top: 3px;
-    bottom: 3px;
-    width: calc((100% - 12px) / 3);
-    border-radius: 999px;
-    background-color: $nav-hover-color;
-    transition: transform .2s ease;
-    z-index: 0;
-  }
-
-  .theme-toggle-btn {
-    appearance: none;
-    -webkit-appearance: none;
-    border: 0;
-    background: transparent;
-    padding: 0;
-    margin: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: $nav-icon-color;
-    cursor: pointer;
-    border-radius: 999px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .theme-toggle-btn.active {
-    color: $nav-icon-active-color;
-  }
-
-  .github-link {
-    @include github-icon($github-icon-color);
-  }
-
-  .sponsor-link {
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24"><path fill="crimson" d="M12 21.35l-1.45-1.32c-5.15-4.67-8.55-7.75-8.55-11.53 0-3.08 2.42-5.5 5.5-5.5 1.74 0 3.41.81 4.5 2.09 1.09-1.28 2.76-2.09 4.5-2.09 3.08 0 5.5 2.42 5.5 5.5 0 3.78-3.4 6.86-8.55 11.54l-1.45 1.31z"/></svg>');
-    margin-left: 2em;
-  }
-
-  .file-cache-only {
-    margin-top: 0;
-  }
-
-  .paginate-filter {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    flex-wrap: wrap;
-
-    .filter > * {
-      padding: 3px;
-      margin: 3px 3px 10px 0;
-    }
-  }
-
-  .pagination {
-    margin: 10px 0;
-    padding: 0;
-
-    li {
-      display: inline-block;
-
-      a {
-        display: inline-flex;
-        align-items: center;
-        white-space: nowrap;
-        line-height: 1;
-        padding: 0.5rem 0.75rem;
-        border-radius: 3px;
-        text-decoration: none;
-        height: 100%;
-
-        &.arrow {
-          font-size: 1.1rem;
-        }
-
-        &:active {
-          transform: translateY(2px);
-        }
-
-        &.active {
-          background-color: $pagination-active-color;
-          color: $pagination-active-font-color;
-        }
-
-        &:hover:not(.active) {
-          background-color: $pagination-hover-color;
-          color: $pagination-hover-font-color;
-        }
-      }
-    }
-  }
-
-  @media screen and (max-width: 750px) {
-    .nav-tab-list {
-      border-bottom: 0;
-      padding-right: 8px;
-    }
-    .nav-tab {
-      display: block;
-      margin: 0;
-    }
-    .nav-tab-link {
-      display: block;
-      margin: 0 10px;
-      padding: 10px 0 10px 30px;
-      border: 0;
-    }
-    .nav-tab-link[data-for].active {
-      border-bottom-color: $nav-border-color;
-    }
-    .theme-switcher {
-      position: static;
-      height: auto;
-      margin: 5px;
-      align-self: center;
-      transform: none;
-    }
-    .tab-content-overview-info {
-      margin-right: auto;
-      clear: both;
-    }
-    .tab-content-overview-counts {
-      position: relative;
-      display: block;
+    .tables {
+      margin: 0 0 1em 0;
+      border-collapse: collapse;
       width: 100%;
-    }
-    header {
-      flex-direction: column-reverse;
-    }
-  }
+      table-layout: fixed;
 
-  @media screen and (max-width: 550px) {
+      tr {
+        &:nth-child(odd) {
+          background-color: $table-row-color;
+        }
+
+        &:nth-child(even) {
+          background-color: $table-row-color-alternative;
+        }
+      }
+
+      th {
+        text-align: left;
+        padding: 6px;
+        background-color: $table-header-color;
+        color: $table-header-font-color;
+        border-color: $table-header-border-color;
+        font-weight: normal;
+      }
+
+      td {
+        padding: 4px 6px;
+        line-height: 1.4em;
+        vertical-align: top;
+        border-color: $table-row-border-color;
+        overflow: hidden;
+        overflow-wrap: break-word;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .directive-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        margin-bottom: 0.5em;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        ul {
+          margin-top: 1.5em;
+        }
+      }
+    }
+
     .file-filter {
-      width: 100%;
-    }
-  }
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50%, 100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-@mixin dark-theme {
-  background-color: #121212;
-  color: #ddd;
-
-  a {
-    color: dodgerblue;
-  }
-
-  .nav-tab {
-    background-color: transparent;
-    border-color: transparent;
-
-    &:hover {
-      background-color: #2a2a2a;
+      width: 520px;
     }
 
-    &.active {
-      background-color: #1e1e1e;
-      border-color: transparent;
-      border-top-color: #84b8ff;
-      border-bottom-color: #1e1e1e;
+    .file-metainfo {
+      font-size: 80%;
+
+      &.invalid {
+        font-style: italic;
+      }
     }
-  }
 
-  .nav-tab-link-reset,
-  .nav-tab-link-realtime {
-    background-color: transparent;
+    .file-pathname {
+      width: 70%;
+      display: block;
+    }
 
-    &.is-resetting,
-    &.live-update {
+    .nav-tab-link-reset,
+    .nav-tab-link-realtime,
+    .github-link,
+    .sponsor-link {
+      background-repeat: no-repeat;
       background-color: transparent;
     }
 
-    &.pulse::before {
-      border-color: #00e600;
+    .nav-tab-link-reset,
+    .nav-tab-link-realtime {
+      background-position: 24px 50%;
+    }
+
+    .main-footer {
+      border-top: 1px solid $footer-border-color;
+      padding: 1em 2em;
+      display: flex;
+      align-items: center;
+    }
+
+    .github-link,
+    .sponsor-link {
+      background-position: 0 50%;
+      padding: 2em 0 2em 2.3em;
+      text-decoration: none;
+      opacity: 0.7;
+      font-size: 80%;
+      display: flex;
+      align-items: center;
+
+      &:hover {
+        opacity: 1;
+      }
+
+      > svg {
+        height: 1rem;
+        width: 1rem;
+        margin-right: 0.25rem;
+      }
+    }
+
+    .theme-switcher {
+      position: absolute;
+      top: 0;
+      right: 8px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      z-index: 2;
+      margin: 15px 20px 0 0;
+    }
+
+    .theme-toggle {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      align-items: stretch;
+      min-width: 156px;
+      height: 30px;
+      padding: 0;
+      border: 1px solid $nav-border-color;
+      border-radius: 999px;
+      background-color: $nav-background-color;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.02);
+    }
+
+    .theme-toggle-slider {
+      position: absolute;
+      left: 3px;
+      top: 3px;
+      bottom: 3px;
+      width: calc((100% - 12px) / 3);
+      border-radius: 999px;
+      background-color: $nav-hover-color;
+      transition: transform .2s ease;
+      z-index: 0;
+    }
+
+    .theme-toggle-btn {
+      appearance: none;
+      -webkit-appearance: none;
+      border: 0;
+      background: transparent;
+      padding: 0;
+      margin: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: $nav-icon-color;
+      cursor: pointer;
+      border-radius: 999px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .theme-toggle-btn.active {
+      color: $nav-icon-active-color;
+    }
+
+    .github-link > svg > path {
+      fill: $nav-icon-color;
+    }
+
+    .sponsor-link {
+      margin-left: 2em;
+    }
+
+    .file-cache-only {
+      margin-top: 0;
+    }
+
+    .paginate-filter {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+
+      .filter > * {
+        padding: 3px;
+        margin: 3px 3px 10px 0;
+      }
+    }
+
+    .pagination {
+      margin: 10px 0;
+      padding: 0;
+
+      li {
+        display: inline-block;
+
+        a {
+          display: inline-flex;
+          align-items: center;
+          white-space: nowrap;
+          line-height: 1;
+          padding: 0.5rem 0.75rem;
+          border-radius: 3px;
+          text-decoration: none;
+          height: 100%;
+
+          &.arrow {
+            font-size: 1.1rem;
+          }
+
+          &:active {
+            transform: translateY(2px);
+          }
+
+          &.active {
+            background-color: $pagination-active-color;
+            color: $pagination-active-font-color;
+          }
+
+          &:hover:not(.active) {
+            background-color: $pagination-hover-color;
+            color: $pagination-hover-font-color;
+          }
+        }
+      }
+    }
+
+    @media screen and (max-width: 750px) {
+      .opcache-gui {
+        .nav-tab-list {
+          border-bottom: 0;
+          display: flex;
+          flex-direction: column;
+          padding: 0;
+          align-items: center;
+        }
+
+        .nav-tab {
+          margin: 0;
+          border: 0;
+          border-top: 1px solid $nav-border-color;
+          width: 100%;
+          align-items: center;
+          justify-content: center;
+
+          &:last-child {
+            border-bottom: 1px solid $nav-border-color;
+          }
+
+          &.active {
+            border: 0;
+            border-top: 1px solid $nav-border-color;
+            background: rgba($nav-header-color, 0.1);
+          }
+        }
+
+        .nav-tab-link {
+          display: block;
+          margin: 0 10px;
+          padding: 10px 0 10px 30px;
+          border: 0;
+        }
+
+        .theme-switcher {
+          position: static;
+          height: auto;
+          margin: 5px;
+          align-self: center;
+          transform: none;
+        }
+
+        .tab-content-overview-info {
+          margin-right: auto;
+          clear: both;
+        }
+
+        .tab-content-overview-counts {
+          position: relative;
+          display: block;
+          width: 100%;
+        }
+
+        header {
+          flex-direction: column-reverse;
+        }
+      }
+
+      @media screen and (max-width: 550px) {
+        .file-filter {
+          width: 100%;
+        }
+      }
+    }
+
+
+  @keyframes spin-pause {
+    0% {
+      transform: rotate(0deg);
+    }
+    50%, 100% {
+      transform: rotate(360deg);
     }
   }
 
-  .github-link {
-    @include github-icon($github-icon-color-dark);
+  @keyframes spin-all {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 
-  .graph-widget .widget-value,
-  .widget-value span.large,
-  .widget-value span.large + span {
-    color: #84b8ff;
-  }
+  @mixin dark-theme {
+    background-color: #121212;
+    color: #ddd;
 
-  .widget-panel {
-    background-color: #2a2a2a;
-  }
+    a {
+      color: dodgerblue;
+    }
 
-  .widget-header {
-    background-color: #333;
-    color: #ccc;
-  }
+    .nav-tab {
+      background-color: transparent;
+      border-color: transparent;
 
-  .tables {
-    tr:nth-child(odd) {
+      &:hover {
+        background-color: #2a2a2a;
+      }
+
+      &.active {
+        background-color: #1e1e1e;
+        border-color: transparent;
+        border-top-color: #84b8ff;
+        border-bottom-color: #1e1e1e;
+      }
+    }
+
+    .nav-tab-link-reset,
+    .nav-tab-link-realtime {
+      background-color: transparent;
+
+      &.is-resetting,
+      &.live-update {
+        background-color: transparent;
+      }
+
+      &.pulse::before {
+        border-color: #00e600;
+      }
+    }
+
+    .github-link > svg > path {
+      fill: $github-icon-color-dark;
+    }
+
+    .graph-widget .widget-value,
+    .widget-value span.large,
+    .widget-value span.large + span {
+      color: #84b8ff;
+    }
+
+    .widget-panel {
       background-color: #2a2a2a;
     }
 
-    tr:nth-child(even) {
-      background-color: #1f1f1f;
+    .widget-header {
+      background-color: #333;
+      color: #ccc;
     }
 
-    th {
-      background-color: #3a4a5e;
-      color: #ddd;
+    .tables {
+      tr:nth-child(odd) {
+        background-color: #2a2a2a;
+      }
+
+      tr:nth-child(even) {
+        background-color: #1f1f1f;
+      }
+
+      th {
+        background-color: #3a4a5e;
+        color: #ddd;
+        border-color: #444;
+      }
+
+      td {
+        border-color: #333;
+      }
+    }
+
+    .main-footer {
+      border-top-color: #444;
+      color: #ccc;
+    }
+
+    .pagination li a {
+      &.active {
+        background-color: #4d75af;
+        color: #fff;
+      }
+
+      &:hover:not(.active) {
+        background-color: #ff7400;
+        color: #fff;
+      }
+    }
+
+    .theme-toggle {
+      background-color: #1e1e1e;
       border-color: #444;
     }
-
-    td {
-      border-color: #333;
+    .theme-toggle-slider {
+      background-color: #2a2a2a;
+    }
+    .theme-toggle-btn {
+      color: $nav-icon-color-dark;
+    }
+    .theme-toggle-btn.active {
+      color: #84b8ff;
     }
   }
 
-  .main-footer {
-    border-top-color: #444;
-    color: #ccc;
-  }
-
-  .pagination li a {
-    &.active {
-      background-color: #4d75af;
-      color: #fff;
-    }
-
-    &:hover:not(.active) {
-      background-color: #ff7400;
-      color: #fff;
+  @media (prefers-color-scheme: dark) {
+    :root:not(.light) .opcache-gui {
+      @include dark-theme;
     }
   }
 
-  .theme-toggle {
-    background-color: #1e1e1e;
-    border-color: #444;
-  }
-  .theme-toggle-slider {
-    background-color: #2a2a2a;
-  }
-  .theme-toggle-btn {
-    color: $nav-icon-color-dark;
-  }
-  .theme-toggle-btn.active {
-    color: #84b8ff;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not(.light) .opcache-gui {
+  .dark .opcache-gui {
     @include dark-theme;
   }
-}
-
-.dark .opcache-gui {
-  @include dark-theme;
-}
-
-
