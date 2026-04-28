@@ -241,6 +241,7 @@ To get started with a new language, copy the `example.json` to the language you 
 * Fixed a potential file security issue
 * Dependabot updates for some node dependencies
 * Added default value of Optimization Level thanks to @krzotr (PR#127)
+* Added treemap output of the cached files
 
 **Version 3.6.0**\
 * Added German translation and various fixes thanks to @matthiasstraka (PR#123)
