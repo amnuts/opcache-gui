@@ -386,6 +386,9 @@ class Service
                 $v = $this->size($v) . " ({$v})";
             } elseif ($k === 'opcache.optimization_level') {
                 $levels = [];
+                if ($v > 0) {
+                    $levels[] = sprintf("Optimization Level: [0x%08X]", $v);
+                }
                 foreach ($this->optimizationLevels as $level => $info) {
                     if ($level & $v) {
                         $levels[] = "{$info} [{$level}]";
