@@ -12,7 +12,11 @@ MIT: http://acollington.mit-license.org/
 
 If you're able and would like to sponsor this work in some way, then that would be super awesome :heart:.  You can do that through the [GitHub Sponsorship](https://github.com/sponsors/amnuts) page.
 
-Alternatively, if you'd just like to give me a [shout-out on X (aka, Twitter)](https://twitter.com/acollington) to say you use it, then that'd be awesome, too!  (Any one else miss postcardware?)
+Alternatively, if you'd just like to give me a [shout-out on X (aka, Twitter)](https://twitter.com/acollington) to say you use it, then that'd be awesome, too!  (Anyone else miss postcardware?)
+
+## Sponsor shoutout
+
+Many thanks to Miraç KAÇMAZ (@mirackacmazcom) for doing monthly sponsorship – it was sincerely appreciated!  I was utterly remiss in not thanking you sooner and putting your name up here, sorry!
 
 ## Using the opcache-gui
 
@@ -232,6 +236,11 @@ If you want to create a language file then `build/_languages/example.json` conta
 To get started with a new language, copy the `example.json` to the language you want that doesn't already exist - for example, `pt-br.json` or `pirate.json`.  Then fill in the translations into the values.  Once done, rebuild with `php ./build/build.php -l pt-br` or `php ./build/build.php -l pirate`.
 
 ## Releases
+
+**Version 3.7.0**\
+Fixed a potential file security issue
+Dependabot updates for some node dependencies
+Added default value of Optimization Level thanks to @krzotr (PR#127)
 
 **Version 3.6.0**\
 Added German translation and various fixes thanks to @matthiasstraka (PR#123)
