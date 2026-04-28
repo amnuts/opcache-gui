@@ -6,7 +6,7 @@
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.6.0
+ * @version 3.7.0
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, https://acollington.mit-license.org/
  */
@@ -59,7 +59,7 @@ header('Pragma: no-cache');
 
 class Service
 {
-    public const VERSION = '3.6.0';
+    public const VERSION = '3.7.0';
 
     protected $tz;
     protected $data;
@@ -261,11 +261,17 @@ class Service
      */
     public function resetCache(?string $file = null): bool
     {
-        $success = false;
         if ($file === null) {
             $success = opcache_reset();
         } elseif (function_exists('opcache_invalidate')) {
-            $success = opcache_invalidate(urldecode($file), true);
+            $file = urldecode($file);
+            $cached = array_column($this->getData('files') ?? [], 'full_path');
+            if (!in_array($file, $cached, true)) {
+                return false;
+            }
+            $success = opcache_invalidate($file, true);
+        } else {
+            return false;
         }
         if ($success) {
             $this->compileState();
@@ -437,6 +443,9 @@ class Service
                 $v = $this->size($v) . " ({$v})";
             } elseif ($k === 'opcache.optimization_level') {
                 $levels = [];
+                if ($v > 0) {
+                    $levels[] = sprintf("Optimization Level: [0x%08X]", $v);
+                }
                 foreach ($this->optimizationLevels as $level => $info) {
                     if ($level & $v) {
                         $levels[] = "{$info} [{$level}]";
@@ -528,7 +537,7 @@ $opcache = (new Service($options))->handle();
     <script src="//cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js"></script>
     <style>
-        :root{--opcache-gui-graph-track-fill-color: #6CA6EF;--opcache-gui-graph-track-background-color: rgba(229, 231, 231, 0.9058823529)}.opcache-gui{font-family:sans-serif;font-size:90%;padding:0;margin:0}.opcache-gui .hide{display:none}.opcache-gui .sr-only{border:0 !important;clip:rect(1px, 1px, 1px, 1px) !important;-webkit-clip-path:inset(50%) !important;clip-path:inset(50%) !important;height:1px !important;margin:-1px !important;overflow:hidden !important;padding:0 !important;position:absolute !important;width:1px !important;white-space:nowrap !important}.opcache-gui .main-nav{padding-top:20px}.opcache-gui .nav-tab-list{list-style-type:none;padding-left:8px;margin:0;border-bottom:1px solid #ccc}.opcache-gui .nav-tab{display:inline-block;margin:0 0 -1px 0;padding:15px 30px;border:1px solid rgba(0,0,0,0);border-bottom-color:#ccc;text-decoration:none;background-color:#fff;cursor:pointer;user-select:none}.opcache-gui .nav-tab:hover{background-color:#f4f4f4;text-decoration:underline}.opcache-gui .nav-tab.active{border:1px solid #ccc;border-bottom-color:#fff;border-top:3px solid #6ca6ef}.opcache-gui .nav-tab.active:hover{background-color:initial}.opcache-gui .nav-tab:focus{outline:0;text-decoration:underline}.opcache-gui .nav-tab-link-reset{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .nav-tab-link-reset.is-resetting{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgb(0, 186, 0)"/></svg>')}.opcache-gui .nav-tab-link-realtime{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="rgb(98, 98, 98)"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .nav-tab-link-realtime.live-update{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="rgb(0, 186, 0)"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="rgb(0, 186, 0)"/></svg>')}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime{position:relative;padding-left:50px}.opcache-gui .nav-tab-link-reset.pulse::before,.opcache-gui .nav-tab-link-realtime.pulse::before{content:"";position:absolute;top:12px;left:25px;width:18px;height:18px;z-index:10;opacity:0;background-color:rgba(0,0,0,0);border:2px solid #00ba00;border-radius:100%;animation:pulse 2s linear infinite}.opcache-gui .tab-content{padding:2em}.opcache-gui .tab-content-overview-counts{width:270px;float:right}.opcache-gui .tab-content-overview-info{margin-right:280px}.opcache-gui .graph-widget{max-width:100%;height:auto;margin:0 auto;display:flex;position:relative}.opcache-gui .graph-widget .widget-value{display:flex;align-items:center;justify-content:center;text-align:center;position:absolute;top:0;width:100%;height:100%;margin:0 auto;font-size:3.2em;font-weight:100;color:#6ca6ef;user-select:none}.opcache-gui .widget-panel{background-color:#ededed;margin-bottom:10px}.opcache-gui .widget-header{background-color:#cdcdcd;padding:4px 6px;margin:0;text-align:center;font-size:1rem;font-weight:bold}.opcache-gui .widget-value{margin:0;text-align:center}.opcache-gui .widget-value span.large{color:#6ca6ef;font-size:80pt;margin:0;padding:0;text-align:center}.opcache-gui .widget-value span.large+span{font-size:20pt;margin:0;color:#6ca6ef}.opcache-gui .widget-info{margin:0;padding:10px}.opcache-gui .widget-info *{margin:0;line-height:1.75em;text-align:left}.opcache-gui .tables{margin:0 0 1em 0;border-collapse:collapse;width:100%;table-layout:fixed}.opcache-gui .tables tr:nth-child(odd){background-color:#effeff}.opcache-gui .tables tr:nth-child(even){background-color:#e0ecef}.opcache-gui .tables th{text-align:left;padding:6px;background-color:#6ca6ef;color:#fff;border-color:#fff;font-weight:normal}.opcache-gui .tables td{padding:4px 6px;line-height:1.4em;vertical-align:top;border-color:#fff;overflow:hidden;overflow-wrap:break-word;text-overflow:ellipsis}.opcache-gui .directive-list{list-style-type:none;padding:0;margin:0}.opcache-gui .directive-list li{margin-bottom:.5em}.opcache-gui .directive-list li:last-child{margin-bottom:0}.opcache-gui .directive-list li ul{margin-top:1.5em}.opcache-gui .file-filter{width:520px}.opcache-gui .file-metainfo{font-size:80%}.opcache-gui .file-metainfo.invalid{font-style:italic}.opcache-gui .file-pathname{width:70%;display:block}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime,.opcache-gui .github-link,.opcache-gui .sponsor-link{background-repeat:no-repeat;background-color:rgba(0,0,0,0)}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime{background-position:24px 50%}.opcache-gui .main-footer{border-top:1px solid #ccc;padding:1em 2em}.opcache-gui .github-link,.opcache-gui .sponsor-link{background-position:0 50%;padding:2em 0 2em 2.3em;text-decoration:none;opacity:.7;font-size:80%}.opcache-gui .github-link:hover,.opcache-gui .sponsor-link:hover{opacity:1}.opcache-gui .github-link{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.19em" height="1em" viewBox="0 0 1664 1408"><path d="M640 960q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm640 0q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm160 0q0-120-69-204t-187-84q-41 0-195 21q-71 11-157 11t-157-11q-152-21-195-21q-118 0-187 84t-69 204q0 88 32 153.5t81 103t122 60t140 29.5t149 7h168q82 0 149-7t140-29.5t122-60t81-103t32-153.5zm224-176q0 207-61 331q-38 77-105.5 133t-141 86t-170 47.5t-171.5 22t-167 4.5q-78 0-142-3t-147.5-12.5t-152.5-30t-137-51.5t-121-81t-86-115Q0 992 0 784q0-237 136-396q-27-82-27-170q0-116 51-218q108 0 190 39.5T539 163q147-35 309-35q148 0 280 32q105-82 187-121t189-39q51 102 51 218q0 87-27 168q136 160 136 398z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .sponsor-link{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24"><path fill="crimson" d="M12 21.35l-1.45-1.32c-5.15-4.67-8.55-7.75-8.55-11.53 0-3.08 2.42-5.5 5.5-5.5 1.74 0 3.41.81 4.5 2.09 1.09-1.28 2.76-2.09 4.5-2.09 3.08 0 5.5 2.42 5.5 5.5 0 3.78-3.4 6.86-8.55 11.54l-1.45 1.31z"/></svg>');margin-left:2em}.opcache-gui .file-cache-only{margin-top:0}.opcache-gui .paginate-filter{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap}.opcache-gui .paginate-filter .filter>*{padding:3px;margin:3px 3px 10px 0}.opcache-gui .pagination{margin:10px 0;padding:0}.opcache-gui .pagination li{display:inline-block}.opcache-gui .pagination li a{display:inline-flex;align-items:center;white-space:nowrap;line-height:1;padding:.5rem .75rem;border-radius:3px;text-decoration:none;height:100%}.opcache-gui .pagination li a.arrow{font-size:1.1rem}.opcache-gui .pagination li a:active{transform:translateY(2px)}.opcache-gui .pagination li a.active{background-color:#4d75af;color:#fff}.opcache-gui .pagination li a:hover:not(.active){background-color:#ff7400;color:#fff}@media screen and (max-width: 750px){.opcache-gui .nav-tab-list{border-bottom:0}.opcache-gui .nav-tab{display:block;margin:0}.opcache-gui .nav-tab-link{display:block;margin:0 10px;padding:10px 0 10px 30px;border:0}.opcache-gui .nav-tab-link[data-for].active{border-bottom-color:#ccc}.opcache-gui .tab-content-overview-info{margin-right:auto;clear:both}.opcache-gui .tab-content-overview-counts{position:relative;display:block;width:100%}}@media screen and (max-width: 550px){.opcache-gui .file-filter{width:100%}}@keyframes pulse{0%{transform:scale(1);opacity:1}50%,100%{transform:scale(2);opacity:0}}/*# sourceMappingURL=interface.css.map */
+        :root{--opcache-gui-graph-track-fill-color: #6CA6EF;--opcache-gui-graph-track-background-color: rgba(229, 231, 231, 0.9058823529)}.opcache-gui{font-family:sans-serif;font-size:90%;padding:0;margin:0}.opcache-gui .hide{display:none}.opcache-gui .sr-only{border:0 !important;clip:rect(1px, 1px, 1px, 1px) !important;-webkit-clip-path:inset(50%) !important;clip-path:inset(50%) !important;height:1px !important;margin:-1px !important;overflow:hidden !important;padding:0 !important;position:absolute !important;width:1px !important;white-space:nowrap !important}.opcache-gui .main-nav{padding-top:20px}.opcache-gui .nav-tab-list{list-style-type:none;padding-left:8px;margin:0;border-bottom:1px solid #ccc}.opcache-gui .nav-tab{display:inline-block;margin:0 0 -1px 0;padding:15px 30px;border:1px solid rgba(0,0,0,0);border-bottom-color:#ccc;text-decoration:none;background-color:#fff;cursor:pointer;user-select:none}.opcache-gui .nav-tab:hover{background-color:#f4f4f4;text-decoration:underline}.opcache-gui .nav-tab.active{border:1px solid #ccc;border-bottom-color:#fff;border-top:3px solid #6ca6ef}.opcache-gui .nav-tab.active:hover{background-color:initial}.opcache-gui .nav-tab:focus{outline:0;text-decoration:underline}.opcache-gui .nav-tab-link-reset{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .nav-tab-link-reset.is-resetting{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgb(0, 186, 0)"/></svg>')}.opcache-gui .nav-tab-link-realtime{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="rgb(98, 98, 98)"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .nav-tab-link-realtime.live-update{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.5em" height="1.5em" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8s8 3.58 8 8s-3.58 8-8 8z" fill="rgb(0, 186, 0)"/><path d="M12.5 7H11v6l5.25 3.15l.75-1.23l-4.5-2.67z" fill="rgb(0, 186, 0)"/></svg>')}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime{position:relative;padding-left:50px}.opcache-gui .nav-tab-link-reset.pulse::before,.opcache-gui .nav-tab-link-realtime.pulse::before{content:"";position:absolute;top:12px;left:25px;width:18px;height:18px;z-index:10;opacity:0;background-color:rgba(0,0,0,0);border:2px solid #00ba00;border-radius:100%;animation:pulse 2s linear infinite}.opcache-gui .tab-content{padding:2em}.opcache-gui .tab-content-overview-counts{width:270px;float:right}.opcache-gui .tab-content-overview-info{margin-right:280px}.opcache-gui .graph-widget{max-width:100%;height:auto;margin:0 auto;display:flex;position:relative}.opcache-gui .graph-widget .widget-value{display:flex;align-items:center;justify-content:center;text-align:center;position:absolute;top:0;width:100%;height:100%;margin:0 auto;font-size:3.2em;font-weight:100;color:#6ca6ef;user-select:none}.opcache-gui .widget-panel{background-color:#ededed;margin-bottom:10px}.opcache-gui .widget-header{background-color:#cdcdcd;padding:4px 6px;margin:0;text-align:center;font-size:1rem;font-weight:bold}.opcache-gui .widget-value{margin:0;text-align:center}.opcache-gui .widget-value span.large{color:#6ca6ef;font-size:80pt;margin:0;padding:0;text-align:center}.opcache-gui .widget-value span.large+span{font-size:20pt;margin:0;color:#6ca6ef}.opcache-gui .widget-info{margin:0;padding:10px}.opcache-gui .widget-info *{margin:0;line-height:1.75em;text-align:left}.opcache-gui .tables{margin:0 0 1em 0;border-collapse:collapse;width:100%;table-layout:fixed}.opcache-gui .tables tr:nth-child(odd){background-color:#effeff}.opcache-gui .tables tr:nth-child(even){background-color:#e0ecef}.opcache-gui .tables th{text-align:left;padding:6px;background-color:#6ca6ef;color:#fff;border-color:#fff;font-weight:normal}.opcache-gui .tables td{padding:4px 6px;line-height:1.4em;vertical-align:top;border-color:#fff;overflow:hidden;overflow-wrap:break-word;text-overflow:ellipsis}.opcache-gui .directive-list{list-style-type:none;padding:0;margin:0}.opcache-gui .directive-list li{margin-bottom:.5em}.opcache-gui .directive-list li:last-child{margin-bottom:0}.opcache-gui .directive-list li ul{margin-top:1.5em}.opcache-gui .file-filter{width:520px}.opcache-gui .file-metainfo{font-size:80%}.opcache-gui .file-metainfo.invalid{font-style:italic}.opcache-gui .file-pathname{width:70%;display:block}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime,.opcache-gui .github-link,.opcache-gui .sponsor-link{background-repeat:no-repeat;background-color:rgba(0,0,0,0)}.opcache-gui .nav-tab-link-reset,.opcache-gui .nav-tab-link-realtime{background-position:24px 50%}.opcache-gui .main-footer{border-top:1px solid #ccc;padding:1em 2em}.opcache-gui .github-link,.opcache-gui .sponsor-link{background-position:0 50%;padding:2em 0 2em 2.3em;text-decoration:none;opacity:.7;font-size:80%}.opcache-gui .github-link:hover,.opcache-gui .sponsor-link:hover{opacity:1}.opcache-gui .github-link{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1.19em" height="1em" viewBox="0 0 1664 1408"><path d="M640 960q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm640 0q0 40-12.5 82t-43 76t-72.5 34t-72.5-34t-43-76t-12.5-82t12.5-82t43-76t72.5-34t72.5 34t43 76t12.5 82zm160 0q0-120-69-204t-187-84q-41 0-195 21q-71 11-157 11t-157-11q-152-21-195-21q-118 0-187 84t-69 204q0 88 32 153.5t81 103t122 60t140 29.5t149 7h168q82 0 149-7t140-29.5t122-60t81-103t32-153.5zm224-176q0 207-61 331q-38 77-105.5 133t-141 86t-170 47.5t-171.5 22t-167 4.5q-78 0-142-3t-147.5-12.5t-152.5-30t-137-51.5t-121-81t-86-115Q0 992 0 784q0-237 136-396q-27-82-27-170q0-116 51-218q108 0 190 39.5T539 163q147-35 309-35q148 0 280 32q105-82 187-121t189-39q51 102 51 218q0 87-27 168q136 160 136 398z" fill="rgb(98, 98, 98)"/></svg>')}.opcache-gui .sponsor-link{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24"><path fill="crimson" d="M12 21.35l-1.45-1.32c-5.15-4.67-8.55-7.75-8.55-11.53 0-3.08 2.42-5.5 5.5-5.5 1.74 0 3.41.81 4.5 2.09 1.09-1.28 2.76-2.09 4.5-2.09 3.08 0 5.5 2.42 5.5 5.5 0 3.78-3.4 6.86-8.55 11.54l-1.45 1.31z"/></svg>');margin-left:2em}.opcache-gui .file-cache-only{margin-top:0}.opcache-gui .paginate-filter{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap}.opcache-gui .paginate-filter .filter>*{padding:3px;margin:3px 3px 10px 0}.opcache-gui .pagination{margin:10px 0;padding:0}.opcache-gui .pagination li{display:inline-block}.opcache-gui .pagination li a{display:inline-flex;align-items:center;white-space:nowrap;line-height:1;padding:.5rem .75rem;border-radius:3px;text-decoration:none;height:100%}.opcache-gui .pagination li a.arrow{font-size:1.1rem}.opcache-gui .pagination li a:active{transform:translateY(2px)}.opcache-gui .pagination li a.active{background-color:#4d75af;color:#fff}.opcache-gui .pagination li a:hover:not(.active){background-color:#ff7400;color:#fff}.opcache-gui .treemap-container .treemap-breadcrumb{margin:.5em 0;font-size:90%;word-break:break-all}.opcache-gui .treemap-container .treemap-breadcrumb a{text-decoration:none;color:#6ca6ef}.opcache-gui .treemap-container .treemap-breadcrumb a:hover{text-decoration:underline}.opcache-gui .treemap-container .treemap-breadcrumb .treemap-breadcrumb-sep{color:#ccc}.opcache-gui .treemap-container .treemap-meta{margin:0 0 .75em 0;font-size:90%}.opcache-gui .treemap-container .treemap-meta span{margin-right:1.25em}.opcache-gui .treemap-container .treemap-meta .treemap-hint{color:#888;font-style:italic}.opcache-gui .treemap-container .treemap-svg-wrap{width:100%;aspect-ratio:2/1;background:#ededed;border:1px solid #ccc;overflow:hidden}.opcache-gui .treemap-container .treemap-svg{width:100%;height:100%;display:block}.opcache-gui .treemap-container .treemap-cell rect{stroke:#fff;stroke-width:1;transition:opacity .15s ease}.opcache-gui .treemap-container .treemap-cell.is-dir rect{cursor:pointer}.opcache-gui .treemap-container .treemap-cell.is-file rect{cursor:default}.opcache-gui .treemap-container .treemap-cell:hover rect{opacity:.78}.opcache-gui .treemap-container .treemap-cell .treemap-label{font-size:11px;font-family:sans-serif;fill:#fff;pointer-events:none;user-select:none;paint-order:stroke;stroke:rgba(0,0,0,.45);stroke-width:2px;stroke-linejoin:round}.opcache-gui .treemap-container .treemap-hover-info{margin:.6em 0 0 0;font-size:85%;min-height:1.4em;color:#444;word-break:break-all}.opcache-gui .treemap-container .treemap-hover-info .treemap-hover-placeholder{color:#999;font-style:italic}@media screen and (max-width: 750px){.opcache-gui .nav-tab-list{border-bottom:0}.opcache-gui .nav-tab{display:block;margin:0}.opcache-gui .nav-tab-link{display:block;margin:0 10px;padding:10px 0 10px 30px;border:0}.opcache-gui .nav-tab-link[data-for].active{border-bottom-color:#ccc}.opcache-gui .tab-content-overview-info{margin-right:auto;clear:both}.opcache-gui .tab-content-overview-counts{position:relative;display:block;width:100%}}@media screen and (max-width: 550px){.opcache-gui .file-filter{width:100%}}@keyframes pulse{0%{transform:scale(1);opacity:1}50%,100%{transform:scale(2);opacity:0}}/*# sourceMappingURL=interface.css.map */
     </style>
 </head>
 
@@ -689,10 +698,20 @@ function MainNavigation(props) {
     },
     realtime: props.realtime,
     txt: props.txt
+  })), props.allow.filelist && props.opstate.files.length && /*#__PURE__*/React.createElement("div", {
+    label: props.txt("Treemap"),
+    tabId: "treemap",
+    tabIndex: 3
+  }, /*#__PURE__*/React.createElement(Treemap, {
+    allFiles: props.opstate.files,
+    allow: {
+      fileList: props.allow.filelist
+    },
+    txt: props.txt
   })), props.allow.filelist && props.opstate.blacklist.length && /*#__PURE__*/React.createElement("div", {
     label: props.txt("Ignored"),
     tabId: "ignored",
-    tabIndex: 3
+    tabIndex: 4
   }, /*#__PURE__*/React.createElement(IgnoredFiles, {
     perPageLimit: props.perPageLimit,
     allFiles: props.opstate.blacklist,
@@ -703,7 +722,7 @@ function MainNavigation(props) {
   })), props.allow.filelist && props.opstate.preload.length && /*#__PURE__*/React.createElement("div", {
     label: props.txt("Preloaded"),
     tabId: "preloaded",
-    tabIndex: 4
+    tabIndex: 5
   }, /*#__PURE__*/React.createElement(PreloadedFiles, {
     perPageLimit: props.perPageLimit,
     allFiles: props.opstate.preload,
@@ -716,13 +735,13 @@ function MainNavigation(props) {
     tabId: "resetCache",
     className: `nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`,
     handler: props.resetHandler,
-    tabIndex: 5
+    tabIndex: 6
   }), props.allow.realtime && /*#__PURE__*/React.createElement("div", {
     label: props.txt(`${props.realtime ? 'Disable' : 'Enable'} real-time update`),
     tabId: "toggleRealtime",
     className: `nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`,
     handler: props.realtimeHandler,
-    tabIndex: 6
+    tabIndex: 7
   })));
 }
 class Tabs extends React.Component {
@@ -1374,6 +1393,290 @@ class CachedFile extends React.Component {
       onClick: this.handleInvalidate
     }, this.props.txt('force file invalidation')))));
   }
+}
+function buildFileTree(files) {
+  const root = {
+    name: '',
+    path: '',
+    children: {},
+    isDir: true,
+    value: 0,
+    hits: 0,
+    fileCount: 0
+  };
+  for (const file of files) {
+    const parts = file.full_path.split('/').filter(p => p !== '');
+    if (parts.length === 0) continue;
+    let node = root;
+    for (let i = 0; i < parts.length - 1; i++) {
+      const p = parts[i];
+      if (!node.children[p]) {
+        node.children[p] = {
+          name: p,
+          path: (node.path ? node.path + '/' : '') + p,
+          children: {},
+          isDir: true,
+          value: 0,
+          hits: 0,
+          fileCount: 0
+        };
+      }
+      node = node.children[p];
+    }
+    const leafName = parts[parts.length - 1];
+    node.children[leafName] = {
+      name: leafName,
+      path: (node.path ? node.path + '/' : '') + leafName,
+      isDir: false,
+      value: file.memory_consumption || 0,
+      hits: file.hits || 0,
+      fileCount: 1,
+      file
+    };
+  }
+  const aggregate = node => {
+    if (!node.isDir) return;
+    let totalValue = 0,
+      totalHits = 0,
+      totalFiles = 0;
+    for (const key of Object.keys(node.children)) {
+      const child = node.children[key];
+      aggregate(child);
+      totalValue += child.value;
+      totalHits += child.hits;
+      totalFiles += child.fileCount;
+    }
+    node.value = totalValue;
+    node.hits = totalHits;
+    node.fileCount = totalFiles;
+  };
+  aggregate(root);
+  return root;
+}
+function nodeFromPath(root, path) {
+  if (!path) return root;
+  const parts = path.split('/').filter(p => p !== '');
+  let node = root;
+  for (const p of parts) {
+    if (node.children && node.children[p]) {
+      node = node.children[p];
+    } else {
+      return root;
+    }
+  }
+  return node;
+}
+function squarify(items, rect) {
+  if (!items.length) return [];
+  const totalValue = items.reduce((s, i) => s + (i.value || 0), 0);
+  if (totalValue <= 0 || rect.w <= 0 || rect.h <= 0) return [];
+  const area = rect.w * rect.h;
+  const scaled = items.filter(i => (i.value || 0) > 0).map(i => ({
+    item: i,
+    area: (i.value || 0) / totalValue * area
+  })).sort((a, b) => b.area - a.area);
+  const placed = [];
+  let remaining = scaled;
+  let row = [];
+  let cur = {
+    ...rect
+  };
+  const worst = (rowArr, side) => {
+    if (!rowArr.length) return Infinity;
+    const sum = rowArr.reduce((s, r) => s + r.area, 0);
+    if (sum === 0) return Infinity;
+    let maxA = -Infinity,
+      minA = Infinity;
+    for (const r of rowArr) {
+      if (r.area > maxA) maxA = r.area;
+      if (r.area < minA) minA = r.area;
+    }
+    const s2 = sum * sum;
+    const w2 = side * side;
+    return Math.max(w2 * maxA / s2, s2 / (w2 * minA));
+  };
+  const layoutRow = (rowArr, r) => {
+    const sum = rowArr.reduce((s, x) => s + x.area, 0);
+    const horizontal = r.w >= r.h;
+    if (horizontal) {
+      const colW = sum / r.h;
+      let y = r.y;
+      for (const x of rowArr) {
+        const h = x.area / colW;
+        placed.push({
+          item: x.item,
+          x: r.x,
+          y,
+          w: colW,
+          h
+        });
+        y += h;
+      }
+      return {
+        x: r.x + colW,
+        y: r.y,
+        w: r.w - colW,
+        h: r.h
+      };
+    } else {
+      const rowH = sum / r.w;
+      let xPos = r.x;
+      for (const x of rowArr) {
+        const w = x.area / rowH;
+        placed.push({
+          item: x.item,
+          x: xPos,
+          y: r.y,
+          w,
+          h: rowH
+        });
+        xPos += w;
+      }
+      return {
+        x: r.x,
+        y: r.y + rowH,
+        w: r.w,
+        h: r.h - rowH
+      };
+    }
+  };
+  while (remaining.length > 0) {
+    const side = Math.min(cur.w, cur.h);
+    const next = remaining[0];
+    if (row.length === 0 || worst([...row, next], side) <= worst(row, side)) {
+      row.push(next);
+      remaining = remaining.slice(1);
+    } else {
+      cur = layoutRow(row, cur);
+      row = [];
+    }
+  }
+  if (row.length > 0) layoutRow(row, cur);
+  return placed;
+}
+function lerpHeatColor(t) {
+  const a = [108, 166, 239];
+  const b = [255, 116, 0];
+  const clamp = Math.max(0, Math.min(1, t));
+  const r = Math.round(a[0] + (b[0] - a[0]) * clamp);
+  const g = Math.round(a[1] + (b[1] - a[1]) * clamp);
+  const bl = Math.round(a[2] + (b[2] - a[2]) * clamp);
+  return `rgb(${r},${g},${bl})`;
+}
+function formatBytesShort(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+}
+function Treemap(props) {
+  const [zoomPath, setZoomPath] = React.useState('');
+  const [hovered, setHovered] = React.useState(null);
+  const tree = React.useMemo(() => buildFileTree(props.allFiles || []), [props.allFiles]);
+  const currentNode = React.useMemo(() => nodeFromPath(tree, zoomPath), [tree, zoomPath]);
+  const VIEW_W = 1200;
+  const VIEW_H = 600;
+  const childItems = React.useMemo(() => {
+    if (!currentNode || !currentNode.isDir) return [];
+    const items = Object.values(currentNode.children).filter(c => c.value > 0);
+    return squarify(items, {
+      x: 0,
+      y: 0,
+      w: VIEW_W,
+      h: VIEW_H
+    });
+  }, [currentNode]);
+  const maxHits = React.useMemo(() => {
+    let m = 0;
+    if (currentNode && currentNode.children) {
+      for (const c of Object.values(currentNode.children)) {
+        if ((c.hits || 0) > m) m = c.hits;
+      }
+    }
+    return m;
+  }, [currentNode]);
+  if (!props.allow.fileList) {
+    return null;
+  }
+  if (!props.allFiles || props.allFiles.length === 0) {
+    return /*#__PURE__*/React.createElement("p", {
+      dangerouslySetInnerHTML: {
+        __html: props.txt(`No files have been cached or you have <i>opcache.file_cache_only</i> turned on`)
+      }
+    });
+  }
+  const breadcrumbParts = currentNode.path ? currentNode.path.split('/').filter(p => p !== '') : [];
+  return /*#__PURE__*/React.createElement("div", {
+    className: "treemap-container"
+  }, /*#__PURE__*/React.createElement("h3", null, props.txt('{0} files cached', props.allFiles.length)), /*#__PURE__*/React.createElement("nav", {
+    className: "treemap-breadcrumb",
+    "aria-label": props.txt('Treemap location')
+  }, /*#__PURE__*/React.createElement("a", {
+    href: "#",
+    onClick: e => {
+      e.preventDefault();
+      setZoomPath('');
+    }
+  }, props.txt('root')), breadcrumbParts.map((part, i) => {
+    const targetPath = breadcrumbParts.slice(0, i + 1).join('/');
+    return /*#__PURE__*/React.createElement(React.Fragment, {
+      key: targetPath
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "treemap-breadcrumb-sep"
+    }, " / "), /*#__PURE__*/React.createElement("a", {
+      href: "#",
+      onClick: e => {
+        e.preventDefault();
+        setZoomPath(targetPath);
+      }
+    }, part));
+  })), /*#__PURE__*/React.createElement("p", {
+    className: "treemap-meta"
+  }, /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("b", null, props.txt('files'), ":"), " ", currentNode.fileCount.toLocaleString()), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("b", null, props.txt('memory'), ":"), " ", formatBytesShort(currentNode.value)), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("b", null, props.txt('hits'), ":"), " ", (currentNode.hits || 0).toLocaleString()), /*#__PURE__*/React.createElement("span", {
+    className: "treemap-hint"
+  }, props.txt('Click a directory to zoom in'))), /*#__PURE__*/React.createElement("div", {
+    className: "treemap-svg-wrap"
+  }, /*#__PURE__*/React.createElement("svg", {
+    className: "treemap-svg",
+    viewBox: `0 0 ${VIEW_W} ${VIEW_H}`,
+    preserveAspectRatio: "none",
+    role: "img",
+    "aria-label": props.txt('Treemap of cached files')
+  }, childItems.map(({
+    item,
+    x,
+    y,
+    w,
+    h
+  }) => {
+    const t = maxHits > 0 ? Math.log(1 + (item.hits || 0)) / Math.log(1 + maxHits) : 0;
+    const fill = lerpHeatColor(t);
+    const showLabel = w > 60 && h > 18;
+    const tip = item.isDir ? `${item.path}/\n${props.txt('files')}: ${item.fileCount}\n${props.txt('memory')}: ${formatBytesShort(item.value)}\n${props.txt('hits')}: ${(item.hits || 0).toLocaleString()}` : `${item.path}\n${props.txt('memory')}: ${formatBytesShort(item.value)}\n${props.txt('hits')}: ${(item.hits || 0).toLocaleString()}`;
+    return /*#__PURE__*/React.createElement("g", {
+      key: item.path,
+      className: `treemap-cell ${item.isDir ? 'is-dir' : 'is-file'}`,
+      onClick: () => {
+        if (item.isDir) setZoomPath(item.path);
+      },
+      onMouseEnter: () => setHovered(item),
+      onMouseLeave: () => setHovered(prev => prev === item ? null : prev)
+    }, /*#__PURE__*/React.createElement("rect", {
+      x: x,
+      y: y,
+      width: w,
+      height: h,
+      fill: fill
+    }), showLabel && /*#__PURE__*/React.createElement("text", {
+      x: x + 4,
+      y: y + 14,
+      className: "treemap-label"
+    }, item.name, item.isDir ? '/' : ''), /*#__PURE__*/React.createElement("title", null, tip));
+  }))), /*#__PURE__*/React.createElement("p", {
+    className: "treemap-hover-info"
+  }, hovered ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("b", null, hovered.path, hovered.isDir ? '/' : ''), hovered.isDir ? /*#__PURE__*/React.createElement(React.Fragment, null, " \u2014 ", props.txt('{0} files', hovered.fileCount), ", ", formatBytesShort(hovered.value), ", ", (hovered.hits || 0).toLocaleString(), " ", props.txt('hits')) : /*#__PURE__*/React.createElement(React.Fragment, null, " \u2014 ", formatBytesShort(hovered.value), ", ", (hovered.hits || 0).toLocaleString(), " ", props.txt('hits'))) : /*#__PURE__*/React.createElement("span", {
+    className: "treemap-hover-placeholder"
+  }, props.txt('Hover a tile for details'))));
 }
 class IgnoredFiles extends React.Component {
   constructor(props) {

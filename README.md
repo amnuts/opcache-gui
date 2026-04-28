@@ -12,7 +12,11 @@ MIT: http://acollington.mit-license.org/
 
 If you're able and would like to sponsor this work in some way, then that would be super awesome :heart:.  You can do that through the [GitHub Sponsorship](https://github.com/sponsors/amnuts) page.
 
-Alternatively, if you'd just like to give me a [shout-out on X (aka, Twitter)](https://twitter.com/acollington) to say you use it, then that'd be awesome, too!  (Any one else miss postcardware?)
+Alternatively, if you'd just like to give me a [shout-out on X (aka, Twitter)](https://twitter.com/acollington) to say you use it, then that'd be awesome, too!  (Anyone else miss postcardware?)
+
+## Sponsor shoutout
+
+Many thanks to Miraç KAÇMAZ (@mirackacmazcom) for doing monthly sponsorship – it was sincerely appreciated!  I was utterly remiss in not thanking you sooner and putting your name up here, sorry!
 
 ## Using the opcache-gui
 
@@ -233,13 +237,19 @@ To get started with a new language, copy the `example.json` to the language you 
 
 ## Releases
 
+**Version 3.7.0**\
+* Fixed a potential file security issue
+* Dependabot updates for some node dependencies
+* Added default value of Optimization Level thanks to @krzotr (PR#127)
+* Added treemap output of the cached files
+
 **Version 3.6.0**\
-Added German translation and various fixes thanks to @matthiasstraka (PR#123)
-Added fix for missing JIT in older PHP versions thanks to @cpeel (PR#120)
-Updated React and Axios packages
-Changes node-sass to sass, and various updates to support that
-Fixed #118
-Fixed #122
+* Added German translation and various fixes thanks to @matthiasstraka (PR#123)
+* Added fix for missing JIT in older PHP versions thanks to @cpeel (PR#120)
+* Updated React and Axios packages
+* Changes node-sass to sass, and various updates to support that
+* Fixed #118
+* Fixed #122
 
 **Version 3.5.5**\
 Added Spanish translations thanks to @cvc90 (PR#110)

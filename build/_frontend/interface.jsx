@@ -145,8 +145,18 @@ function MainNavigation(props) {
                         </div>
                 }
                 {
+                    (props.allow.filelist && props.opstate.files.length &&
+                        <div label={props.txt("Treemap")} tabId="treemap" tabIndex={3}>
+                            <Treemap
+                                allFiles={props.opstate.files}
+                                allow={{fileList: props.allow.filelist}}
+                                txt={props.txt}
+                            />
+                        </div>)
+                }
+                {
                     (props.allow.filelist && props.opstate.blacklist.length &&
-                        <div label={props.txt("Ignored")} tabId="ignored" tabIndex={3}>
+                        <div label={props.txt("Ignored")} tabId="ignored" tabIndex={4}>
                             <IgnoredFiles
                                 perPageLimit={props.perPageLimit}
                                 allFiles={props.opstate.blacklist}
@@ -157,7 +167,7 @@ function MainNavigation(props) {
                 }
                 {
                     (props.allow.filelist && props.opstate.preload.length &&
-                        <div label={props.txt("Preloaded")} tabId="preloaded" tabIndex={4}>
+                        <div label={props.txt("Preloaded")} tabId="preloaded" tabIndex={5}>
                             <PreloadedFiles
                                 perPageLimit={props.perPageLimit}
                                 allFiles={props.opstate.preload}
@@ -171,7 +181,7 @@ function MainNavigation(props) {
                         <div label={props.txt("Reset cache")} tabId="resetCache"
                            className={`nav-tab-link-reset${props.resetting ? ' is-resetting pulse' : ''}`}
                            handler={props.resetHandler}
-                           tabIndex={5}
+                           tabIndex={6}
                         ></div>
                 }
                 {
@@ -179,7 +189,7 @@ function MainNavigation(props) {
                         <div label={props.txt(`${props.realtime ? 'Disable' : 'Enable'} real-time update`)} tabId="toggleRealtime"
                             className={`nav-tab-link-realtime${props.realtime ? ' live-update pulse' : ''}`}
                             handler={props.realtimeHandler}
-                            tabIndex={6}
+                            tabIndex={7}
                         ></div>
                 }
             </Tabs>
@@ -895,6 +905,269 @@ class CachedFile extends React.Component {
             </tr>
         );
     }
+}
+
+
+function buildFileTree(files) {
+    const root = { name: '', path: '', children: {}, isDir: true, value: 0, hits: 0, fileCount: 0 };
+    for (const file of files) {
+        const parts = file.full_path.split('/').filter(p => p !== '');
+        if (parts.length === 0) continue;
+        let node = root;
+        for (let i = 0; i < parts.length - 1; i++) {
+            const p = parts[i];
+            if (!node.children[p]) {
+                node.children[p] = {
+                    name: p,
+                    path: (node.path ? node.path + '/' : '') + p,
+                    children: {},
+                    isDir: true,
+                    value: 0,
+                    hits: 0,
+                    fileCount: 0
+                };
+            }
+            node = node.children[p];
+        }
+        const leafName = parts[parts.length - 1];
+        node.children[leafName] = {
+            name: leafName,
+            path: (node.path ? node.path + '/' : '') + leafName,
+            isDir: false,
+            value: file.memory_consumption || 0,
+            hits: file.hits || 0,
+            fileCount: 1,
+            file
+        };
+    }
+    const aggregate = (node) => {
+        if (!node.isDir) return;
+        let totalValue = 0, totalHits = 0, totalFiles = 0;
+        for (const key of Object.keys(node.children)) {
+            const child = node.children[key];
+            aggregate(child);
+            totalValue += child.value;
+            totalHits += child.hits;
+            totalFiles += child.fileCount;
+        }
+        node.value = totalValue;
+        node.hits = totalHits;
+        node.fileCount = totalFiles;
+    };
+    aggregate(root);
+    return root;
+}
+
+function nodeFromPath(root, path) {
+    if (!path) return root;
+    const parts = path.split('/').filter(p => p !== '');
+    let node = root;
+    for (const p of parts) {
+        if (node.children && node.children[p]) {
+            node = node.children[p];
+        } else {
+            return root;
+        }
+    }
+    return node;
+}
+
+function squarify(items, rect) {
+    if (!items.length) return [];
+    const totalValue = items.reduce((s, i) => s + (i.value || 0), 0);
+    if (totalValue <= 0 || rect.w <= 0 || rect.h <= 0) return [];
+    const area = rect.w * rect.h;
+    const scaled = items
+        .filter(i => (i.value || 0) > 0)
+        .map(i => ({ item: i, area: ((i.value || 0) / totalValue) * area }))
+        .sort((a, b) => b.area - a.area);
+    const placed = [];
+    let remaining = scaled;
+    let row = [];
+    let cur = { ...rect };
+    const worst = (rowArr, side) => {
+        if (!rowArr.length) return Infinity;
+        const sum = rowArr.reduce((s, r) => s + r.area, 0);
+        if (sum === 0) return Infinity;
+        let maxA = -Infinity, minA = Infinity;
+        for (const r of rowArr) {
+            if (r.area > maxA) maxA = r.area;
+            if (r.area < minA) minA = r.area;
+        }
+        const s2 = sum * sum;
+        const w2 = side * side;
+        return Math.max((w2 * maxA) / s2, s2 / (w2 * minA));
+    };
+    const layoutRow = (rowArr, r) => {
+        const sum = rowArr.reduce((s, x) => s + x.area, 0);
+        const horizontal = r.w >= r.h;
+        if (horizontal) {
+            const colW = sum / r.h;
+            let y = r.y;
+            for (const x of rowArr) {
+                const h = x.area / colW;
+                placed.push({ item: x.item, x: r.x, y, w: colW, h });
+                y += h;
+            }
+            return { x: r.x + colW, y: r.y, w: r.w - colW, h: r.h };
+        } else {
+            const rowH = sum / r.w;
+            let xPos = r.x;
+            for (const x of rowArr) {
+                const w = x.area / rowH;
+                placed.push({ item: x.item, x: xPos, y: r.y, w, h: rowH });
+                xPos += w;
+            }
+            return { x: r.x, y: r.y + rowH, w: r.w, h: r.h - rowH };
+        }
+    };
+    while (remaining.length > 0) {
+        const side = Math.min(cur.w, cur.h);
+        const next = remaining[0];
+        if (row.length === 0 || worst([...row, next], side) <= worst(row, side)) {
+            row.push(next);
+            remaining = remaining.slice(1);
+        } else {
+            cur = layoutRow(row, cur);
+            row = [];
+        }
+    }
+    if (row.length > 0) layoutRow(row, cur);
+    return placed;
+}
+
+function lerpHeatColor(t) {
+    const a = [108, 166, 239];
+    const b = [255, 116, 0];
+    const clamp = Math.max(0, Math.min(1, t));
+    const r = Math.round(a[0] + (b[0] - a[0]) * clamp);
+    const g = Math.round(a[1] + (b[1] - a[1]) * clamp);
+    const bl = Math.round(a[2] + (b[2] - a[2]) * clamp);
+    return `rgb(${r},${g},${bl})`;
+}
+
+function formatBytesShort(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+}
+
+function Treemap(props) {
+    const [zoomPath, setZoomPath] = React.useState('');
+    const [hovered, setHovered] = React.useState(null);
+
+    const tree = React.useMemo(
+        () => buildFileTree(props.allFiles || []),
+        [props.allFiles]
+    );
+    const currentNode = React.useMemo(
+        () => nodeFromPath(tree, zoomPath),
+        [tree, zoomPath]
+    );
+
+    const VIEW_W = 1200;
+    const VIEW_H = 600;
+
+    const childItems = React.useMemo(() => {
+        if (!currentNode || !currentNode.isDir) return [];
+        const items = Object.values(currentNode.children).filter(c => c.value > 0);
+        return squarify(items, { x: 0, y: 0, w: VIEW_W, h: VIEW_H });
+    }, [currentNode]);
+
+    const maxHits = React.useMemo(() => {
+        let m = 0;
+        if (currentNode && currentNode.children) {
+            for (const c of Object.values(currentNode.children)) {
+                if ((c.hits || 0) > m) m = c.hits;
+            }
+        }
+        return m;
+    }, [currentNode]);
+
+    if (!props.allow.fileList) {
+        return null;
+    }
+    if (!props.allFiles || props.allFiles.length === 0) {
+        return <p dangerouslySetInnerHTML={{__html: props.txt(`No files have been cached or you have <i>opcache.file_cache_only</i> turned on`)}}></p>;
+    }
+
+    const breadcrumbParts = currentNode.path
+        ? currentNode.path.split('/').filter(p => p !== '')
+        : [];
+
+    return (
+        <div className="treemap-container">
+            <h3>{props.txt('{0} files cached', props.allFiles.length)}</h3>
+            <nav className="treemap-breadcrumb" aria-label={props.txt('Treemap location')}>
+                <a href="#" onClick={e => { e.preventDefault(); setZoomPath(''); }}>{props.txt('root')}</a>
+                {breadcrumbParts.map((part, i) => {
+                    const targetPath = breadcrumbParts.slice(0, i + 1).join('/');
+                    return (
+                        <React.Fragment key={targetPath}>
+                            <span className="treemap-breadcrumb-sep"> / </span>
+                            <a href="#" onClick={e => { e.preventDefault(); setZoomPath(targetPath); }}>{part}</a>
+                        </React.Fragment>
+                    );
+                })}
+            </nav>
+            <p className="treemap-meta">
+                <span><b>{props.txt('files')}:</b> {currentNode.fileCount.toLocaleString()}</span>
+                <span><b>{props.txt('memory')}:</b> {formatBytesShort(currentNode.value)}</span>
+                <span><b>{props.txt('hits')}:</b> {(currentNode.hits || 0).toLocaleString()}</span>
+                <span className="treemap-hint">{props.txt('Click a directory to zoom in')}</span>
+            </p>
+            <div className="treemap-svg-wrap">
+                <svg
+                    className="treemap-svg"
+                    viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+                    preserveAspectRatio="none"
+                    role="img"
+                    aria-label={props.txt('Treemap of cached files')}
+                >
+                    {childItems.map(({ item, x, y, w, h }) => {
+                        const t = maxHits > 0
+                            ? Math.log(1 + (item.hits || 0)) / Math.log(1 + maxHits)
+                            : 0;
+                        const fill = lerpHeatColor(t);
+                        const showLabel = w > 60 && h > 18;
+                        const tip = (item.isDir
+                            ? `${item.path}/\n${props.txt('files')}: ${item.fileCount}\n${props.txt('memory')}: ${formatBytesShort(item.value)}\n${props.txt('hits')}: ${(item.hits || 0).toLocaleString()}`
+                            : `${item.path}\n${props.txt('memory')}: ${formatBytesShort(item.value)}\n${props.txt('hits')}: ${(item.hits || 0).toLocaleString()}`
+                        );
+                        return (
+                            <g key={item.path}
+                               className={`treemap-cell ${item.isDir ? 'is-dir' : 'is-file'}`}
+                               onClick={() => { if (item.isDir) setZoomPath(item.path); }}
+                               onMouseEnter={() => setHovered(item)}
+                               onMouseLeave={() => setHovered(prev => (prev === item ? null : prev))}
+                            >
+                                <rect x={x} y={y} width={w} height={h} fill={fill} />
+                                {showLabel && (
+                                    <text x={x + 4} y={y + 14} className="treemap-label">
+                                        {item.name}{item.isDir ? '/' : ''}
+                                    </text>
+                                )}
+                                <title>{tip}</title>
+                            </g>
+                        );
+                    })}
+                </svg>
+            </div>
+            <p className="treemap-hover-info">
+                {hovered
+                    ? <>
+                        <b>{hovered.path}{hovered.isDir ? '/' : ''}</b>
+                        {hovered.isDir
+                            ? <> — {props.txt('{0} files', hovered.fileCount)}, {formatBytesShort(hovered.value)}, {(hovered.hits || 0).toLocaleString()} {props.txt('hits')}</>
+                            : <> — {formatBytesShort(hovered.value)}, {(hovered.hits || 0).toLocaleString()} {props.txt('hits')}</>
+                        }
+                    </>
+                    : <span className="treemap-hover-placeholder">{props.txt('Hover a tile for details')}</span>
+                }
+            </p>
+        </div>
+    );
 }
 
 

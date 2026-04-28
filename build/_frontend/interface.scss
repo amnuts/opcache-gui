@@ -392,6 +392,100 @@ $footer-border-color: #CCC;
     }
   }
 
+  .treemap-container {
+    .treemap-breadcrumb {
+      margin: 0.5em 0;
+      font-size: 90%;
+      word-break: break-all;
+
+      a {
+        text-decoration: none;
+        color: $nav-header-color;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+
+      .treemap-breadcrumb-sep {
+        color: $nav-border-color;
+      }
+    }
+
+    .treemap-meta {
+      margin: 0 0 0.75em 0;
+      font-size: 90%;
+
+      span {
+        margin-right: 1.25em;
+      }
+
+      .treemap-hint {
+        color: #888;
+        font-style: italic;
+      }
+    }
+
+    .treemap-svg-wrap {
+      width: 100%;
+      aspect-ratio: 2 / 1;
+      background: $widget-background-color;
+      border: 1px solid $nav-border-color;
+      overflow: hidden;
+    }
+
+    .treemap-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .treemap-cell {
+      rect {
+        stroke: $table-row-border-color;
+        stroke-width: 1;
+        transition: opacity 0.15s ease;
+      }
+
+      &.is-dir rect {
+        cursor: pointer;
+      }
+
+      &.is-file rect {
+        cursor: default;
+      }
+
+      &:hover rect {
+        opacity: 0.78;
+      }
+
+      .treemap-label {
+        font-size: 11px;
+        font-family: sans-serif;
+        fill: #FFF;
+        pointer-events: none;
+        user-select: none;
+        paint-order: stroke;
+        stroke: rgba(0, 0, 0, 0.45);
+        stroke-width: 2px;
+        stroke-linejoin: round;
+      }
+    }
+
+    .treemap-hover-info {
+      margin: 0.6em 0 0 0;
+      font-size: 85%;
+      min-height: 1.4em;
+      color: #444;
+      word-break: break-all;
+
+      .treemap-hover-placeholder {
+        color: #999;
+        font-style: italic;
+      }
+    }
+  }
+
   @media screen and (max-width: 750px) {
     .nav-tab-list {
       border-bottom: 0;
