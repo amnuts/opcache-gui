@@ -238,17 +238,17 @@ To get started with a new language, copy the `example.json` to the language you 
 ## Releases
 
 **Version 3.7.0**\
-Fixed a potential file security issue
-Dependabot updates for some node dependencies
-Added default value of Optimization Level thanks to @krzotr (PR#127)
+* Fixed a potential file security issue
+* Dependabot updates for some node dependencies
+* Added default value of Optimization Level thanks to @krzotr (PR#127)
 
 **Version 3.6.0**\
-Added German translation and various fixes thanks to @matthiasstraka (PR#123)
-Added fix for missing JIT in older PHP versions thanks to @cpeel (PR#120)
-Updated React and Axios packages
-Changes node-sass to sass, and various updates to support that
-Fixed #118
-Fixed #122
+* Added German translation and various fixes thanks to @matthiasstraka (PR#123)
+* Added fix for missing JIT in older PHP versions thanks to @cpeel (PR#120)
+* Updated React and Axios packages
+* Changes node-sass to sass, and various updates to support that
+* Fixed #118
+* Fixed #122
 
 **Version 3.5.5**\
 Added Spanish translations thanks to @cvc90 (PR#110)
