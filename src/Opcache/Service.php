@@ -8,7 +8,7 @@ use Exception;
 
 class Service
 {
-    public const VERSION = '3.6.0';
+    public const VERSION = '3.7.0';
 
     protected $tz;
     protected $data;
@@ -210,11 +210,17 @@ class Service
      */
     public function resetCache(?string $file = null): bool
     {
-        $success = false;
         if ($file === null) {
             $success = opcache_reset();
         } elseif (function_exists('opcache_invalidate')) {
-            $success = opcache_invalidate(urldecode($file), true);
+            $file = urldecode($file);
+            $cached = array_column($this->getData('files') ?? [], 'full_path');
+            if (!in_array($file, $cached, true)) {
+                return false;
+            }
+            $success = opcache_invalidate($file, true);
+        } else {
+            return false;
         }
         if ($success) {
             $this->compileState();
