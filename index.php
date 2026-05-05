@@ -6,7 +6,7 @@
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.6.0
+ * @version 3.6.1
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, https://acollington.mit-license.org/
  */
@@ -59,7 +59,7 @@ header('Pragma: no-cache');
 
 class Service
 {
-    public const VERSION = '3.6.0';
+    public const VERSION = '3.6.1';
 
     protected $tz;
     protected $data;
@@ -261,11 +261,17 @@ class Service
      */
     public function resetCache(?string $file = null): bool
     {
-        $success = false;
         if ($file === null) {
             $success = opcache_reset();
         } elseif (function_exists('opcache_invalidate')) {
-            $success = opcache_invalidate(urldecode($file), true);
+            $file = urldecode($file);
+            $cached = array_column($this->getData('files') ?? [], 'full_path');
+            if (!in_array($file, $cached, true)) {
+                return false;
+            }
+            $success = opcache_invalidate($file, true);
+        } else {
+            return false;
         }
         if ($success) {
             $this->compileState();
@@ -437,6 +443,9 @@ class Service
                 $v = $this->size($v) . " ({$v})";
             } elseif ($k === 'opcache.optimization_level') {
                 $levels = [];
+                if ($v > 0) {
+                    $levels[] = sprintf("Optimization Level: [0x%08X]", $v);
+                }
                 foreach ($this->optimizationLevels as $level => $info) {
                     if ($level & $v) {
                         $levels[] = "{$info} [{$level}]";
