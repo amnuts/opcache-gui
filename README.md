@@ -237,12 +237,12 @@ To get started with a new language, copy the `example.json` to the language you 
 
 ## Releases
 
-**Version 3.6.1**\
+**Version 3.6.1**
 * Fixed a potential file traversal security issue - many thanks to @fernandobortotti for the detailed report
 * Dependabot updates for some node dependencies
 * Added default value of Optimization Level thanks to @krzotr (PR#127)
 
-**Version 3.6.0**\
+**Version 3.6.0**
 * Added German translation and various fixes thanks to @matthiasstraka (PR#123)
 * Added fix for missing JIT in older PHP versions thanks to @cpeel (PR#120)
 * Updated React and Axios packages
