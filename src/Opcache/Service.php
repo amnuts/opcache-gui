@@ -8,7 +8,7 @@ use Exception;
 
 class Service
 {
-    public const VERSION = '3.7.0';
+    public const VERSION = '3.6.1';
 
     protected $tz;
     protected $data;

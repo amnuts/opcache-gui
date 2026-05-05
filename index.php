@@ -6,7 +6,7 @@
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.7.0
+ * @version 3.6.1
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, https://acollington.mit-license.org/
  */
@@ -59,7 +59,7 @@ header('Pragma: no-cache');
 
 class Service
 {
-    public const VERSION = '3.7.0';
+    public const VERSION = '3.6.1';
 
     protected $tz;
     protected $data;

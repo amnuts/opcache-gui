@@ -159,7 +159,7 @@ If you have not supplied that configuration option in the `php.ini` file then th
 
 #### Preloaded files
 
-PHP 7.4 introduced the ability to pre-load a set of files on server start by way of the `opcache.preload` setting in your `php.ini` file.  If you have set that up then the list of files specifically pre-loaded will be listed within this tab.
+PHP 7.4 introduced the ability to preload a set of files on server start by way of the `opcache.preload` setting in your `php.ini` file.  If you have set that up then the list of files specifically preloaded will be listed within this tab.
 
 As with the ignored file, if you have not supplied the ini setting, or the `allow_filelist` configuration option is `false`, then this tab will not be displayed.
 
@@ -175,11 +175,11 @@ The interface can poll every so often to get a fresh look at the opcache.  You c
 
 When the real-time updates are active, the interface will automatically update all the values as needed.
 
-Also, if you choose to invalidate any files or reset the cache it will do this without reloading the page, so the search term you've entered, or the page to which you've navigated do not get reset.  If the real-time update is not on then the page will reload on any invalidation usage.
+Also, if you choose to invalidate any files or reset the cache it will do this without reloading the page, so the search term you've entered, or the page to which you've navigated do not get reset.  If the real-time update is not on, then the page will reload on any invalidation usage.
 
 ### Building it yourself
 
-The interface has been designed around the principle of having just one file that anyone needs to get up and running.  To fulfil this, there's a template file, language files, jsx, and css, which are all used to create the interface and they're brought together in the build process.
+The interface has been designed around the principle of having just one file that anyone needs to get up and running.  To fulfil this, there's a template file, language files, jsx, and css, which are all used to create the interface, and they're brought together in the build process.
 
 This build process will allow you to change the language used, how the required third-party javascript libraries are included, the look and feel, or even the core components, should you wish.
 
@@ -215,7 +215,7 @@ Run the build script again should you make changes here.
 
 The wrapper PHP template used in the build process, and that acts to pass various bits of data to the ReactJS side of things, is located at `build/template.phps`.  If you wanted to update the version of ReactJS used, or how the wrapper html is structured (such as wanting to pass additional things to the ReactJS side of things), then this would be the file you'd want to update. 
 
-The interface requires a few third-party js files to function correctly.  You have the option of being able to change where these are fetched (between CloudFare, JSDelivr, and Unpkg), or you can have js completely local and in-line (for example, you have CSP policies in place and the remote urls are not allowed).
+The interface requires a few third-party js files to function correctly.  You have the option of being able to change where these are fetched (between CloudFare, JSDelivr, and Unpkg), or you can have js completely local and in-line. (For example, you have CSP policies in place and the remote urls are not allowed.)
 
 To change the location of the third-party resources, use the `-r` or `--remote-js` option followed by either `cloudflare`, `jsdelivr`, or `unpkg`.  For example, if you wanted to use _jsdelivr_ then you'd run the build command like this: `php ./build/build.php -r jsdelivr`.  This defaults to `cloudflare`.
 
@@ -223,7 +223,7 @@ If you wanted to have the js in-line, then you can use the `-j` or `--local-js` 
 
 #### The language
 
-There's an old saying that goes, "If you know more than one language you're multilingual, if you don't you're British."  Not only is that a damning indictment of the British mentality towards other languages, but also goes to explain why the UI has only so far been in English - because I am, for all my sins, British.
+There's an old saying that goes, "If you know more than one language you're multilingual, if you don't, you're British."  Not only is that a damning indictment of the British mentality towards other languages, but also goes to explain why the UI has only so far been in English – because I am, for all my sins, British.
 
 However, it is now possible to build the interface with a different language.  Currently, thanks to contributors, French, German, and Spanish are also supported.  If anyone else wants to contribute additional language packs, please submit a PR! 
 
@@ -237,8 +237,8 @@ To get started with a new language, copy the `example.json` to the language you 
 
 ## Releases
 
-**Version 3.7.0**\
-* Fixed a potential file security issue
+**Version 3.6.1**\
+* Fixed a potential file traversal security issue - many thanks to @fernandobortotti for the detailed report
 * Dependabot updates for some node dependencies
 * Added default value of Optimization Level thanks to @krzotr (PR#127)
 
