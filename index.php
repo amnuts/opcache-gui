@@ -6,7 +6,7 @@
  * A simple but effective single-file GUI for the OPcache PHP extension.
  *
  * @author Andrew Collington, andy@amnuts.com
- * @version 3.6.1
+ * @version 3.6.2
  * @link https://github.com/amnuts/opcache-gui
  * @license MIT, https://acollington.mit-license.org/
  */
@@ -59,7 +59,7 @@ header('Pragma: no-cache');
 
 class Service
 {
-    public const VERSION = '3.6.1';
+    public const VERSION = '3.6.2';
 
     protected $tz;
     protected $data;
@@ -308,6 +308,7 @@ class Service
     {
         $i = 0;
         $val = ['b', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        $size = abs((float) $size);
         while (($size / 1024) > 1) {
             $size /= 1024;
             ++$i;
@@ -339,6 +340,28 @@ class Service
             $config['directives'] = array_merge($config['directives'], $missingConfig);
         }
 
+        // FrankenPHP / PHP 8.5+ ZTS: opcache_get_configuration() can report
+        // memory_consumption=0 while ini_get() is correct (MB). Also used_memory
+        // may overflow to a negative int. See php/frankenphp#2231 / #2354.
+        $memoryConsumption = (int) ($config['directives']['opcache.memory_consumption'] ?? 0);
+        if ($memoryConsumption <= 0) {
+            $memoryConsumption = max(0, (int) ini_get('opcache.memory_consumption') * 1024 * 1024);
+            $config['directives']['opcache.memory_consumption'] = $memoryConsumption;
+        }
+        if (isset($status['memory_usage'])) {
+            if (($status['memory_usage']['used_memory'] ?? 0) < 0 && $memoryConsumption > 0) {
+                $status['memory_usage']['used_memory'] = max(
+                    0,
+                    $memoryConsumption
+                    - (int) ($status['memory_usage']['free_memory'] ?? 0)
+                    - (int) ($status['memory_usage']['wasted_memory'] ?? 0)
+                );
+            }
+            if (!is_finite($status['memory_usage']['current_wasted_percentage'] ?? 0)) {
+                $status['memory_usage']['current_wasted_percentage'] = 0.0;
+            }
+        }
+
         $files = [];
         if (!empty($status['scripts']) && $this->getOption('allow_filelist')) {
             uasort($status['scripts'], static function ($a, $b) {
@@ -366,20 +389,27 @@ class Service
         if ($config['directives']['opcache.file_cache_only'] || !empty($status['file_cache_only'])) {
             $overview = false;
         } else {
+            $maxCachedKeys = (int) ($status['opcache_statistics']['max_cached_keys'] ?? 0);
             $overview = array_merge(
                 $status['memory_usage'], $status['opcache_statistics'], [
-                    'used_memory_percentage' => round(100 * (
-                        ($status['memory_usage']['used_memory'] + $status['memory_usage']['wasted_memory'])
-                        / $config['directives']['opcache.memory_consumption']
-                    )),
+                    'used_memory_percentage' => ($memoryConsumption > 0
+                        ? round(100 * (
+                            ($status['memory_usage']['used_memory'] + $status['memory_usage']['wasted_memory'])
+                            / $memoryConsumption
+                        ))
+                        : 0
+                    ),
                     'hit_rate_percentage' => round($status['opcache_statistics']['opcache_hit_rate']),
-                    'used_key_percentage' => round(100 * (
-                        $status['opcache_statistics']['num_cached_keys']
-                        / $status['opcache_statistics']['max_cached_keys']
-                    )),
+                    'used_key_percentage' => ($maxCachedKeys > 0
+                        ? round(100 * (
+                            $status['opcache_statistics']['num_cached_keys']
+                            / $maxCachedKeys
+                        ))
+                        : 0
+                    ),
                     'wasted_percentage' => round($status['memory_usage']['current_wasted_percentage'], 2),
                     'readable' => [
-                        'total_memory' => $this->size($config['directives']['opcache.memory_consumption']),
+                        'total_memory' => $this->size($memoryConsumption),
                         'used_memory' => $this->size($status['memory_usage']['used_memory']),
                         'free_memory' => $this->size($status['memory_usage']['free_memory']),
                         'wasted_memory' => $this->size($status['memory_usage']['wasted_memory']),
