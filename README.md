@@ -81,6 +81,7 @@ $options = [
     'allow_invalidate' => true,                // give a link to invalidate files
     'allow_reset'      => true,                // give option to reset the whole cache
     'allow_realtime'   => true,                // give option to enable/disable real-time updates
+    'lazy_load_files'  => true,                // only load cached files when requested
     'refresh_time'     => 5,                   // how often the data will refresh, in seconds
     'size_precision'   => 2,                   // Digits after decimal point
     'size_space'       => false,               // have '1MB' or '1 MB' when showing sizes
@@ -141,7 +142,7 @@ The overview will show you all the core information.  From here you'll be able t
 
 #### Cached files
 
-All the files currently in the cache are listed here with their associated statistics.
+All the files currently in the cache are listed here with their associated statistics. The single-file GUI loads this list only when you open the Cached tab, so a large cache does not slow the initial page load. Set `lazy_load_files` to `false` to retain eager loading.
 
 You can filter the results to help find the particular scripts you're looking for and change the way cached files are sorted.  From here you can invalidate the cache for individual files or invalidate the cache for all the files matching your search.
 

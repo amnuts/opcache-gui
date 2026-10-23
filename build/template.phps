@@ -22,6 +22,7 @@ $options = [
     'allow_invalidate' => true,                // give a link to invalidate files
     'allow_reset'      => true,                // give option to reset the whole cache
     'allow_realtime'   => true,                // give option to enable/disable real-time updates
+    'lazy_load_files'  => true,                // only load cached files when requested
     'refresh_time'     => 5,                   // how often the data will refresh, in seconds
     'size_precision'   => 2,                   // Digits after decimal point
     'size_space'       => false,               // have '1MB' or '1 MB' when showing sizes
@@ -90,6 +91,7 @@ $opcache = (new Service($options))->handle();
             reset: <?= $opcache->getOption('allow_reset') ? 'true' : 'false'; ?>,
             realtime: <?= $opcache->getOption('allow_realtime') ? 'true' : 'false'; ?>
         },
+        lazyLoadFiles: <?= $opcache->getOption('lazy_load_files') ? 'true' : 'false'; ?>,
         cookie: {
             name: '<?= $opcache->getOption('cookie_name'); ?>',
             ttl: <?= $opcache->getOption('cookie_ttl'); ?>

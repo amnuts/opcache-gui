@@ -4,7 +4,10 @@ class Interface extends React.Component {
         this.state = {
             realtime: this.getCookie(),
             resetting: false,
-            opstate: props.opstate
+            opstate: props.opstate,
+            filesLoaded: !props.lazyLoadFiles || !props.allow.filelist,
+            filesLoading: false,
+            filesError: false
         }
         this.polling = false;
         this.isSecure = (window.location.protocol === 'https:');
@@ -17,11 +20,35 @@ class Interface extends React.Component {
         this.setState({realtime: true})
         this.polling = setInterval(() => {
             this.setState({fetching: true, resetting: false});
-            axios.get(window.location.pathname, {time: Date.now()})
-                .then((response) => {
-                    this.setState({opstate: response.data});
-                });
+            axios.get(window.location.pathname, {
+                params: {
+                    time: Date.now(),
+                    ...(this.state.filesLoaded ? {load_files: 1} : {})
+                }
+            }).then((response) => {
+                this.setState((state) => ({
+                    opstate: {
+                        ...response.data,
+                        files: state.filesLoaded ? response.data.files : state.opstate.files
+                    }
+                }));
+            });
         }, this.props.realtimeRefresh * 1000);
+    }
+
+    loadFiles = () => {
+        if (this.state.filesLoaded || this.state.filesLoading) {
+            return;
+        }
+
+        this.setState({filesLoading: true, filesError: false});
+        axios.get(window.location.pathname, {params: {load_files: 1}})
+            .then((response) => {
+                this.setState({opstate: response.data, filesLoaded: true, filesLoading: false});
+            })
+            .catch(() => {
+                this.setState({filesLoading: false, filesError: true});
+            });
     }
 
     stopTimer = () => {
@@ -88,6 +115,10 @@ class Interface extends React.Component {
                         resetting={this.state.resetting}
                         realtimeHandler={this.realtimeHandler}
                         resetHandler={this.resetHandler}
+                        filesLoaded={this.state.filesLoaded}
+                        filesLoading={this.state.filesLoading}
+                        filesError={this.state.filesError}
+                        loadFiles={this.loadFiles}
                         txt={this.txt}
                     />
                 </header>
@@ -104,7 +135,7 @@ class Interface extends React.Component {
 function MainNavigation(props) {
     return (
         <nav className="main-nav">
-            <Tabs>
+            <Tabs onCachedTab={props.loadFiles}>
                 <div label={props.txt("Overview")} tabId="overview" tabIndex={1}>
                     <OverviewCounts
                         overview={props.opstate.overview}
@@ -136,6 +167,9 @@ function MainNavigation(props) {
                             <CachedFiles
                                 perPageLimit={props.perPageLimit}
                                 allFiles={props.opstate.files}
+                                filesLoaded={props.filesLoaded}
+                                filesLoading={props.filesLoading}
+                                filesError={props.filesError}
                                 searchTerm={props.searchTerm}
                                 debounceRate={props.debounceRate}
                                 allow={{fileList: props.allow.filelist, invalidate: props.allow.invalidate}}
@@ -196,8 +230,11 @@ class Tabs extends React.Component {
         };
     }
 
-    onClickTabItem = (tab) => {
+    onClickTabItem = (tab, tabId) => {
         this.setState({ activeTab: tab });
+        if (tabId === 'cached' && this.props.onCachedTab) {
+            this.props.onCachedTab();
+        }
     }
 
     render() {
@@ -218,7 +255,7 @@ class Tabs extends React.Component {
                                 activeTab={activeTab}
                                 key={tabId}
                                 label={label}
-                                onClick={handler || onClickTabItem}
+                                onClick={handler || (() => onClickTabItem(label, tabId))}
                                 className={className}
                                 tabIndex={tabIndex}
                                 tabId={tabId}
@@ -776,6 +813,16 @@ class CachedFiles extends React.Component {
 
     render() {
         if (!this.props.allow.fileList) {
+            return null;
+        }
+
+        if (!this.props.filesLoaded) {
+            if (this.props.filesLoading) {
+                return <p>{this.props.txt('Loading cached files...')}</p>;
+            }
+            if (this.props.filesError) {
+                return <p>{this.props.txt('Could not load cached files. Reopen this tab to retry.')}</p>;
+            }
             return null;
         }
 

@@ -25,6 +25,7 @@ class Service
         'allow_invalidate' => true,                // give a link to invalidate files
         'allow_reset'      => true,                // give option to reset the whole cache
         'allow_realtime'   => true,                // give option to enable/disable real-time updates
+        'lazy_load_files'  => false,               // only load cached files when requested
         'refresh_time'     => 5,                   // how often the data will refresh, in seconds
         'size_precision'   => 2,                   // Digits after decimal point
         'size_space'       => false,               // have '1MB' or '1 MB' when showing sizes
@@ -154,7 +155,7 @@ class Service
             $response($this->resetCache($_GET['invalidate']));
         } elseif (isset($_GET['invalidate_searched']) && $this->getOption('allow_invalidate')) {
             $response($this->resetSearched($_GET['invalidate_searched']));
-        } elseif ($this->isJsonRequest() && $this->getOption('allow_realtime')) {
+        } elseif ($this->isJsonRequest() && ($this->getOption('allow_realtime') || isset($_GET['load_files']))) {
             echo json_encode($this->getData($_GET['section'] ?? null));
             exit;
         }
@@ -281,7 +282,10 @@ class Service
      */
     protected function compileState(): array
     {
-        $status = opcache_get_status();
+        $includeFiles = !$this->getOption('lazy_load_files')
+            || ($this->isJsonRequest() && isset($_GET['load_files']))
+            || ($this->getOption('allow_invalidate') && (isset($_GET['invalidate']) || isset($_GET['invalidate_searched'])));
+        $status = opcache_get_status($includeFiles);
         $config = opcache_get_configuration();
         $missingConfig = array_diff_key(ini_get_all('zend opcache', false), $config['directives']);
         if (!empty($missingConfig)) {

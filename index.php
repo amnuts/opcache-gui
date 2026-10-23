@@ -22,6 +22,7 @@ $options = [
     'allow_invalidate' => true,                // give a link to invalidate files
     'allow_reset'      => true,                // give option to reset the whole cache
     'allow_realtime'   => true,                // give option to enable/disable real-time updates
+    'lazy_load_files'  => true,                // only load cached files when requested
     'refresh_time'     => 5,                   // how often the data will refresh, in seconds
     'size_precision'   => 2,                   // Digits after decimal point
     'size_space'       => false,               // have '1MB' or '1 MB' when showing sizes
@@ -76,6 +77,7 @@ class Service
         'allow_invalidate' => true,                // give a link to invalidate files
         'allow_reset'      => true,                // give option to reset the whole cache
         'allow_realtime'   => true,                // give option to enable/disable real-time updates
+        'lazy_load_files'  => false,               // only load cached files when requested
         'refresh_time'     => 5,                   // how often the data will refresh, in seconds
         'size_precision'   => 2,                   // Digits after decimal point
         'size_space'       => false,               // have '1MB' or '1 MB' when showing sizes
@@ -205,7 +207,7 @@ class Service
             $response($this->resetCache($_GET['invalidate']));
         } elseif (isset($_GET['invalidate_searched']) && $this->getOption('allow_invalidate')) {
             $response($this->resetSearched($_GET['invalidate_searched']));
-        } elseif ($this->isJsonRequest() && $this->getOption('allow_realtime')) {
+        } elseif ($this->isJsonRequest() && ($this->getOption('allow_realtime') || isset($_GET['load_files']))) {
             echo json_encode($this->getData($_GET['section'] ?? null));
             exit;
         }
@@ -332,7 +334,10 @@ class Service
      */
     protected function compileState(): array
     {
-        $status = opcache_get_status();
+        $includeFiles = !$this->getOption('lazy_load_files')
+            || ($this->isJsonRequest() && isset($_GET['load_files']))
+            || ($this->getOption('allow_invalidate') && (isset($_GET['invalidate']) || isset($_GET['invalidate_searched'])));
+        $status = opcache_get_status($includeFiles);
         $config = opcache_get_configuration();
         $missingConfig = array_diff_key(ini_get_all('zend opcache', false), $config['directives']);
         if (!empty($missingConfig)) {
@@ -564,13 +569,46 @@ class Interface extends React.Component {
           resetting: false
         });
         axios.get(window.location.pathname, {
-          time: Date.now()
+          params: {
+            time: Date.now(),
+            ...(this.state.filesLoaded ? {
+              load_files: 1
+            } : {})
+          }
         }).then(response => {
-          this.setState({
-            opstate: response.data
-          });
+          this.setState(state => ({
+            opstate: {
+              ...response.data,
+              files: state.filesLoaded ? response.data.files : state.opstate.files
+            }
+          }));
         });
       }, this.props.realtimeRefresh * 1000);
+    });
+    _defineProperty(this, "loadFiles", () => {
+      if (this.state.filesLoaded || this.state.filesLoading) {
+        return;
+      }
+      this.setState({
+        filesLoading: true,
+        filesError: false
+      });
+      axios.get(window.location.pathname, {
+        params: {
+          load_files: 1
+        }
+      }).then(response => {
+        this.setState({
+          opstate: response.data,
+          filesLoaded: true,
+          filesLoading: false
+        });
+      }).catch(() => {
+        this.setState({
+          filesLoading: false,
+          filesError: true
+        });
+      });
     });
     _defineProperty(this, "stopTimer", () => {
       this.setState({
@@ -629,7 +667,10 @@ class Interface extends React.Component {
     this.state = {
       realtime: this.getCookie(),
       resetting: false,
-      opstate: props.opstate
+      opstate: props.opstate,
+      filesLoaded: !props.lazyLoadFiles || !props.allow.filelist,
+      filesLoading: false,
+      filesError: false
     };
     this.polling = false;
     this.isSecure = window.location.protocol === 'https:';
@@ -649,6 +690,10 @@ class Interface extends React.Component {
       resetting: this.state.resetting,
       realtimeHandler: this.realtimeHandler,
       resetHandler: this.resetHandler,
+      filesLoaded: this.state.filesLoaded,
+      filesLoading: this.state.filesLoading,
+      filesError: this.state.filesError,
+      loadFiles: this.loadFiles,
       txt: this.txt
     }))), /*#__PURE__*/React.createElement(Footer, {
       version: this.props.opstate.version.gui,
@@ -659,7 +704,9 @@ class Interface extends React.Component {
 function MainNavigation(props) {
   return /*#__PURE__*/React.createElement("nav", {
     className: "main-nav"
-  }, /*#__PURE__*/React.createElement(Tabs, null, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(Tabs, {
+    onCachedTab: props.loadFiles
+  }, /*#__PURE__*/React.createElement("div", {
     label: props.txt("Overview"),
     tabId: "overview",
     tabIndex: 1
@@ -690,6 +737,9 @@ function MainNavigation(props) {
   }, /*#__PURE__*/React.createElement(CachedFiles, {
     perPageLimit: props.perPageLimit,
     allFiles: props.opstate.files,
+    filesLoaded: props.filesLoaded,
+    filesLoading: props.filesLoading,
+    filesError: props.filesError,
     searchTerm: props.searchTerm,
     debounceRate: props.debounceRate,
     allow: {
@@ -737,10 +787,13 @@ function MainNavigation(props) {
 class Tabs extends React.Component {
   constructor(props) {
     super(props);
-    _defineProperty(this, "onClickTabItem", tab => {
+    _defineProperty(this, "onClickTabItem", (tab, tabId) => {
       this.setState({
         activeTab: tab
       });
+      if (tabId === 'cached' && this.props.onCachedTab) {
+        this.props.onCachedTab();
+      }
     });
     this.state = {
       activeTab: this.props.children[0].props.label
@@ -768,7 +821,7 @@ class Tabs extends React.Component {
         activeTab: activeTab,
         key: tabId,
         label: label,
-        onClick: handler || onClickTabItem,
+        onClick: handler || (() => onClickTabItem(label, tabId)),
         className: className,
         tabIndex: tabIndex,
         tabId: tabId
@@ -1268,6 +1321,15 @@ class CachedFiles extends React.Component {
     if (!this.props.allow.fileList) {
       return null;
     }
+    if (!this.props.filesLoaded) {
+      if (this.props.filesLoading) {
+        return /*#__PURE__*/React.createElement("p", null, this.props.txt('Loading cached files...'));
+      }
+      if (this.props.filesError) {
+        return /*#__PURE__*/React.createElement("p", null, this.props.txt('Could not load cached files. Reopen this tab to retry.'));
+      }
+      return null;
+    }
     if (this.props.allFiles.length === 0) {
       return /*#__PURE__*/React.createElement("p", {
         dangerouslySetInnerHTML: {
@@ -1683,6 +1745,7 @@ function debounce(func, wait, immediate) {
             reset: <?= $opcache->getOption('allow_reset') ? 'true' : 'false'; ?>,
             realtime: <?= $opcache->getOption('allow_realtime') ? 'true' : 'false'; ?>
         },
+        lazyLoadFiles: <?= $opcache->getOption('lazy_load_files') ? 'true' : 'false'; ?>,
         cookie: {
             name: '<?= $opcache->getOption('cookie_name'); ?>',
             ttl: <?= $opcache->getOption('cookie_ttl'); ?>
