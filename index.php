@@ -18,6 +18,7 @@
  */
 
 $options = [
+    'debug'            => false,
     'allow_filelist'   => true,                // show/hide the files tab
     'allow_invalidate' => true,                // give a link to invalidate files
     'allow_reset'      => true,                // give option to reset the whole cache
@@ -102,6 +103,13 @@ class Service
     public function __construct(array $options = [])
     {
         $this->options = array_merge($this->defaults, $options);
+
+        if ($this->options['debug']) {
+            ini_set('display_errors', '1');
+            ini_set('display_startup_errors', '1');
+            error_reporting(E_ALL);
+        }
+
         $this->tz = new DateTimeZone(date_default_timezone_get());
         if (is_string($this->options['language_pack'])) {
             $this->options['language_pack'] = json_decode($this->options['language_pack'], true);
@@ -298,6 +306,36 @@ class Service
             $this->compileState();
         }
         return $found === $success;
+    }
+
+    /**
+     * @param mixed $value
+     *
+     * @throws \JsonException
+     */
+    public function encode($value): string
+    {
+        $flags = 0;
+
+        if ($this->options['debug']) {
+            if (PHP_VERSION_ID >= 70300) {
+                $flags |= JSON_THROW_ON_ERROR;
+            }
+        }
+
+        return json_encode($value, $flags);
+    }
+
+    /**
+     * @param string $name
+     *
+     * @throws \JsonException
+     */
+    public function encodeOption(string $name): string
+    {
+        $value = $this->getOption($name);
+
+        return $this->encode($value);
     }
 
     /**
@@ -1678,22 +1716,22 @@ function debounce(func, wait, immediate) {
 
     ReactDOM.render(React.createElement(Interface, {
         allow: {
-            filelist: <?= $opcache->getOption('allow_filelist') ? 'true' : 'false'; ?>,
-            invalidate: <?= $opcache->getOption('allow_invalidate') ? 'true' : 'false'; ?>,
-            reset: <?= $opcache->getOption('allow_reset') ? 'true' : 'false'; ?>,
-            realtime: <?= $opcache->getOption('allow_realtime') ? 'true' : 'false'; ?>
+            filelist: <?= $opcache->encodeOption('allow_filelist'); ?>,
+            invalidate: <?= $opcache->encodeOption('allow_invalidate'); ?>,
+            reset: <?= $opcache->encodeOption('allow_reset'); ?>,
+            realtime: <?= $opcache->encodeOption('allow_realtime'); ?>
         },
         cookie: {
             name: '<?= $opcache->getOption('cookie_name'); ?>',
             ttl: <?= $opcache->getOption('cookie_ttl'); ?>
         },
-        opstate: <?= json_encode($opcache->getData()); ?>,
-        useCharts: <?= json_encode($opcache->getOption('charts')); ?>,
-        highlight: <?= json_encode($opcache->getOption('highlight')); ?>,
+        opstate: <?= $opcache->encode($opcache->getData()); ?>,
+        useCharts: <?= $opcache->encodeOption('charts'); ?>,
+        highlight: <?= $opcache->encodeOption('highlight'); ?>,
         debounceRate: <?= $opcache->getOption('debounce_rate'); ?>,
-        perPageLimit: <?= json_encode($opcache->getOption('per_page')); ?>,
-        realtimeRefresh: <?= json_encode($opcache->getOption('refresh_time')); ?>,
-        language: <?= json_encode($opcache->getOption('language_pack')); ?>,
+        perPageLimit: <?= $opcache->encodeOption('per_page'); ?>,
+        realtimeRefresh: <?= $opcache->encodeOption('refresh_time'); ?>,
+        language: <?= $opcache->encodeOption('language_pack'); ?>,
     }), document.getElementById('interface'));
 
     </script>
